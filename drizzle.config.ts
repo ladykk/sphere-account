@@ -8,4 +8,6 @@ export default {
   dbCredentials: {
     connectionString: getPoolDBUrl(),
   },
+  verbose: true,
+  strict: true,
 } satisfies Config;
