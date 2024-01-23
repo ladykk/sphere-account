@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
 import GoogleProvider from "next-auth/providers/google";
 import LineProvider from "next-auth/providers/line";
-import { NextAuthOptions, getServerSession } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import { Adapter } from "next-auth/adapters";
 
 const EmailPasswordProvider = CredentialsProvider({
@@ -40,5 +40,3 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: env.NEXTAUTH_SECRET,
 };
-
-export const getServerAuthSession = getServerSession(authOptions);
