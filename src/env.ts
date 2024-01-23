@@ -6,8 +6,13 @@ dotenv.config({
   override: true,
 });
 
-export const dbEnv = createEnv({
+export const env = createEnv({
   server: {
+    // VERCEL
+    VERCEL_ENV: z.enum(["development", "preview", "production"], {
+      required_error: "VERCEL_ENV is required",
+    }),
+    // NEON
     PGHOST: z.string({
       required_error: "PGHOST is required",
     }),
@@ -23,6 +28,31 @@ export const dbEnv = createEnv({
     DATABASE_URL: z.string({
       required_error: "DATABASE_URL is required",
     }),
+    // NEXT AUTH
+    NEXTAUTH_URL: z.string({
+      required_error: "NEXTAUTH_URL is required",
+    }),
+    NEXTAUTH_SECRET: z.string({
+      required_error: "NEXTAUTH_SECRET is required",
+    }),
+    FACEBOOK_CLIENT_ID: z.string({
+      required_error: "FACEBOOK_CLIENT_ID is required",
+    }),
+    FACEBOOK_CLIENT_SECRET: z.string({
+      required_error: "FACEBOOK_CLIENT_SECRET is required",
+    }),
+    GOOGLE_CLIENT_ID: z.string({
+      required_error: "GOOGLE_CLIENT_ID is required",
+    }),
+    GOOGLE_CLIENT_SECRET: z.string({
+      required_error: "GOOGLE_CLIENT_SECRET is required",
+    }),
+    LINE_CLIENT_ID: z.string({
+      required_error: "LINE_CLIENT_ID is required",
+    }),
+    LINE_CLIENT_SECRET: z.string({
+      required_error: "LINE_CLIENT_SECRET is required",
+    }),
   },
   isServer: typeof window === "undefined",
   clientPrefix: "NEXT_PUBLIC_",
@@ -31,12 +61,12 @@ export const dbEnv = createEnv({
 });
 
 export const getDBUrl = () => {
-  const { PGHOST, PGUSER, PGDATABASE, PGPASSWORD } = dbEnv;
+  const { PGHOST, PGUSER, PGDATABASE, PGPASSWORD } = env;
   return `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=require`;
 };
 
 export const getPoolDBUrl = () => {
-  const { PGHOST, PGUSER, PGDATABASE, PGPASSWORD } = dbEnv;
+  const { PGHOST, PGUSER, PGDATABASE, PGPASSWORD } = env;
   const PG_HOST_PARTS = PGHOST.split(".");
   const POOL_PGHOST =
     PG_HOST_PARTS[0] + "-pooler." + PG_HOST_PARTS.slice(1).join(".");
