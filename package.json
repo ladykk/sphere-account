@@ -63,6 +63,8 @@
     "next-themes": "^0.2.1",
     "pg": "^8.11.3",
     "postgres": "^3.4.3",
+    "posthog-js": "^1.101.0",
+    "posthog-node": "^3.5.0",
     "react": "^18",
     "react-day-picker": "^8.10.0",
     "react-dom": "^18",

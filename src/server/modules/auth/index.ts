@@ -1,5 +1,5 @@
 import db from "@/db";
-import { env } from "@/env";
+import { env } from "@/env/server.mjs";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -39,4 +39,22 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   secret: env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "database",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  pages: {
+    signIn: "/auth/signin",
+    signOut: "/auth/signout",
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request",
+    newUser: "/auth/new-user",
+  },
+  callbacks: {
+    session: async ({ session, token, user }) => {
+      session.user.id = user.id;
+      return session;
+    },
+  },
 };

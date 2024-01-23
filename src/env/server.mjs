@@ -1,6 +1,6 @@
 import { createEnv } from "@t3-oss/env-core";
 import * as dotenv from "dotenv";
-import { z } from "zod";
+import { ZodError, z } from "zod";
 dotenv.config({
   path: `.env.local`,
   override: true,
@@ -54,10 +54,34 @@ export const env = createEnv({
       required_error: "LINE_CLIENT_SECRET is required",
     }),
   },
-  isServer: typeof window === "undefined",
-  clientPrefix: "NEXT_PUBLIC_",
-  client: {},
-  runtimeEnv: process.env,
+  runtimeEnv: {
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    PGHOST: process.env.PGHOST,
+    PGUSER: process.env.PGUSER,
+    PGDATABASE: process.env.PGDATABASE,
+    PGPASSWORD: process.env.PGPASSWORD,
+    DATABASE_URL: process.env.DATABASE_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
+    FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    LINE_CLIENT_ID: process.env.LINE_CLIENT_ID,
+    LINE_CLIENT_SECRET: process.env.LINE_CLIENT_SECRET,
+  },
+  onValidationError: (error) => {
+    console.error(
+      "❌ Invalid environment variables:",
+      error.flatten().fieldErrors
+    );
+    throw new Error("Invalid environment variables");
+  },
+  onInvalidAccess: (variable) => {
+    throw new Error(
+      "❌ Attempted to access a server-side environment variable on the client"
+    );
+  },
 });
 
 export const getDBUrl = () => {

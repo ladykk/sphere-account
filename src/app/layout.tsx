@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/sonner";
+import { Provider } from "@/providers";
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -24,8 +24,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        {children}
-        <Toaster />
+        <Provider>{children}</Provider>
       </body>
     </html>
   );

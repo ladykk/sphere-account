@@ -1,4 +1,4 @@
-import { getDBUrl } from "@/env";
+import { getDBUrl } from "@/env/server.mjs";
 import type { Config } from "drizzle-kit";
 
 export default {
