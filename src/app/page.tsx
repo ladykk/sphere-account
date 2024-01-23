@@ -1,3 +1,8 @@
+"use client";
+
+import { trpc } from "@/lib/trpc";
+
 export default function Home() {
-  return <main>Sphere Account</main>;
+  const query = trpc.test.useQuery();
+  return <main>{query.data}</main>;
 }
