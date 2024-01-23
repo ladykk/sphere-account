@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Sphere Account",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -23,6 +23,7 @@ export default function RootLayout({
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable
         )}
+        suppressHydrationWarning
       >
         <Provider>{children}</Provider>
       </body>

@@ -17,14 +17,10 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_API_HOST: z.string({
       required_error: "NEXT_PUBLIC_POSTHOG_API_HOST is required",
     }),
-    NEXT_PUBLIC_POSTHOG_UI_HOST: z.string({
-      required_error: "NEXT_PUBLIC_POSTHOG_UI_HOST is required",
-    }),
   },
   runtimeEnv: {
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_API_HOST: process.env.NEXT_PUBLIC_POSTHOG_API_HOST,
-    NEXT_PUBLIC_POSTHOG_UI_HOST: process.env.NEXT_PUBLIC_POSTHOG_UI_HOST,
   },
   onValidationError: (error) => {
     console.error(
