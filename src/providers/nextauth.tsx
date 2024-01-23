@@ -10,5 +10,9 @@ export function SessionProvider({
   children: ReactNode;
   session: Session | null;
 }) {
-  return <Provider session={session}>{children}</Provider>;
+  return (
+    <Provider session={session} refetchInterval={5 * 60} refetchOnWindowFocus>
+      {children}
+    </Provider>
+  );
 }
