@@ -1,4 +1,4 @@
-import { getPoolDBUrl } from "@/env/db";
+import { getPoolDBUrl } from "@/env";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import schema from "./schema";

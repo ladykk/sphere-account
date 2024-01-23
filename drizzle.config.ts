@@ -1,4 +1,4 @@
-import { getPoolDBUrl } from "@/env/db";
+import { getDBUrl } from "@/env";
 import type { Config } from "drizzle-kit";
 
 export default {
@@ -6,7 +6,7 @@ export default {
   out: "./drizzle",
   driver: "pg",
   dbCredentials: {
-    connectionString: getPoolDBUrl(),
+    connectionString: getDBUrl(),
   },
   verbose: true,
   strict: true,
