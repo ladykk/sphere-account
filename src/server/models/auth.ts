@@ -5,6 +5,10 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 
 export const Auth = {
+  constants: {
+    RESET_PASSWORD_TOKEN_EXPIRY: 1000 * 60 * 60, // 1 hour
+    RESET_PASSWORD_TOKEN_EXPIRY_TEXT: "1 hour",
+  },
   logics: {
     checkEmailExists: async (email: string) => {
       const result = await db
@@ -28,8 +32,14 @@ export const Auth = {
           .string()
           .email("Invalid email address")
           .min(1, "Email is required"),
-        password: z.string().min(6).max(20),
-        confirmPassword: z.string().min(6).max(20),
+        password: z
+          .string()
+          .min(6, "Password's length should be between 6-20")
+          .max(20, "Password's length should be between 6-20"),
+        confirmPassword: z
+          .string()
+          .min(6, "Password's length should be between 6-20")
+          .max(20, "Password's length should be between 6-20"),
       })
       .superRefine(async (val, ctx) => {
         if (val.password !== val.confirmPassword) {
@@ -51,5 +61,44 @@ export const Auth = {
     registerOutputSchema: z.object({
       email: z.string(),
     }),
+    sendResetPasswordEmailInputSchema: z
+      .object({
+        email: z
+          .string()
+          .email("Invalid email address")
+          .min(1, "Email is required"),
+      })
+      .superRefine(async (val, ctx) => {
+        if (!(await Auth.logics.checkEmailExists(val.email))) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Email does not exist",
+            path: ["email"],
+          });
+        }
+      }),
+    getResetPasswordTokenExpireInputSchema: z.string().optional(),
+    getResetPasswordTokenExpireOutputSchema: z.boolean().default(false),
+    resetPasswordInputSchema: z
+      .object({
+        token: z.string().min(1, "Token is required"),
+        password: z
+          .string()
+          .min(6, "Password's length should be between 6-20")
+          .max(20, "Password's length should be between 6-20"),
+        confirmPassword: z
+          .string()
+          .min(6, "Password's length should be between 6-20")
+          .max(20, "Password's length should be between 6-20"),
+      })
+      .superRefine(async (val, ctx) => {
+        if (val.password !== val.confirmPassword) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Passwords do not match",
+            path: ["confirmPassword"],
+          });
+        }
+      }),
   },
 };

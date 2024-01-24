@@ -8,6 +8,5 @@ export default {
   dbCredentials: {
     connectionString: getDBUrl(),
   },
-  verbose: true,
   strict: true,
 } satisfies Config;

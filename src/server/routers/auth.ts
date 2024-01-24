@@ -1,7 +1,12 @@
-import { userCredentials, users } from "@/db/schema/auth";
+import { resetPasswordTokens, userCredentials, users } from "@/db/schema/auth";
 import { Auth } from "../models/auth";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { and, eq, lt } from "drizzle-orm";
+import { sendMail } from "../modules/nodemailer";
+import ResetPasswordEmail from "@/emails/forget-password-email";
+import { env } from "@/env/server.mjs";
+import { getBaseUrl } from "@/trpc/shared";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -50,6 +55,141 @@ export const authRouter = createTRPCRouter({
         return {
           email: input.email,
         };
+      });
+    }),
+  sendResetPasswordEmail: publicProcedure
+    .input(Auth.schemas.sendResetPasswordEmailInputSchema)
+    .mutation(async ({ input, ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const userResult = await trx
+          .select({ id: users.id, name: users.name })
+          .from(users)
+          .where(eq(users.email, input.email))
+          .limit(1);
+
+        // Skip if userResult is empty
+        if (userResult.length === 0) return;
+
+        // Create reset password token
+        const resetPasswordTokensResult = await trx
+          .insert(resetPasswordTokens)
+          .values({
+            token: crypto.randomUUID(),
+            userId: userResult[0].id,
+            expires: new Date(
+              Date.now() + Auth.constants.RESET_PASSWORD_TOKEN_EXPIRY
+            ), // 1 Hour
+          })
+          .returning({
+            token: resetPasswordTokens.token,
+          });
+
+        // Throw error if resetPasswordTokensResult is empty
+
+        if (resetPasswordTokensResult.length === 0)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create reset password token",
+          });
+
+        // Send email
+        await sendMail(
+          input.email,
+          "SphereAccount reset password",
+          ResetPasswordEmail({
+            name: userResult[0].name ?? "User",
+            expiresDuration: Auth.constants.RESET_PASSWORD_TOKEN_EXPIRY_TEXT,
+            resetPasswordLink: `${getBaseUrl()}/auth/reset-password?token=${
+              resetPasswordTokensResult[0].token
+            }`,
+            contactEmail: env.SMTP_USERNAME,
+          })
+        ).catch((err) => {
+          console.error(err);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to send email",
+          });
+        });
+      });
+    }),
+  getResetPasswordTokenExpire: publicProcedure
+    .input(Auth.schemas.getResetPasswordTokenExpireInputSchema)
+    .output(Auth.schemas.getResetPasswordTokenExpireOutputSchema)
+    .query(async ({ input, ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        // Return false if has no token
+        if (!input) return false;
+
+        // Find token from database
+        const result = await trx
+          .select({
+            token: resetPasswordTokens.token,
+          })
+          .from(resetPasswordTokens)
+
+          .where(
+            and(
+              eq(resetPasswordTokens.token, input),
+              eq(resetPasswordTokens.isUsed, false),
+              lt(resetPasswordTokens.expires, new Date())
+            )
+          )
+          .limit(1);
+
+        // Return false if result is empty
+        if (result.length === 0) return false;
+      });
+    }),
+  resetPassword: publicProcedure
+    .input(Auth.schemas.resetPasswordInputSchema)
+    .mutation(async ({ input, ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        // Find token from database
+        const result = await trx
+          .select({
+            token: resetPasswordTokens.token,
+            userId: resetPasswordTokens.userId,
+          })
+          .from(resetPasswordTokens)
+          .where(
+            and(
+              eq(resetPasswordTokens.token, input.token),
+              eq(resetPasswordTokens.isUsed, false),
+              lt(resetPasswordTokens.expires, new Date())
+            )
+          )
+          .limit(1);
+
+        // Throw error if result is empty
+        if (result.length === 0)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Invalid token",
+          });
+
+        // Update token to used
+        await trx
+          .update(resetPasswordTokens)
+          .set({
+            isUsed: true,
+          })
+          .where(eq(resetPasswordTokens.token, input.token));
+
+        // Update password
+        const newPassword = await Auth.logics.hashPassword(input.password);
+        await trx
+          .insert(userCredentials)
+          .values({
+            userId: result[0].userId,
+            password: newPassword,
+          })
+          .onConflictDoUpdate({
+            target: userCredentials.userId,
+            set: {
+              password: newPassword,
+            },
+          });
       });
     }),
 });

@@ -75,3 +75,12 @@ export const userCredentials = pgTable("user_credentials", {
     .primaryKey(),
   password: text("password").notNull(),
 });
+
+export const resetPasswordTokens = pgTable("reset_password_token", {
+  token: text("token").notNull().primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+  isUsed: boolean("is_used").notNull().default(false),
+});
