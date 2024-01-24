@@ -3,8 +3,8 @@ import { Auth } from "../models/auth";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { and, eq, lt } from "drizzle-orm";
-import { sendMail } from "../modules/nodemailer";
-import ResetPasswordEmail from "@/emails/forget-password-email";
+import { sendMail } from "../modules/email";
+import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { env } from "@/env/server.mjs";
 import { getBaseUrl } from "@/trpc/shared";
 

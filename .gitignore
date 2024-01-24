@@ -43,6 +43,6 @@ next-env.d.ts
 
 .env*.local
 .vercel
-.react-email
+.rendered
 
 .env*.local

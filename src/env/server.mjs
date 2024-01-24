@@ -67,7 +67,11 @@ export const env = createEnv({
     PGDATABASE: process.env.PGDATABASE,
     PGPASSWORD: process.env.PGPASSWORD,
     DATABASE_URL: process.env.DATABASE_URL,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL
+      ? process.env.NEXTAUTH_URL
+      : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}/`
+      : undefined,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,

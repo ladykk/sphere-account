@@ -1,7 +1,7 @@
 import { env } from "@/env/server.mjs";
-import { render } from "@react-email/components";
+import { render } from "jsx-email";
 import nodemailer from "nodemailer";
-import { JSXElementConstructor, ReactElement, ReactNode } from "react";
+import { JSXElementConstructor, ReactElement } from "react";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -14,12 +14,12 @@ const transporter = nodemailer.createTransport({
 export async function sendMail<P>(
   to: string,
   subject: string,
-  html: ReactElement<P, string | JSXElementConstructor<P>>
+  email: ReactElement<P, string | JSXElementConstructor<P>>
 ) {
   return await transporter.sendMail({
     from: env.SMTP_USERNAME,
     to,
     subject,
-    html: render(html),
+    html: await render(email),
   });
 }

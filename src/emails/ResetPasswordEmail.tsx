@@ -9,7 +9,7 @@ import {
   Preview,
   Section,
   Text,
-} from "@react-email/components";
+} from "jsx-email";
 import * as React from "react";
 
 interface ResetPasswordProps {
@@ -61,7 +61,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
 };
 
 ResetPasswordEmail.PreviewProps = {
-  name: "Alan",
+  name: "User",
   expiresDuration: "1 hours",
   resetPasswordLink: baseUrl,
   contactEmail: "acct1.sphere@gmail.com",
