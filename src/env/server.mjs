@@ -53,6 +53,12 @@ export const env = createEnv({
     LINE_CLIENT_SECRET: z.string({
       required_error: "LINE_CLIENT_SECRET is required",
     }),
+    SMTP_USERNAME: z.string({
+      required_error: "SMTP_USERNAME is required",
+    }),
+    SMTP_PASSWORD: z.string({
+      required_error: "SMTP_PASSWORD is required",
+    }),
   },
   runtimeEnv: {
     VERCEL_ENV: process.env.VERCEL_ENV,
@@ -61,7 +67,11 @@ export const env = createEnv({
     PGDATABASE: process.env.PGDATABASE,
     PGPASSWORD: process.env.PGPASSWORD,
     DATABASE_URL: process.env.DATABASE_URL,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL
+      ? process.env.NEXTAUTH_URL
+      : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}/`
+      : undefined,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
@@ -69,6 +79,8 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     LINE_CLIENT_ID: process.env.LINE_CLIENT_ID,
     LINE_CLIENT_SECRET: process.env.LINE_CLIENT_SECRET,
+    SMTP_USERNAME: process.env.SMTP_USERNAME,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   },
   onValidationError: (error) => {
     console.error(
