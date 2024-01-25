@@ -2,7 +2,7 @@ import { resetPasswordTokens, userCredentials, users } from "@/db/schema/auth";
 import { Auth } from "../models/auth";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, gt, lt } from "drizzle-orm";
 import { sendMail } from "../modules/email";
 import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { env } from "@/env/server.mjs";
@@ -132,13 +132,12 @@ export const authRouter = createTRPCRouter({
             and(
               eq(resetPasswordTokens.token, input),
               eq(resetPasswordTokens.isUsed, false),
-              lt(resetPasswordTokens.expires, new Date())
+              gt(resetPasswordTokens.expires, new Date())
             )
           )
           .limit(1);
 
-        // Return false if result is empty
-        if (result.length === 0) return false;
+        return result.length > 0;
       });
     }),
   resetPassword: publicProcedure
