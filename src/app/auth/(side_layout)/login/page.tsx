@@ -36,7 +36,7 @@ export default function Page() {
         <h4>or continue with</h4>
         <Separator className="flex-1 bg-muted-foreground" />
       </div>
-      <div className="flex items-center gap-[14px]">
+      <div className="flex items-center gap-3">
         <Button size="xl" variant="outline" className="flex-1 gap-2">
           <Image src={googleLogo} alt="Google" className="w-5 h-5" />
           Google
