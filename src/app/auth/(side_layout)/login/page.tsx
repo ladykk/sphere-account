@@ -6,65 +6,79 @@ import facebookLogo from "@/asset/image/facebookLogo.png";
 import googleLogo from "@/asset/image/googleLogo.png";
 import lineLogo from "@/asset/image/lineLogo.png";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function Page() {
   return (
-    <div>
-      <div className="text-[30px] font-semibold"> Log in to your account</div>
-      <div className="mt-[30px] text-[18px] font-normal text-[#4B4B4B]">
-        <span>Log in width your email:</span>
+    <div className="w-full space-y-6">
+      <h1 className="mb-2">Login to your account</h1>
+      <h4 className="text-muted-foreground">Login in with your email:</h4>
+      <div className="space-y-6">
+        <Input
+          type="email"
+          inputSize="xl"
+          prefixIcon={emailIcon}
+          placeholder="Email Address"
+        />
+        <Input
+          type="password"
+          inputSize="xl"
+          prefixIcon={lockKey}
+          placeholder="Password"
+        />
       </div>
-      <div id="input-wrap" className="mt-[24px]">
-        <div>
-          <Input
-            type="email"
-            prefixIcon={emailIcon}
-            prefixIconClass=""
-            className="h-[60px] pl-[60px]"
-          />
-          <Input
-            type="password"
-            prefixIcon={lockKey}
-            prefixIconClass="w-[37px] h-[37px]"
-            className="h-[60px] pl-[60px] mt-[24px] min-w-[479px]"
-          />
-        </div>
+      <div className="flex items-center w-full gap-11 px-2">
+        <Separator className="flex-1 bg-muted-foreground" />
+        <h4>or continue with</h4>
+        <Separator className="flex-1 bg-muted-foreground" />
       </div>
-      <div className="mt-[24px] flex justify-center items-center">
-        <div className="w-[100px] h-[1px] border-t border-[#4B4B4B]"></div>
-        <div className="ml-[45px] mr-[45px]">
-          <span className="text-[18px]"> or continue with</span>
-        </div>
-        <div className="w-[100px] h-[1px] border-t border-[#4B4B4B]"></div>
+      <div className="flex items-center gap-[14px]">
+        <Button size="xl" variant="outline" className="flex-1 gap-2">
+          <Image src={googleLogo} alt="Google" className="w-5 h-5" />
+          Google
+        </Button>
+        <Button size="xl" variant="outline" className="flex-1 gap-2">
+          <Image src={facebookLogo} alt="Facebook" className="w-5 h-5" />
+          Facebook
+        </Button>
+        <Button size="xl" variant="outline" className="flex-1 gap-2">
+          <Image src={lineLogo} alt="LINE" className="w-5 h-5" />
+          Line
+        </Button>
       </div>
-      <div className="mt-[24px] flex justify-center items-center gap-[14px]">
-        <div className=" flex justify-center items-center h-[58px] border border-[#AEAEAE] w-[33%] rounded-md gap-[8px]">
-          <Image src={googleLogo} alt="google" />
-          <span>Google</span>{" "}
-        </div>
-        <div className=" flex justify-center items-center h-[58px] border border-[#AEAEAE] w-[33%] rounded-md gap-[8px]">
-          <Image src={facebookLogo} alt="facebook" />
-          <span>Facebook</span>
-        </div>
-        <div className=" flex justify-center items-center h-[58px] border border-[#AEAEAE] w-[33%] rounded-md gap-[8px]">
-          <Image src={lineLogo} alt="Line" />
-          <span>Line</span>
-        </div>
-      </div>
-      <div className="mt-[24px] flex justify-between items-center">
-        <div className="flex gap-[14px] items-center">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-3 items-center">
           <Checkbox />
-          <div>Remember me</div>{" "}
+          <Label className="text-base font-normal">Remember me</Label>
         </div>
-        <div className="text-[#2079CB]">Forgot Password?</div>{" "}
+        <Link
+          href="/auth/reset-password"
+          className={cn(
+            buttonVariants({ variant: "link" }),
+            "text-base font-normal"
+          )}
+        >
+          Forget Password?
+        </Link>
       </div>
-      <div className="mt-[40px] mb-[40px]">
-        <Button className="w-full h-[60px] bg-[#F17121]">Login</Button>
-      </div>
-      <div className="flex justify-center gap-[24px] items-center">
+      <Button className="w-full my-10" size="xl">
+        Login
+      </Button>
+      <div className="flex justify-center gap-6 items-center">
         <div>Don’t have an account? </div>
-        <div className="text-[#2079CB]"> Create an account</div>
+        <Link
+          href="/auth/register"
+          className={cn(
+            buttonVariants({ variant: "link" }),
+            "text-base font-normal"
+          )}
+        >
+          Create an account
+        </Link>
       </div>
     </div>
   );

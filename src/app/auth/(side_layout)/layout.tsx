@@ -19,11 +19,11 @@ export default function LoginLayout(props: Props) {
             fill
           />
         </div>
-        <div className="w-[50%] flex items-center justify-center flex-col">
+        <div className="w-[50%] flex justify-center flex-col max-w-md mx-auto">
           <Image
             src={SphereLogo}
             alt="Spheresoft Account"
-            className="mb-[40px]"
+            className="mb-10"
             width={379}
             height={56.27}
           />
