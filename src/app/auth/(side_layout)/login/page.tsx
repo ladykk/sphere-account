@@ -69,7 +69,7 @@ export default function Page() {
         Login
       </Button>
       <div className="flex justify-center gap-6 items-center">
-        <div>Don’t have an account? </div>
+        <div>Don't have an account? </div>
         <Link
           href="/auth/register"
           className={cn(
