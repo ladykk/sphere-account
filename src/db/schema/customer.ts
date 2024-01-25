@@ -38,7 +38,7 @@ export const customers = pgTable("customer", {
 
 export const customerContacts = pgTable("customer_contacts", {
   id: uuid("id").notNull().primaryKey(),
-  customerId: text("customer_id")
+  customerId: uuid("customer_id")
     .notNull()
     .references(() => customers.id, {
       onDelete: "cascade",
@@ -62,7 +62,7 @@ export const customerContacts = pgTable("customer_contacts", {
 
 export const customerBankAccounts = pgTable("customer_bank_accounts", {
   id: uuid("id").notNull().primaryKey(),
-  customerId: text("customer_id")
+  customerId: uuid("customer_id")
     .notNull()
     .references(() => customers.id, {
       onDelete: "cascade",
