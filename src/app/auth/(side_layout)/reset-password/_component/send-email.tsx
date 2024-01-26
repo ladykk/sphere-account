@@ -1,5 +1,5 @@
 "use client";
-
+import { useState } from "react";
 import emailIcon from "@/asset/icon/email.svg";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -18,18 +18,26 @@ import { RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
 
-export default function resetpassword() {
+export function SendEmailSection() {
+  const [email, setEmail] = useState<string | undefined>(undefined);
+
+  const handleAfterSendEmail = (email: string) => setEmail(email);
+
+  if (!email) return <Step1 onSuccess={handleAfterSendEmail} />;
+
+  return <Step2 email={email} />;
+}
+
+function Step1(props: { onSuccess: (email: string) => void }) {
   const form = useForm<RouterInputs["auth"]["sendResetPasswordEmail"]>({
     defaultValues: {
       email: "",
     },
   });
 
-  const mutation = api.auth.sendResetPasswordEmail.useMutation({});
-
-  // const OnSubmit = async (Input: RouterInputs["auth"]["sendResetPasswordEmail"]) => {
-
-  // }
+  const mutation = api.auth.sendResetPasswordEmail.useMutation({
+    onSuccess: (_, variable) => props.onSuccess(variable.email),
+  });
 
   return (
     <Form {...form}>
@@ -71,5 +79,36 @@ export default function resetpassword() {
         </Link>
       </form>
     </Form>
+  );
+}
+
+export default function Step2(props: { email: string }) {
+  const mutation = api.auth.sendResetPasswordEmail.useMutation({});
+  return (
+    <div className="w-full">
+      <h1 className="mb-6">Reset password</h1>
+      <h4 className="mb-5">
+        Password reset information has sent to <br></br> {props.email}
+      </h4>
+      <p className=" text-center text-neutral-600">
+        Didn’t receive the email? Check spam folder or
+      </p>
+      <Button
+        className="w-full my-4"
+        size="lg"
+        onClick={() => mutation.mutateAsync({ email: props.email })}
+      >
+        Resend Email
+      </Button>
+      <Link
+        href="/auth/login"
+        className={cn(
+          buttonVariants({ variant: "link", size: "lg" }),
+          "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
+        )}
+      >
+        Back to Login
+      </Link>
+    </div>
   );
 }

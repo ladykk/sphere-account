@@ -1,38 +1,25 @@
-import ResetPasswordComponent from "./_component/resetpassword";
-import CheckEmailComponent from "./_component/check-email";
-import NewPasswordComponent from "./_component/newpassword";
-import SuccessResetPassword from "./_component/success-resetpassword";
+import { SendEmailSection } from "./_component/send-email";
+
+// Token - Secret
+// Link ใน Email - /auth/reset-password?token=secret
 
 export default function page(props: {
   searchParams: {
     token?: string;
   };
 }) {
-  // Destucture
-  // {
-  //   searchParams: {
-  //       token
-  //     }
-  // }: {
-  //   searchParams: {
-  //     token?:string
-  //   }
-  // }
+  const token = props.searchParams.token;
 
-  console.log(props.searchParams.token);
-
-  if (props.searchParams.token === undefined) {
-    return <ResetPasswordComponent />;
-  }
-  if (props.searchParams.token !== undefined) {
-    return (
-      <>
-        <NewPasswordComponent />
-        <CheckEmailComponent />
-      </>
-    );
-  }
-  if ((props.searchParams.token = "success")) {
-    return <SuccessResetPassword />;
-  }
+  if (!token) return <SendEmailSection />;
 }
+
+// Destucture
+// {
+//   searchParams: {
+//       token
+//     }
+// }: {
+//   searchParams: {
+//     token?:string
+//   }
+// }
