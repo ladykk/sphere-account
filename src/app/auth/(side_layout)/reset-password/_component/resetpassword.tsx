@@ -34,7 +34,7 @@ export default function resetpassword() {
   return (
     <Form {...form}>
       {" "}
-      <form className="w-full" onSubmit={}>
+      <form className="w-full">
         <h1 className="mb-6">Reset password</h1>
         <h4 className="mb-5">
           Enter the email you used to create you account so we will send
