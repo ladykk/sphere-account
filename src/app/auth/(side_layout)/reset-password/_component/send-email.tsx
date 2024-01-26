@@ -39,10 +39,20 @@ function Step1(props: { onSuccess: (email: string) => void }) {
     onSuccess: (_, variable) => props.onSuccess(variable.email),
   });
 
+  const onSubmit = async (
+    input: RouterInputs["auth"]["sendResetPasswordEmail"]
+  ) => {
+    toast.promise(mutation.mutateAsync(input), {
+      loading: "Sending Email...",
+      success: "Email has already been sent",
+      error: "Failed to send email",
+    });
+  };
+
   return (
     <Form {...form}>
       {" "}
-      <form className="w-full">
+      <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
         <h1 className="mb-6">Reset password</h1>
         <h4 className="mb-5">
           Enter the email you used to create you account so we will send
@@ -55,6 +65,7 @@ function Step1(props: { onSuccess: (email: string) => void }) {
             <FormItem>
               <FormControl>
                 <Input
+                  {...field}
                   prefixIcon={emailIcon}
                   placeholder="Email"
                   inputSize="xl"
@@ -82,7 +93,7 @@ function Step1(props: { onSuccess: (email: string) => void }) {
   );
 }
 
-export default function Step2(props: { email: string }) {
+export function Step2(props: { email: string }) {
   const mutation = api.auth.sendResetPasswordEmail.useMutation({});
   return (
     <div className="w-full">
