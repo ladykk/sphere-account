@@ -4,7 +4,7 @@ import {
   text,
   integer,
   numeric,
-  uuid
+  uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
@@ -13,9 +13,9 @@ export const products = pgTable("product", {
   id: uuid("id").notNull().primaryKey(),
   type: text("type").notNull(),
   name: text("name").notNull(),
-  // product_img: text("product_img"), //image
+  // product_img: text("product_img"), // TODO: File implementation
   code: text("code").notNull(),
-  category: text("category"),
+  category: text("category").notNull(),
   barcode: text("barcode"),
   sellingPrice: numeric("selling_price").notNull().default("0.00"),
   vatType: text("vat_type"),
@@ -35,6 +35,3 @@ export const products = pgTable("product", {
     onDelete: "set null",
   }),
 });
-
-
-// TODO : Attachment

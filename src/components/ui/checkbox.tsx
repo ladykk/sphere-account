@@ -8,8 +8,14 @@ import { cn } from "@/lib/utils";
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, ...props }, ref) => (
+  Omit<
+    React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
+    "value" | "onChange"
+  > & {
+    value: boolean;
+    onChange: (value: boolean) => void;
+  }
+>(({ className, value, onChange, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
@@ -17,6 +23,8 @@ const Checkbox = React.forwardRef<
       className
     )}
     {...props}
+    checked={value}
+    onCheckedChange={onChange}
   >
     <CheckboxPrimitive.Indicator
       className={cn("flex items-center justify-center text-current")}
