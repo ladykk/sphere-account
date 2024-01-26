@@ -12,7 +12,7 @@ export async function Provider({ children }: { children: ReactNode }) {
       <TRPCReactProvider>
         <PostHogProvider>
           {children}
-          <Toaster richColors />
+          <Toaster richColors theme="light" position="top-center" />
         </PostHogProvider>
       </TRPCReactProvider>
     </SessionProvider>

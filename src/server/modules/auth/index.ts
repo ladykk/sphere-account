@@ -17,6 +17,7 @@ const EmailPasswordProvider = CredentialsProvider({
   },
   async authorize(credentials) {
     // TODO: Authenticate logic
+    console.log(credentials);
     return null;
   },
 });
@@ -45,8 +46,8 @@ export const authOptions: NextAuthOptions = {
     updateAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
+    signIn: "/auth/login",
+    signOut: "/auth/logout",
     error: "/auth/error",
     verifyRequest: "/auth/verify-request",
     newUser: "/auth/new-user",
