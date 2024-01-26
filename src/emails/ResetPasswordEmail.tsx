@@ -29,24 +29,59 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
       <Head />
       <Preview>SphereAccount reset your password</Preview>
       <Body>
-        <Container>
+        <Container
+          style={{
+            padding: "60px",
+            border: "1px solid #ccc",
+            borderRadius: "45px",
+            margin: "20px auto",
+          }}
+        >
           <Img
             src={`${baseUrl}/static/logo-text-128h.png`}
             width="auto"
             height="56"
             alt="Dropbox"
+            style={{ marginBottom: "20px" }}
           />
           <Section>
-            <Text>Hi {props.name},</Text>
-            <Text>
+            <Text
+              style={{
+                fontSize: "24px",
+                fontWeight: "bold",
+              }}
+            >
+              Hi {props.name},
+            </Text>
+            <Text
+              style={{
+                fontSize: "16px",
+              }}
+            >
               To reset your account password click on the following link. Please
               note that reset link will expire in {props.expiresDuration}. If
               you didn't issue a password reset you can safely ignore this
               email.
             </Text>
-            <Button href={props.resetPasswordLink}>Change Password</Button>
+            <Button
+              href={props.resetPasswordLink}
+              style={{
+                backgroundColor: "rgb(243, 113, 32)",
+                padding: "8px 16px",
+                color: "rgb(255, 255, 255)",
+                borderRadius: "6px",
+                fontWeight: "500",
+                cursor: "pointer",
+              }}
+            >
+              Change Password
+            </Button>
 
-            <Text>
+            <Text
+              style={{
+                fontSize: "16px",
+              }}
+            >
               If you have any other questions or concerns, please reach out to{" "}
               <Link href={`mailto:${props.contactEmail}`}>
                 {props.contactEmail}

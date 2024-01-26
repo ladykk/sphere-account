@@ -1,5 +1,4 @@
 "use client";
-
 import { Input } from "@/components/ui/input";
 import emailIcon from "@/asset/icon/email.svg";
 import lockKey from "@/asset/icon/padlock.png";
@@ -44,9 +43,9 @@ export default function page() {
 
   const onSubmit = async (input: RouterInputs["auth"]["register"]) => {
     toast.promise(mutation.mutateAsync(input), {
-      loading: "Creating account ......",
-      success: "Creating account successfully",
-      error: "Fail to create account",
+      loading: "Creating account...",
+      success: "Account created successfully!",
+      error: "Failed to create account",
     });
   };
 
@@ -58,7 +57,7 @@ export default function page() {
           Enter your information below to create your account
         </h5>
         <div className="space-y-4 mt-3">
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2">
             <FormField
               control={form.control}
               name="firstName"
@@ -117,7 +116,6 @@ export default function page() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -135,21 +133,22 @@ export default function page() {
               </FormItem>
             )}
           />
+
           <div className="flex items-center w-full gap-8 px-2 py-1">
             <Separator className="flex-1 bg-muted-foreground" />
             <p>or continue with</p>
             <Separator className="flex-1 bg-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="flex-1 gap-2">
+            <Button variant="outline" className="flex-1 gap-2" type="button">
               <Image src={googleLogo} alt="Google" className="w-5 h-5" />
               Google
             </Button>
-            <Button variant="outline" className="flex-1 gap-2">
+            <Button variant="outline" className="flex-1 gap-2" type="button">
               <Image src={facebookLogo} alt="Facebook" className="w-5 h-5" />
               Facebook
             </Button>
-            <Button variant="outline" className="flex-1 gap-2">
+            <Button variant="outline" className="flex-1 gap-2" type="button">
               <Image src={lineLogo} alt="LINE" className="w-5 h-5" />
               Line
             </Button>
