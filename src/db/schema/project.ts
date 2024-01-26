@@ -1,14 +1,7 @@
-import {
-  timestamp,
-  pgTable,
-  text,
-  uuid,
-  numeric,
-} from "drizzle-orm/pg-core";
-import { customers } from "./customer"
+import { timestamp, pgTable, text, uuid, numeric } from "drizzle-orm/pg-core";
+import { customers } from "./customer";
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
-
 
 export const projects = pgTable("project", {
   id: uuid("id").notNull().primaryKey(),
@@ -18,7 +11,6 @@ export const projects = pgTable("project", {
     .references(() => customers.id, {
       onDelete: "cascade",
     }),
-  price: numeric("price").notNull().default("0.00"),
   detail: text("detail"),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
@@ -32,4 +24,4 @@ export const projects = pgTable("project", {
   updatedBy: text("updated_by").references(() => users.id, {
     onDelete: "set null",
   }),
-})
+});
