@@ -12,7 +12,7 @@ export default function page(props: {
   const token = props.searchParams.token;
 
   if (!token) return <SendEmailSection />;
-  // if (token) return <ChangePassword />;
+  else return <ChangePassword token={token} />;
 }
 
 // Destucture
