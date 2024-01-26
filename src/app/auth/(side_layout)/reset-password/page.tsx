@@ -1,31 +1,38 @@
-import emailIcon from "@/asset/icon/email.svg";
-import { Input } from "@/components/ui/input";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { SignalZero } from "lucide-react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import ResetPasswordComponent from "./_component/resetpassword";
+import CheckEmailComponent from "./_component/check-email";
+import NewPasswordComponent from "./_component/newpassword";
+import SuccessResetPassword from "./_component/success-resetpassword";
 
-export default function page() {
-  return (
-    <div className="w-full">
-      <h1 className="mb-6">Reset password</h1>
-      <h4 className="mb-5">
-        Enter the email you used to create you account so we will send
-        [condition]
-      </h4>
-      <Input prefixIcon={emailIcon} placeholder="Email" inputSize="xl" />
-      <Button className="w-full my-4" size="lg">
-        Send
-      </Button>
-      <Link
-        href="/auth/login"
-        className={cn(
-          buttonVariants({ variant: "link", size: "lg" }),
-          "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
-        )}
-      >
-        Back to Login
-      </Link>
-    </div>
-  );
+export default function page(props: {
+  searchParams: {
+    token?: string;
+  };
+}) {
+  // Destucture
+  // {
+  //   searchParams: {
+  //       token
+  //     }
+  // }: {
+  //   searchParams: {
+  //     token?:string
+  //   }
+  // }
+
+  console.log(props.searchParams.token);
+
+  if (props.searchParams.token === undefined) {
+    return <ResetPasswordComponent />;
+  }
+  if (props.searchParams.token !== undefined) {
+    return (
+      <>
+        <NewPasswordComponent />
+        <CheckEmailComponent />
+      </>
+    );
+  }
+  if ((props.searchParams.token = "success")) {
+    return <SuccessResetPassword />;
+  }
 }
