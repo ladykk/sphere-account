@@ -58,6 +58,7 @@
     "@trpc/react-query": "^11.0.0-next-beta.228",
     "@trpc/server": "^11.0.0-next-beta.228",
     "aws-sdk": "^2.1545.0",
+    "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -88,7 +89,8 @@
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^2.9.5",
     "vaul": "^0.8.9",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

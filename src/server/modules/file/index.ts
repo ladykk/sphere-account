@@ -150,16 +150,7 @@ export const deleteFileById = async (id: string) => {
   const isAuthorized = await checkAccessControl(file[0].writeAccessControl);
 
   // If not authorized, return 401
-  if (!isAuthorized)
-    return new Response(
-      JSON.stringify({
-        status: "error",
-        error: "Unauthorized",
-      }),
-      {
-        status: 401,
-      }
-    );
+  if (!isAuthorized) return;
 
   // Delete file from R2
   const result = await deleteObject(file[0].id);
