@@ -9,6 +9,10 @@ const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "Sphere Account",
   description: "Sphere Account",
+  icons: {
+    icon: "/static/logo-256x256.png",
+    shortcut: "/static/logo-256x256.png",
+  },
 };
 
 export default async function RootLayout({

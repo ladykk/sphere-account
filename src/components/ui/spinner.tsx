@@ -9,7 +9,7 @@ export const Spinner = (
 ) => {
   return (
     <div {...props} className={cn("w-5 h-5", props.className)}>
-      <Loader2Icon className="w-full h-full animate-spin" />
+      <Loader2Icon className="w-full h-full animate-spin text-primary" />
     </div>
   );
 };
@@ -29,4 +29,13 @@ export const ScreenSpinner = (props: ScreenSpinnerProps) => {
       <Spinner className="w-16 h-16 text-white/80" />
     </div>
   ) : null;
+};
+
+export const BlockInteraction = (props: { isBlock: boolean }) => {
+  if (!props.isBlock) return null;
+  return (
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-secondary/20 z-[100]">
+      <Spinner className="ml-auto mt-5 mr-5 w-6 h-6" />
+    </div>
+  );
 };

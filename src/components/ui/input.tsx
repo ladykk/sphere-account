@@ -1,10 +1,11 @@
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import eyeOff from "@/asset/icon/eyeoff.svg";
-import eyeOn from "@/asset/icon/eyeon.svg";
+import eyeOff from "@/assets/icon/eyeoff.svg";
+import eyeOn from "@/assets/icon/eyeon.svg";
 import Image from "next/image";
 import { VariantProps, cva } from "class-variance-authority";
+import { create } from "zustand";
 
 const inputVariants = cva(
   "flex w-full rounded-md border border-input bg-background ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -33,6 +34,15 @@ export interface InputProps
   };
 }
 
+const usePasswordStore = create<{
+  showPassword: boolean;
+  togglePasswordVisibility: () => void;
+}>((set) => ({
+  showPassword: true,
+  togglePasswordVisibility: () =>
+    set((state) => ({ showPassword: !state.showPassword })),
+}));
+
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -46,8 +56,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const [showPassword, setShowPassword] = React.useState(true);
-    const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+    const { showPassword, togglePasswordVisibility } = usePasswordStore();
 
     return (
       <div className={cn("relative", classNames?.container)}>

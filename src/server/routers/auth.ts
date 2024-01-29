@@ -155,7 +155,7 @@ export const authRouter = createTRPCRouter({
             and(
               eq(resetPasswordTokens.token, input.token),
               eq(resetPasswordTokens.isUsed, false),
-              lt(resetPasswordTokens.expires, new Date())
+              gt(resetPasswordTokens.expires, new Date())
             )
           )
           .limit(1);
