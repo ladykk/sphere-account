@@ -1,9 +1,8 @@
 "use client";
-import { useState } from "react";
-import emailIcon from "@/asset/icon/email.svg";
+import { useEffect, useState } from "react";
+import emailIcon from "@/assets/icon/email.svg";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { SignalZero } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -17,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { RouterInputs } from "@/trpc/shared";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import { BlockInteraction } from "@/components/ui/spinner";
 
 export function SendEmailSection() {
   const [email, setEmail] = useState<string | undefined>(undefined);
@@ -51,13 +51,13 @@ function Step1(props: { onSuccess: (email: string) => void }) {
 
   return (
     <Form {...form}>
-      {" "}
       <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
-        <h1 className="mb-6">Reset password</h1>
-        <h4 className="mb-5">
-          Enter the email you used to create you account so we will send
-          [condition]
-        </h4>
+        <BlockInteraction isBlock={mutation.isPending} />
+        <h1 className="mb-6">Reset Password</h1>
+        <h5 className="mb-5 text-muted-foreground">
+          Enter the email that you used to create your account. You will receive
+          a link to reset your password via email.
+        </h5>
         <FormField
           control={form.control}
           name="email"
@@ -67,8 +67,7 @@ function Step1(props: { onSuccess: (email: string) => void }) {
                 <Input
                   {...field}
                   prefixIcon={emailIcon}
-                  placeholder="Email"
-                  inputSize="xl"
+                  placeholder="Email Address"
                 />
               </FormControl>
               <FormMessage />
@@ -76,15 +75,10 @@ function Step1(props: { onSuccess: (email: string) => void }) {
           )}
         ></FormField>
 
-        <Button className="w-full my-4" size="lg">
-          Send
-        </Button>
+        <Button className="w-full my-4">Send</Button>
         <Link
           href="/auth/login"
-          className={cn(
-            buttonVariants({ variant: "link", size: "lg" }),
-            "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
-          )}
+          className={cn(buttonVariants({ variant: "outline" }), "w-full")}
         >
           Back to Login
         </Link>
@@ -93,23 +87,46 @@ function Step1(props: { onSuccess: (email: string) => void }) {
   );
 }
 
-export function Step2(props: { email: string }) {
-  const mutation = api.auth.sendResetPasswordEmail.useMutation({});
+function Step2(props: { email: string }) {
+  const [counter, setCounter] = useState(10);
+  const mutation = api.auth.sendResetPasswordEmail.useMutation({
+    onSuccess: () => setCounter(10),
+  });
+
+  useEffect(() => {
+    if (counter === 0) return;
+    const timer = setTimeout(() => setCounter(counter - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [counter]);
+
+  const onSubmit = async (
+    input: RouterInputs["auth"]["sendResetPasswordEmail"]
+  ) => {
+    toast.promise(mutation.mutateAsync(input), {
+      loading: "Sending Email...",
+      success: "Email has already been sent",
+      error: "Failed to send email",
+    });
+  };
+
   return (
     <div className="w-full">
-      <h1 className="mb-6">Reset password</h1>
-      <h4 className="mb-5">
-        Password reset information has sent to <br></br> {props.email}
-      </h4>
+      <BlockInteraction isBlock={mutation.isPending} />
+      <h1 className="mb-6">Reset Password</h1>
+      <h5 className="mb-5 text-muted-foreground">
+        A link to reset your password has been sent to "{props.email}". Please
+        check your inbox to continue.
+      </h5>
       <p className=" text-center text-neutral-600">
-        Didn’t receive the email? Check spam folder or
+        Didn’t receive the email? Check spam folder or...
       </p>
       <Button
         className="w-full my-4"
         size="lg"
-        onClick={() => mutation.mutateAsync({ email: props.email })}
+        onClick={() => onSubmit({ email: props.email })}
+        disabled={counter > 0}
       >
-        Resend Email
+        Resend Email {counter > 0 ? `(${counter})` : ""}
       </Button>
       <Link
         href="/auth/login"

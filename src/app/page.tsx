@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -9,9 +10,32 @@ export default function Home() {
     <main className="p-5">
       <h1>Sphere Account</h1>
       {session ? (
-        session.user.id
+        <>
+          <p>{session.user.id}</p>
+          <Button
+            onClick={() =>
+              toast.promise(signOut, {
+                loading: "Signing out...",
+                success: "Signed out",
+                error: "Failed to sign out",
+              })
+            }
+          >
+            Sign Out
+          </Button>
+        </>
       ) : (
-        <Button onClick={() => signIn()}>Sign In</Button>
+        <Button
+          onClick={() =>
+            toast.promise(signIn, {
+              loading: "Redirecting to sign in...",
+              success: undefined,
+              error: "Failed to sign in",
+            })
+          }
+        >
+          Sign In
+        </Button>
       )}
     </main>
   );

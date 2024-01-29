@@ -9,9 +9,7 @@ import { NextAuthOptions } from "next-auth";
 import { Adapter } from "next-auth/adapters";
 import { userCredentials, users } from "@/db/schema/auth";
 import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt"
-// const bcrypt = require('bcrypt');
-
+import bcrypt from "bcrypt";
 
 const EmailPasswordProvider = CredentialsProvider({
   id: "email-password",
@@ -21,41 +19,56 @@ const EmailPasswordProvider = CredentialsProvider({
     password: { label: "Password", type: "password" },
   },
   async authorize(credentials) {
-    // TODO: Authenticate logic
-    try {
-      if (credentials && credentials.password && typeof credentials.email === "string") {
-        const user = await db
-          .select({ id: users.id, name: users.name, email: users.email, image: users.image, password: userCredentials.password })
-          .from(users)
-          .innerJoin(userCredentials, eq(users.id, userCredentials.userId))
-          .where(eq(users.email, credentials.email))
-          .limit(1);
-
-        if (user.length > 0) {
-          const decryptedPassword = await bcrypt.compare(credentials.password, user[0].password);
-          if (decryptedPassword) {
-            return { id: user[0].id, name: user[0].name, email: user[0].email, image: user[0].image }
-          } else {
-            console.log('Incorrect Password:');
-            return null
-          }
-        }
-      } else {
-        console.log('Authentication error:');
-        return null
-      }
+    // Return null if user credentials are invalid
+    if (!credentials?.email && !credentials?.password) {
+      console.error("[Auth]: Bad credentials");
       return null;
-    } catch (error) {
-      console.log('Authentication error:', error);
-      return null
     }
 
+    // Find user by email
+    const user = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        password: userCredentials.password,
+      })
+      .from(users)
+      .innerJoin(userCredentials, eq(users.id, userCredentials.userId))
+      .where(eq(users.email, credentials.email))
+      .limit(1);
+
+    // Return null if user not found
+    if (user.length <= 0) {
+      console.error(
+        `[Auth]: User with email: "${credentials.email}" not found.`
+      );
+      return null;
+    }
+
+    const isPass = await bcrypt.compare(credentials.password, user[0].password);
+
+    if (!isPass) {
+      console.error(
+        `[Auth]: User with email: "${credentials.email}" password not match.`
+      );
+      return null;
+    }
+
+    console.info(
+      `[Auth]: User with email: "${
+        credentials.email
+      }" login. (${new Date().toISOString()})`
+    );
+    return {
+      id: user[0].id,
+      name: user[0].name,
+      email: user[0].email,
+      image: user[0].image,
+    };
   },
 });
-
-
-
-
 
 export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db) as Adapter,
@@ -76,9 +89,10 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: env.NEXTAUTH_SECRET,
   session: {
-    strategy: "database",
+    strategy: "jwt",
+  },
+  jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
     signIn: "/auth/login",
@@ -88,8 +102,12 @@ export const authOptions: NextAuthOptions = {
     newUser: "/auth/new-user",
   },
   callbacks: {
-    session: async ({ session, token, user }) => {
-      session.user.id = user.id;
+    session: async ({ session, token }) => {
+      if (!token.sub) {
+        throw new Error("[Auth]: No User ID");
+      }
+      session.user.id = token.sub;
+
       return session;
     },
   },

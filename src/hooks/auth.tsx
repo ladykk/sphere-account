@@ -67,7 +67,7 @@ export const useSignInMutation = (
     mutationKey: ["signIn"],
     mutationFn: async (params) => {
       const result = await signIn(params.type, {
-        callbackUrl: searchParams.get("callbackUrl") ?? undefined,
+        callbackUrl: searchParams.get("callbackUrl") ?? "/",
         email:
           params.type === "email-password"
             ? params.credentials.email
@@ -77,10 +77,11 @@ export const useSignInMutation = (
             ? params.credentials.password
             : undefined,
       });
-
       if (result?.error) {
         throw new Error(result.error);
       }
+
+      await new Promise((resolve) => setTimeout(resolve, 60 * 1000));
     },
     ...options,
   });

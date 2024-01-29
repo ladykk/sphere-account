@@ -1,13 +1,11 @@
 "use client";
-
-import emailIcon from "@/asset/icon/email.svg";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { SignalZero } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import lockKey from "@/asset/icon/padlock.png";
-import success from "@/asset/image/success.png";
+import { cn, handleTRPCFormError } from "@/lib/utils";
+import lockKey from "@/assets/icon/padlock.png";
+import success from "@/assets/icon/success.svg";
+import error from "@/assets/icon/error.svg";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { RouterInputs } from "@/trpc/shared";
@@ -16,31 +14,25 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { BlockInteraction } from "@/components/ui/spinner";
 
-export function ChangePassword(props: { token: string }) {
-  const [isSuccess, setIsSuccess] = useState<boolean | undefined>(undefined);
-  const handleSubmitNewPassword = () => setIsSuccess(true);
+export function ChangePasswordSection(props: { token: string }) {
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const handleSuccess = () => setIsSuccess(true);
 
   if (!isSuccess)
-    return (
-      <InputNewPassword
-        onSuccess={handleSubmitNewPassword}
-        token={props.token}
-      />
-    );
+    return <NewPasswordForm onSuccess={handleSuccess} token={props.token} />;
 
-  return <SuccessResetPassword />;
+  return <Success />;
 }
 
-export function InputNewPassword(props: {
-  onSuccess: (isSuccess: boolean) => void;
-  token: string;
-}) {
+function NewPasswordForm(props: { onSuccess: () => void; token: string }) {
   const form = useForm<RouterInputs["auth"]["resetPassword"]>({
     defaultValues: {
       token: props.token,
@@ -50,9 +42,9 @@ export function InputNewPassword(props: {
   });
 
   const mutation = api.auth.resetPassword.useMutation({
-    // onSuccess: () => {
-    //   const isSuccess = true;
-    // },
+    onSuccess: () => props.onSuccess(),
+    onError: (error) =>
+      handleTRPCFormError(error.data?.zodError, form.setError),
   });
 
   const onSubmit = async (input: RouterInputs["auth"]["resetPassword"]) => {
@@ -61,29 +53,25 @@ export function InputNewPassword(props: {
       success: "Password change successfully!",
       error: "Failed to change password",
     });
-    console.log(props.token);
   };
 
   return (
     <Form {...form}>
       <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
-        <h1 className="mb-6">Reset password {props.token}</h1>
-        <h4 className="mb-5">
-          Enter the email you used to create you account so we will send
-          [condition]
-        </h4>
-        <p className="mb-2 text-lg">New Password</p>
+        <BlockInteraction isBlock={mutation.isPending} />
+        <h1 className="mb-6">Reset Password</h1>
+        <h5 className="mb-5 text-muted-foreground">Enter your new password.</h5>
         <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="mb-4">
+              <FormLabel>New Password</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   prefixIcon={lockKey}
                   placeholder="Password"
-                  inputSize="xl"
                   type="password"
                 />
               </FormControl>
@@ -91,19 +79,17 @@ export function InputNewPassword(props: {
             </FormItem>
           )}
         ></FormField>
-
-        <p className="my-2 text-lg">Confirm Password</p>
         <FormField
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="mb-4">
+              <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   prefixIcon={lockKey}
                   placeholder="Confirm Password"
-                  inputSize="xl"
                   type="password"
                 />
               </FormControl>
@@ -111,16 +97,10 @@ export function InputNewPassword(props: {
             </FormItem>
           )}
         ></FormField>
-
-        <Button className="w-full my-4" size="lg">
-          Send
-        </Button>
+        <Button className="w-full mb-4">Reset Password</Button>
         <Link
           href="/auth/login"
-          className={cn(
-            buttonVariants({ variant: "link", size: "lg" }),
-            "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
-          )}
+          className={cn(buttonVariants({ variant: "outline" }), "w-full")}
         >
           Back to Login
         </Link>
@@ -129,20 +109,39 @@ export function InputNewPassword(props: {
   );
 }
 
-export function SuccessResetPassword() {
+function Success() {
   return (
     <div className="w-full">
-      <h1 className="mb-6">Reset password successfully</h1>
+      <h1 className="mb-6">Reset Password Successfully</h1>
       <div className=" flex justify-center my-9">
-        <Image src={success} alt="success" />{" "}
+        <Image src={success} alt="success" width={128} height={128} />
       </div>
-
       <Link
         href="/auth/login"
-        className={cn(
-          buttonVariants({ variant: "link", size: "lg" }),
-          "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
-        )}
+        className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+      >
+        Back to Login
+      </Link>
+    </div>
+  );
+}
+
+export function InvalidToken() {
+  return (
+    <div className="w-full">
+      <h1 className="mb-6">Invalid Token</h1>
+      <div className=" flex justify-center my-9">
+        <Image src={error} alt="error" width={128} height={128} />
+      </div>
+      <Link
+        href="/auth/reset-password"
+        className={cn(buttonVariants({}), "w-full mb-4")}
+      >
+        Get Reset Password Email
+      </Link>
+      <Link
+        href="/auth/login"
+        className={cn(buttonVariants({ variant: "outline" }), "w-full")}
       >
         Back to Login
       </Link>

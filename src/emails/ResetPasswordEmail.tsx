@@ -21,14 +21,14 @@ interface ResetPasswordProps {
 
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+  : "https://sphere-account.vercel.app";
 
 export const ResetPasswordEmail = (props: ResetPasswordProps) => {
   return (
     <Html>
       <Head />
       <Preview>SphereAccount reset your password</Preview>
-      <Body>
+      <Body style={{ fontFamily: "system-ui, sans-serif" }}>
         <Container
           style={{
             padding: "60px",
@@ -41,7 +41,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
             src={`${baseUrl}/static/logo-text-128h.png`}
             width="auto"
             height="56"
-            alt="Dropbox"
+            alt="SphereAccount Logo"
             style={{ marginBottom: "20px" }}
           />
           <Section>
@@ -49,6 +49,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
               style={{
                 fontSize: "24px",
                 fontWeight: "bold",
+                color: "rgb(10, 10, 10)",
               }}
             >
               Hi {props.name},
@@ -56,6 +57,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
             <Text
               style={{
                 fontSize: "16px",
+                color: "rgb(74, 74, 74)",
               }}
             >
               To reset your account password click on the following link. Please
@@ -67,7 +69,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
               href={props.resetPasswordLink}
               style={{
                 backgroundColor: "rgb(243, 113, 32)",
-                padding: "8px 16px",
+                padding: "12px 16px",
                 color: "rgb(255, 255, 255)",
                 borderRadius: "6px",
                 fontWeight: "500",
@@ -80,6 +82,7 @@ export const ResetPasswordEmail = (props: ResetPasswordProps) => {
             <Text
               style={{
                 fontSize: "16px",
+                color: "rgb(74, 74, 74)",
               }}
             >
               If you have any other questions or concerns, please reach out to{" "}

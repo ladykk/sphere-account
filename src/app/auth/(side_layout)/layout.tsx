@@ -1,7 +1,7 @@
 "use client";
-import imgLogin from "@/asset/image/sphere-login.png";
+import imgLogin from "@/assets/image/sphere-login.png";
 import Image from "next/image";
-import SphereLogo from "@/asset/image/SphereLogo.png";
+import SphereLogo from "@/assets/image/SphereLogo.png";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
