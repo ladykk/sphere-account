@@ -9,7 +9,7 @@ export const Spinner = (
 ) => {
   return (
     <div {...props} className={cn("w-5 h-5", props.className)}>
-      <Loader2Icon className="w-full h-full animate-spin" />
+      <Loader2Icon className="w-full h-full animate-spin text-primary" />
     </div>
   );
 };
