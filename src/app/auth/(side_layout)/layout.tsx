@@ -4,13 +4,23 @@ import Image from "next/image";
 import SphereLogo from "@/assets/image/SphereLogo.png";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default function AuthSideLayout(props: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [isLoaded, setLoaded] = useState(false);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session?.user) router.replace(callbackUrl);
+  }, [session]);
 
   // Wait until client is ready
   useEffect(() => {

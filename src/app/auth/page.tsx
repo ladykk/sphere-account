@@ -7,11 +7,17 @@ type Props = {
   };
 };
 export default async function AuthRedirectDefault(props: Props) {
-  redirect(
-    `/auth/login${
-      props.searchParams.callbackUrl
-        ? `?callbackUrl=${props.searchParams.callbackUrl}`
-        : ""
-    }`
-  );
+  const session = await getServerAuthSession();
+
+  // Redirect to callback url if user is logged in
+  if (session?.user) redirect(props.searchParams?.callbackUrl || "/");
+  // Redirect to login if user is not logged in
+  else
+    redirect(
+      `/auth/login${
+        props.searchParams.callbackUrl
+          ? `?callbackUrl=${props.searchParams.callbackUrl}`
+          : ""
+      }`
+    );
 }
