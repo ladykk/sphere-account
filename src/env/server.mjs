@@ -59,6 +59,18 @@ export const env = createEnv({
     SMTP_PASSWORD: z.string({
       required_error: "SMTP_PASSWORD is required",
     }),
+    R2_ACCESS_KEY_ID: z.string({
+      required_error: "R2_ACCESS_KEY_ID is required",
+    }),
+    R2_ACCESS_SECRET_KEY: z.string({
+      required_error: "R2_ACCESS_SECRET_KEY is required",
+    }),
+    R2_ENDPOINT: z.string({
+      required_error: "R2_ENDPOINT is required",
+    }),
+    R2_BUCKET: z.string({
+      required_error: "R2_BUCKET is required",
+    }),
   },
   runtimeEnv: {
     VERCEL_ENV: process.env.VERCEL_ENV,
@@ -81,6 +93,10 @@ export const env = createEnv({
     LINE_CLIENT_SECRET: process.env.LINE_CLIENT_SECRET,
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_ACCESS_SECRET_KEY: process.env.R2_ACCESS_SECRET_KEY,
+    R2_ENDPOINT: process.env.R2_ENDPOINT,
+    R2_BUCKET: process.env.R2_BUCKET,
   },
   onValidationError: (error) => {
     console.error(
