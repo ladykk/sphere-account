@@ -23,17 +23,7 @@ const EmailPasswordProvider = CredentialsProvider({
   async authorize(credentials) {
     // TODO: Authenticate logic
     try {
-
       if (credentials && credentials.password && typeof credentials.email === "string") {
-        // const user = await db
-        //   .select({ id: users.id, name: users.name, email: users.email, image: users.image }).from(users)
-        //   .where(eq(users.email, credentials.email))
-        //   .limit(1);
-        // const userPassword = await db
-        //   .select({ password: userCredentials.password }).from(userCredentials)
-        //   .where(eq(userCredentials.userId, user[0].id))
-        //   .limit(1);
-
         const user = await db
           .select({ id: users.id, name: users.name, email: users.email, image: users.image, password: userCredentials.password })
           .from(users)
@@ -45,7 +35,6 @@ const EmailPasswordProvider = CredentialsProvider({
           const decryptedPassword = await bcrypt.compare(credentials.password, user[0].password);
           if (decryptedPassword) {
             return { id: user[0].id, name: user[0].name, email: user[0].email, image: user[0].image }
-
           } else {
             console.log('Incorrect Password:');
             return null
