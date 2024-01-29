@@ -7,6 +7,11 @@ import GoogleProvider from "next-auth/providers/google";
 import LineProvider from "next-auth/providers/line";
 import { NextAuthOptions } from "next-auth";
 import { Adapter } from "next-auth/adapters";
+import { userCredentials, users } from "@/db/schema/auth";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt"
+// const bcrypt = require('bcrypt');
+
 
 const EmailPasswordProvider = CredentialsProvider({
   id: "email-password",
@@ -17,10 +22,40 @@ const EmailPasswordProvider = CredentialsProvider({
   },
   async authorize(credentials) {
     // TODO: Authenticate logic
-    console.log(credentials);
-    return null;
+    try {
+      if (credentials && credentials.password && typeof credentials.email === "string") {
+        const user = await db
+          .select({ id: users.id, name: users.name, email: users.email, image: users.image, password: userCredentials.password })
+          .from(users)
+          .innerJoin(userCredentials, eq(users.id, userCredentials.userId))
+          .where(eq(users.email, credentials.email))
+          .limit(1);
+
+        if (user.length > 0) {
+          const decryptedPassword = await bcrypt.compare(credentials.password, user[0].password);
+          if (decryptedPassword) {
+            return { id: user[0].id, name: user[0].name, email: user[0].email, image: user[0].image }
+          } else {
+            console.log('Incorrect Password:');
+            return null
+          }
+        }
+      } else {
+        console.log('Authentication error:');
+        return null
+      }
+      return null;
+    } catch (error) {
+      console.log('Authentication error:', error);
+      return null
+    }
+
   },
 });
+
+
+
+
 
 export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db) as Adapter,
