@@ -38,8 +38,12 @@ export default function RegisterPage() {
     },
   });
 
+  const loginPath = `/auth/login${
+    callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
+  }`;
+
   const mutation = api.auth.register.useMutation({
-    onSuccess: () => router.replace("/auth/login"),
+    onSuccess: () => router.replace(loginPath),
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
@@ -162,9 +166,7 @@ export default function RegisterPage() {
         <div className="flex justify-center gap-6 items-center text-sm mt-6">
           <div> Already have an account?</div>
           <Link
-            href={`/auth/login${
-              callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
-            }`}
+            href={loginPath}
             className={cn(buttonVariants({ variant: "link" }), "font-normal")}
           >
             Login
