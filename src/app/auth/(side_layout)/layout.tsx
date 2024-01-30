@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function AuthSideLayout(props: Props) {
+export default function Layout(props: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
