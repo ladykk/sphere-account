@@ -1,5 +1,5 @@
 "use client";
-import type { generatePresignedUrlInputSchema } from "@/server/modules/file";
+import type { generatePresignedUrlInputSchema } from "@/server/modules/file/trpc";
 import { z } from "zod";
 import { create } from "zustand";
 import axios from "axios";

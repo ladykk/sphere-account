@@ -100,5 +100,30 @@ export const Auth = {
           });
         }
       }),
+    getAccountLoginOptionsOutputSchema: z.object({
+      password: z.boolean().default(false),
+      facebook: z.boolean().default(false),
+      google: z.boolean().default(false),
+      line: z.boolean().default(false),
+    }),
+    updateAccountInputSchema: z
+      .object({
+        firstName: z.string().min(1, "First name is required"),
+        lastName: z.string().min(1, "Last name is required"),
+        email: z
+          .string()
+          .email("Invalid email address")
+          .min(1, "Email is required"),
+        image: z.string().optional(),
+      })
+      .superRefine(async (val, ctx) => {
+        if (await Auth.logics.checkEmailExists(val.email)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Email already exists",
+            path: ["email"],
+          });
+        }
+      }),
   },
 };

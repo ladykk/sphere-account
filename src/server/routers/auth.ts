@@ -1,12 +1,18 @@
-import { resetPasswordTokens, userCredentials, users } from "@/db/schema/auth";
+import {
+  accounts,
+  resetPasswordTokens,
+  userCredentials,
+  users,
+} from "@/db/schema/auth";
 import { Auth } from "../models/auth";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { sendMail } from "../modules/email";
 import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { env } from "@/env/server.mjs";
 import { getBaseUrl } from "@/trpc/shared";
+import { generatePresignedUrlProcedure } from "../modules/file/trpc";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -189,6 +195,58 @@ export const authRouter = createTRPCRouter({
               password: newPassword,
             },
           });
+      });
+    }),
+  getAccountLoginOptions: protectedProcedure
+    .output(Auth.schemas.getAccountLoginOptionsOutputSchema)
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const accountResults = await trx
+          .select({
+            provider: accounts.provider,
+          })
+          .from(accounts)
+          .where(eq(accounts.userId, ctx.session.user.id));
+
+        const userCredentialResult = await trx
+          .select({
+            userId: userCredentials.userId,
+          })
+          .from(userCredentials)
+          .where(eq(userCredentials.userId, ctx.session.user.id))
+          .limit(1);
+
+        return {
+          password: userCredentialResult.length > 0,
+          google: accountResults.some(
+            (account) => account.provider === "google"
+          ),
+          facebook: accountResults.some(
+            (account) => account.provider === "facebook"
+          ),
+          line: accountResults.some((account) => account.provider === "line"),
+        };
+      });
+    }),
+  generateImagePresignedUrl: generatePresignedUrlProcedure((ctx) => ({
+    readAccessControl: {
+      rule: "public",
+    },
+    writeAccessControl: {
+      rule: "userId",
+      userId: ctx.session?.user.id,
+    },
+    isRequireAuth: true,
+  })),
+  updateAccount: protectedProcedure
+    .input(Auth.schemas.updateAccountInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        await trx.update(users).set({
+          name: `${input.firstName} ${input.lastName}`,
+          email: input.email,
+          image: input.image,
+        });
       });
     }),
 });
