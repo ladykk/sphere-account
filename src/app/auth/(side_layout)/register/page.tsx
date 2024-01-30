@@ -158,8 +158,8 @@ export default function RegisterPage() {
             </Button>
           </div>
         </div>
-        <Button className="w-full my-9">Register</Button>
-        <div className="flex justify-center gap-6 items-center text-sm">
+        <Button className="w-full mt-8">Register</Button>
+        <div className="flex justify-center gap-6 items-center text-sm mt-6">
           <div> Already have an account?</div>
           <Link
             href={`/auth/login${
