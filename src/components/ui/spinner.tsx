@@ -34,8 +34,6 @@ export const ScreenSpinner = (props: ScreenSpinnerProps) => {
 export const BlockInteraction = (props: { isBlock: boolean }) => {
   if (!props.isBlock) return null;
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 bg-secondary/20 z-[100]">
-      <Spinner className="ml-auto mt-5 mr-5 w-6 h-6" />
-    </div>
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-secondary/20 z-[100]"></div>
   );
 };

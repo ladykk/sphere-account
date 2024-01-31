@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        tall: { raw: "(min-height: 600px)" },
+      },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
