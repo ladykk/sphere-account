@@ -217,16 +217,18 @@ export const authRouter = createTRPCRouter({
           .where(eq(userCredentials.userId, ctx.session.user.id))
           .limit(1);
 
-        return {
+        let result = {
           password: userCredentialResult.length > 0,
-          google: accountResults.some(
-            (account) => account.provider === "google"
-          ),
-          facebook: accountResults.some(
-            (account) => account.provider === "facebook"
-          ),
-          line: accountResults.some((account) => account.provider === "line"),
+          google: false,
+          facebook: false,
+          line: false,
         };
+
+        accountResults.forEach((account) => {
+          result[account.provider as keyof typeof result] = true;
+        });
+
+        return result;
       });
     }),
   generateImagePresignedUrl: generatePresignedUrlProcedure((ctx) => ({

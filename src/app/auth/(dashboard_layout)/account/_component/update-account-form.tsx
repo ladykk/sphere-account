@@ -21,8 +21,7 @@ import { Button } from "@/components/ui/button";
 import { BlockInteraction } from "@/components/ui/spinner";
 import { AvatarInput } from "@/components/auth/avatar-input";
 import { toast } from "sonner";
-import { Progress } from "@/components/ui/progress";
-import { fileToPresignedUrlInput, uploadFile, useFileUpload } from "@/lib/file";
+import { fileToPresignedUrlInput, uploadFile } from "@/lib/file";
 import { useMutation } from "@tanstack/react-query";
 import { handleTRPCFormError } from "@/lib/utils";
 
