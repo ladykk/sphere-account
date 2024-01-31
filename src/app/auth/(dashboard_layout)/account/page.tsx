@@ -3,6 +3,7 @@ import { DashboardMainContainer } from "@/components/layouts/dashboard";
 import { Separator } from "@/components/ui/separator";
 import { UpdateAccountForm } from "./_component/update-account-form";
 import { LoginOptions } from "./_component/login-options";
+import { ChangePassword } from "./_component/change-password";
 
 export default function AccountClient() {
   return (
@@ -11,7 +12,11 @@ export default function AccountClient() {
       <Separator className="my-5" />
       <div className="flex gap-10">
         <UpdateAccountForm />
-        <LoginOptions />
+        <div className="flex-1 space-y-5">
+          <LoginOptions />
+          <Separator />
+          <ChangePassword />
+        </div>
       </div>
     </DashboardMainContainer>
   );

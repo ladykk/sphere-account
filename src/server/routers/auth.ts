@@ -262,4 +262,39 @@ export const authRouter = createTRPCRouter({
           .where(eq(users.id, ctx.session.user.id));
       });
     }),
+  unlinkLoginProvider: protectedProcedure
+    .input(Auth.schemas.unlinkLoginProviderInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        await trx
+          .delete(accounts)
+          .where(
+            and(
+              eq(accounts.userId, ctx.session.user.id),
+              eq(accounts.provider, input)
+            )
+          );
+      });
+    }),
+  registerPassword: protectedProcedure
+    .input(Auth.schemas.registerPasswordInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const newHashedPassword = await Auth.logics.hashPassword(
+          input.newPassword
+        );
+        await trx
+          .insert(userCredentials)
+          .values({
+            userId: ctx.session.user.id,
+            password: newHashedPassword,
+          })
+          .onConflictDoUpdate({
+            target: userCredentials.userId,
+            set: {
+              password: newHashedPassword,
+            },
+          });
+      });
+    }),
 });

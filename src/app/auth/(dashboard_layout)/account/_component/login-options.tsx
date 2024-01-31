@@ -8,7 +8,9 @@ import google from "@/assets/image/googleLogo.png";
 import line from "@/assets/image/lineLogo.png";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { BlockInteraction, Spinner } from "@/components/ui/spinner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
 
 function LoginProvider({
   provider,
@@ -21,8 +23,37 @@ function LoginProvider({
   registered: boolean | undefined;
   icon: any;
 }) {
+  const queryClient = useQueryClient();
+  const unlinkMutation = api.auth.unlinkLoginProvider.useMutation({
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(api.auth.getAccountLoginOptions),
+      }),
+  });
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (registered) {
+        await toast.promise(unlinkMutation.mutateAsync(provider), {
+          loading: `Unlinking ${label}...`,
+          success: `${label} unlinked successfully`,
+          error: `Failed to unlink ${label}`,
+        });
+      } else {
+        toast.loading("Redirecting to login provider...", {
+          duration: 60 * 1000,
+        });
+        signIn(provider);
+        await new Promise((resolve) => setTimeout(resolve, 60 * 1000));
+      }
+    },
+  });
+
   return (
     <div className="flex justify-between items-center">
+      <BlockInteraction
+        isBlock={mutation.isPending || unlinkMutation.isPending}
+      />
       <div className="flex items-center gap-3">
         <Image src={icon} alt={provider} width={20} height={20} />
         <h5 className="font-medium">{label}</h5>
@@ -31,15 +62,23 @@ function LoginProvider({
         size="sm"
         variant={registered ? "outline" : "secondary"}
         onClick={() => {
-          if (registered) return;
-          toast.loading("Redirecting to login provider...", {
-            duration: 60 * 1000,
-          });
-          signIn(provider);
+          if (registered) {
+            toast.promise(unlinkMutation.mutateAsync(provider), {
+              loading: `Unlinking ${label}...`,
+              success: `${label} unlinked successfully`,
+              error: `Failed to unlink ${label}`,
+            });
+          } else {
+            toast.loading("Redirecting to login provider...", {
+              duration: 60 * 1000,
+            });
+            signIn(provider);
+          }
         }}
-        className=" w-24"
+        className="w-16"
+        disabled={unlinkMutation.isPending}
       >
-        {registered ? "Registered" : "Register"}
+        {registered ? "Unlink" : "Link"}
       </Button>
     </div>
   );
