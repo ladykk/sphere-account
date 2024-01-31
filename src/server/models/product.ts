@@ -18,6 +18,10 @@ export const Product = {
             createdBy: z.string().nullable(),
             updatedAt: z.date(),
             updatedBy: z.string().nullable(),
+        }),
+
+        createOutputSchemas: z.object({
+            id: z.string()
         })
     }
 }
