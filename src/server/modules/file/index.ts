@@ -84,7 +84,7 @@ export const checkAccessControl = async (accessControl: TAccessControl) => {
 
 export const getIdFromUrl = (url: string | undefined | null) => {
   if (!url) return null;
-  const baseStorageUrl = `${getBaseUrl()}/files/`;
+  const baseStorageUrl = `${getBaseUrl()}/api/file/`;
 
   // Skip if the url is not a storage url
   if (!url.startsWith(baseStorageUrl)) return null;

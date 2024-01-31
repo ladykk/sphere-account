@@ -3,8 +3,9 @@ import type { generatePresignedUrlInputSchema } from "@/server/modules/file/trpc
 import { z } from "zod";
 import { create } from "zustand";
 import axios from "axios";
+import { useEffect } from "react";
 
-type FileUploadState = {
+type FileUploadGlobalState = {
   states: {
     [key: string]: {
       status: "idle" | "uploading" | "done" | "error";
@@ -24,7 +25,9 @@ type FileUploadState = {
   ) => void;
 };
 
-export const useFileUpload = create<FileUploadState>((set) => ({
+export type FileUploadState = FileUploadGlobalState["states"][string];
+
+export const useFileUpload = create<FileUploadGlobalState>((set) => ({
   states: {},
   setFileUploadState(key, options) {
     return set((state) => ({
@@ -40,8 +43,22 @@ export const useFileUpload = create<FileUploadState>((set) => ({
 }));
 
 export const useFileUploadState = (key: string) => {
-  const state = useFileUpload((state) => state.states[key]);
-  return state;
+  const state = useFileUpload((state) => state.states?.[key]);
+  const setFileUploadState = useFileUpload((state) => state.setFileUploadState);
+
+  useEffect(() => {
+    setFileUploadState(key, {
+      status: "idle",
+    });
+
+    return () => {
+      setFileUploadState(key, {
+        status: "idle",
+      });
+    };
+  }, []);
+
+  return state as FileUploadState | undefined;
 };
 
 export const fileToPresignedUrlInput = (
@@ -57,7 +74,7 @@ export const fileToPresignedUrlInput = (
 export const uploadFile = async (
   key: string,
   file: File,
-  setFileUploadState?: FileUploadState["setFileUploadState"]
+  setFileUploadState?: FileUploadGlobalState["setFileUploadState"]
 ) => {
   setFileUploadState?.(key, {
     status: "idle",
@@ -79,11 +96,18 @@ export const uploadFile = async (
       }
     },
   })
-    .then(() => {
+    .then((res) => {
+      // If status is not 201, throw error
+      if (res.status !== 201) {
+        throw new Error("Failed to upload file.");
+      }
       setFileUploadState?.(key, {
         status: "done",
       });
-      return key;
+      return {
+        key: key,
+        url: res.data.url,
+      };
     })
     .catch((error) => {
       setFileUploadState?.(key, {

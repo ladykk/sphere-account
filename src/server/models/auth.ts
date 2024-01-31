@@ -3,6 +3,7 @@ import { users } from "@/db/schema/auth";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { getServerAuthSession } from "../modules/auth/server";
 
 export const Auth = {
   constants: {
@@ -117,7 +118,11 @@ export const Auth = {
         image: z.string().optional(),
       })
       .superRefine(async (val, ctx) => {
-        if (await Auth.logics.checkEmailExists(val.email)) {
+        const session = await getServerAuthSession();
+        if (
+          session?.user.email !== val.email &&
+          (await Auth.logics.checkEmailExists(val.email))
+        ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Email already exists",

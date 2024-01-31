@@ -13,6 +13,7 @@ import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { env } from "@/env/server.mjs";
 import { getBaseUrl } from "@/trpc/shared";
 import { generatePresignedUrlProcedure } from "../modules/file/trpc";
+import { deleteFileByUrl } from "../modules/file";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -242,11 +243,21 @@ export const authRouter = createTRPCRouter({
     .input(Auth.schemas.updateAccountInputSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
-        await trx.update(users).set({
-          name: `${input.firstName} ${input.lastName}`,
-          email: input.email,
-          image: input.image,
-        });
+        const allowChangeEmail = !ctx.session.user.email;
+
+        if (input.image !== ctx.session.user.image)
+          await deleteFileByUrl(ctx.session.user.image ?? "");
+
+        await trx
+          .update(users)
+          .set({
+            name: `${input.firstName} ${input.lastName}`,
+            email: allowChangeEmail
+              ? input.email
+              : ctx.session.user.email ?? undefined,
+            image: input.image,
+          })
+          .where(eq(users.id, ctx.session.user.id));
       });
     }),
 });
