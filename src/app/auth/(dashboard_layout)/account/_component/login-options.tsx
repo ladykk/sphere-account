@@ -34,7 +34,7 @@ function LoginProvider({
   const mutation = useMutation({
     mutationFn: async () => {
       if (registered) {
-        await toast.promise(unlinkMutation.mutateAsync(provider), {
+        toast.promise(unlinkMutation.mutateAsync(provider), {
           loading: `Unlinking ${label}...`,
           success: `${label} unlinked successfully`,
           error: `Failed to unlink ${label}`,
