@@ -1,11 +1,11 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import emailIcon from "@/asset/icon/email.svg";
-import lockKey from "@/asset/icon/padlock.png";
+import emailIcon from "@/assets/icon/email.svg";
+import lockKey from "@/assets/icon/padlock.png";
 import { Separator } from "@/components/ui/separator";
-import facebookLogo from "@/asset/image/facebookLogo.png";
-import googleLogo from "@/asset/image/googleLogo.png";
-import lineLogo from "@/asset/image/lineLogo.png";
+import facebookLogo from "@/assets/image/facebookLogo.png";
+import googleLogo from "@/assets/image/googleLogo.png";
+import lineLogo from "@/assets/image/lineLogo.png";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,9 +21,12 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { BlockInteraction } from "@/components/ui/spinner";
 
-export default function page() {
+export default function RegisterPage() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const router = useRouter();
   const form = useForm<RouterInputs["auth"]["register"]>({
     defaultValues: {
@@ -35,8 +38,12 @@ export default function page() {
     },
   });
 
+  const loginPath = `/auth/login${
+    callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
+  }`;
+
   const mutation = api.auth.register.useMutation({
-    onSuccess: () => router.replace("/auth/login"),
+    onSuccess: () => router.replace(loginPath),
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
@@ -52,6 +59,7 @@ export default function page() {
   return (
     <Form {...form}>
       <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
+        <BlockInteraction isBlock={mutation.isPending} />
         <h1 className="mb-4">Register </h1>
         <h5 className="text-muted-foreground mb-4">
           Enter your information below to create your account
@@ -62,7 +70,7 @@ export default function page() {
               control={form.control}
               name="firstName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex-1">
                   <FormControl>
                     <Input {...field} placeholder="First Name" />
                   </FormControl>
@@ -74,7 +82,7 @@ export default function page() {
               control={form.control}
               name="lastName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex-1">
                   <FormControl>
                     <Input {...field} placeholder="Last Name" />
                   </FormControl>
@@ -154,11 +162,11 @@ export default function page() {
             </Button>
           </div>
         </div>
-        <Button className="w-full my-9">Register</Button>
-        <div className="flex justify-center gap-6 items-center text-sm">
+        <Button className="w-full mt-8">Register</Button>
+        <div className="flex justify-center gap-6 items-center text-sm mt-6">
           <div> Already have an account?</div>
           <Link
-            href="/auth/login"
+            href={loginPath}
             className={cn(buttonVariants({ variant: "link" }), "font-normal")}
           >
             Login

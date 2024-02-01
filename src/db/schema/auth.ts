@@ -12,7 +12,7 @@ import { sql } from "drizzle-orm";
 export const users = pgTable("user", {
   id: text("id").notNull().primaryKey(),
   name: text("name"),
-  email: text("email").notNull(),
+  email: text("email").notNull().default(""),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   isActive: boolean("is_active").notNull().default(true),
