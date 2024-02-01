@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -23,6 +24,14 @@ export default function Home() {
           >
             Sign Out
           </Button>
+          <Link
+            href="/auth/account"
+            className={buttonVariants({
+              variant: "secondary",
+            })}
+          >
+            Manage Account
+          </Link>
         </>
       ) : (
         <Button

@@ -6,7 +6,7 @@ export const accessControlSchema = z.discriminatedUnion("rule", [
   }),
   z.object({
     rule: z.literal("userId"),
-    userId: z.string(),
+    userId: z.string().nullish(),
   }),
 ]);
 
