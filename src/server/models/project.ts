@@ -11,6 +11,10 @@ export const Project = {
             createdBy: z.string().nullable(),
             updatedAt: z.date(),
             updatedBy: z.string().nullable(),
+        }),
+
+        createOutputSchema: z.object({
+            id: z.string()
         })
     }
 }
