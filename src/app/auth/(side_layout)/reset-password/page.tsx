@@ -1,31 +1,27 @@
-import emailIcon from "@/asset/icon/email.svg";
-import { Input } from "@/components/ui/input";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { SignalZero } from "lucide-react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { SendEmailSection } from "./_component/send-email";
+import {
+  ChangePasswordSection,
+  InvalidToken,
+} from "./_component/change-password";
+import { api } from "@/trpc/server";
 
-export default function page() {
-  return (
-    <div className="w-full">
-      <h1 className="mb-6">Reset password</h1>
-      <h4 className="mb-5">
-        Enter the email you used to create you account so we will send
-        [condition]
-      </h4>
-      <Input prefixIcon={emailIcon} placeholder="Email" inputSize="xl" />
-      <Button className="w-full my-4" size="lg">
-        Send
-      </Button>
-      <Link
-        href="/auth/login"
-        className={cn(
-          buttonVariants({ variant: "link", size: "lg" }),
-          "w-full text-black bg-white border border-gray-300 hover:bg-black hover:text-white hover:no-underline"
-        )}
-      >
-        Back to Login
-      </Link>
-    </div>
-  );
+// Token - Secret
+// Link ใน Email - /auth/reset-password?token=secret
+
+export default async function ResetPasswordPage(props: {
+  searchParams: {
+    token?: string;
+  };
+}) {
+  const token = props.searchParams.token;
+
+  // ถ้าไม่มี Token ให้แสดงหน้า SendEmailSection
+  if (!token) return <SendEmailSection />;
+
+  const isValidToken = await api.auth.getResetPasswordTokenExpire.query(token);
+
+  // ถ้า Token ไม่ถูกต้อง ให้แสดงหน้า InvalidToken
+  if (!isValidToken) return <InvalidToken />;
+  // ถ้า Token ถูกต้อง ให้แสดงหน้า ChangePasswordSection
+  else return <ChangePasswordSection token={token} />;
 }

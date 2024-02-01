@@ -15,7 +15,7 @@ export const products = pgTable("product", {
   name: text("name").notNull(),
   // product_img: text("product_img"), // TODO: File implementation
   code: text("code").notNull(),
-  category: text("category"),
+  category: text("category").notNull(),
   barcode: text("barcode"),
   sellingPrice: numeric("selling_price").notNull().default("0.00"),
   vatType: text("vat_type"),

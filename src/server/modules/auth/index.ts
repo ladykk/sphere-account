@@ -7,6 +7,9 @@ import GoogleProvider from "next-auth/providers/google";
 import LineProvider from "next-auth/providers/line";
 import { NextAuthOptions } from "next-auth";
 import { Adapter } from "next-auth/adapters";
+import { userCredentials, users } from "@/db/schema/auth";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 const EmailPasswordProvider = CredentialsProvider({
   id: "email-password",
@@ -16,8 +19,54 @@ const EmailPasswordProvider = CredentialsProvider({
     password: { label: "Password", type: "password" },
   },
   async authorize(credentials) {
-    // TODO: Authenticate logic
-    return null;
+    // Return null if user credentials are invalid
+    if (!credentials?.email && !credentials?.password) {
+      console.error("[Auth]: Bad credentials");
+      return null;
+    }
+
+    // Find user by email
+    const user = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        password: userCredentials.password,
+      })
+      .from(users)
+      .innerJoin(userCredentials, eq(users.id, userCredentials.userId))
+      .where(eq(users.email, credentials.email))
+      .limit(1);
+
+    // Return null if user not found
+    if (user.length <= 0) {
+      console.error(
+        `[Auth]: User with email: "${credentials.email}" not found.`
+      );
+      return null;
+    }
+
+    const isPass = await bcrypt.compare(credentials.password, user[0].password);
+
+    if (!isPass) {
+      console.error(
+        `[Auth]: User with email: "${credentials.email}" password not match.`
+      );
+      return null;
+    }
+
+    console.info(
+      `[Auth]: User with email: "${
+        credentials.email
+      }" login. (${new Date().toISOString()})`
+    );
+    return {
+      id: user[0].id,
+      name: user[0].name,
+      email: user[0].email,
+      image: user[0].image,
+    };
   },
 });
 
@@ -40,21 +89,48 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: env.NEXTAUTH_SECRET,
   session: {
-    strategy: "database",
+    strategy: "jwt",
+  },
+  jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
+    signIn: "/auth/login",
+    signOut: "/auth/logout",
     error: "/auth/error",
     verifyRequest: "/auth/verify-request",
     newUser: "/auth/new-user",
   },
   callbacks: {
-    session: async ({ session, token, user }) => {
-      session.user.id = user.id;
+    session: async ({ session, token }) => {
+      if (!token.sub) {
+        throw new Error("[Auth]: No User ID");
+      }
+      session.user.id = token.sub;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.user.image = token.picture;
+
       return session;
+    },
+    jwt: async ({ token, trigger }) => {
+      if (trigger === "update") {
+        const user = await db
+          .select({
+            name: users.name,
+            email: users.email,
+            image: users.image,
+          })
+          .from(users)
+          .where(eq(users.id, token.sub ?? ""))
+          .limit(1);
+        if (user.length > 0) {
+          token.name = user[0].name;
+          token.email = user[0].email;
+          token.picture = user[0].image;
+        }
+      }
+      return token;
     },
   },
 };

@@ -7,12 +7,13 @@ import { TRPCReactProvider } from "./trpc";
 
 export async function Provider({ children }: { children: ReactNode }) {
   const session = await getServerAuthSession();
+
   return (
     <SessionProvider session={session}>
       <TRPCReactProvider>
         <PostHogProvider>
           {children}
-          <Toaster richColors />
+          <Toaster richColors theme="light" position="top-center" />
         </PostHogProvider>
       </TRPCReactProvider>
     </SessionProvider>
