@@ -13,10 +13,9 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "./spinner";
 import { useMediaQuery } from "usehooks-ts";
 import { Drawer, DrawerContent, DrawerTrigger } from "./drawer";
+import Image from "next/image";
 
 export interface ComboBoxProps<T, V extends string | number> {
-  value: V | undefined;
-  onChange: (value: V | undefined) => void;
   options: Array<T> | undefined;
   setLabel: (value: T) => string;
   setValue: (value: T) => V;
@@ -34,10 +33,27 @@ export interface ComboBoxProps<T, V extends string | number> {
     trigger?: string;
     drawerTrigger?: string;
   };
+  subfixIcon?: any;
+  subfix?: string;
+}
+
+export interface SingleComboBoxProps<T, V extends string | number>
+  extends ComboBoxProps<T, V> {
+  multiple: false;
+  value: V | undefined;
+  onChange: (value: V | undefined) => void;
+}
+
+export interface MultiComboBoxProps<T, V extends string | number>
+  extends ComboBoxProps<T, V> {
+  multiple: true;
+  value: Array<V>;
+  setMultiLabel?: (values: Array<T>) => string;
+  onChange: (value: Array<V>) => void;
 }
 
 export function ComboBox<T, V extends string | number>(
-  props: ComboBoxProps<T, V>
+  props: SingleComboBoxProps<T, V> | MultiComboBoxProps<T, V>
 ) {
   const options = props.options ?? [];
   const placeholder = props.placeholder ?? "Select an option...";
@@ -48,21 +64,33 @@ export function ComboBox<T, V extends string | number>(
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find(
-    (option) => props.setValue(option) === props.value
+  const selectedOptions = options.filter((option) =>
+    props.multiple
+      ? props.value.includes(props.setValue(option))
+      : props.setValue(option) === props.value
   );
 
   function Trigger() {
     return (
       <>
-        {selectedOption
-          ? props.customItemRender
-            ? props.customItemRender(selectedOption, true)
-            : props.setLabel(selectedOption)
+        {selectedOptions.length > 0
+          ? selectedOptions.length === 1
+            ? props.customItemRender
+              ? props.customItemRender(selectedOptions[0], true)
+              : props.setLabel(selectedOptions[0])
+            : props.multiple && props.setMultiLabel
+            ? props.setMultiLabel(selectedOptions)
+            : `${selectedOptions.length} selected`
           : placeholder}
 
         {props.loading ? (
           <Spinner />
+        ) : props.subfixIcon ? (
+          <Image
+            src={props.subfixIcon}
+            alt={props.subfix ?? ""}
+            className="w-4 h-4 object-contain ml-2 shrink-0"
+          />
         ) : open && !props.disabled && !props.readOnly ? (
           <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         ) : (
@@ -92,20 +120,44 @@ export function ComboBox<T, V extends string | number>(
                   : props.setLabel(option)
               }
               onSelect={() => {
-                const newOption = options.find(
-                  (o) => props.setValue(o) === props.setValue(option)
-                );
-                props.onChange(
-                  newOption ? props.setValue(newOption) : undefined
-                );
-                setOpen(false);
+                if (props.multiple) {
+                  const newOption = options.find(
+                    (o) => props.setValue(o) === props.setValue(option)
+                  );
+                  if (newOption) {
+                    if (props.value.includes(props.setValue(newOption))) {
+                      props.onChange(
+                        props.value.filter(
+                          (v) => v !== props.setValue(newOption)
+                        )
+                      );
+                    } else {
+                      props.onChange([
+                        ...props.value,
+                        props.setValue(newOption),
+                      ]);
+                    }
+                  }
+                } else {
+                  const newOption = options.find(
+                    (o) => props.setValue(o) === props.setValue(option)
+                  );
+                  props.onChange(
+                    newOption ? props.setValue(newOption) : undefined
+                  );
+                  setOpen(false);
+                }
               }}
             >
               <Fragment>
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    props.value === props.setValue(option)
+                    (
+                      props.multiple
+                        ? props.value.includes(props.setValue(option))
+                        : props.value === props.setValue(option)
+                    )
                       ? "opacity-100"
                       : "opacity-0"
                   )}
@@ -120,12 +172,16 @@ export function ComboBox<T, V extends string | number>(
             </CommandItem>
           ))}
         </CommandGroup>
-        {props.clearable && selectedOption && (
+        {props.clearable && selectedOptions && (
           <CommandGroup className="border-t">
             <CommandItem
               className="hover:text-destructive"
               onSelect={() => {
-                props.onChange(undefined);
+                if (props.multiple) {
+                  props.onChange([]);
+                } else {
+                  props.onChange(undefined);
+                }
                 setOpen(false);
               }}
             >
@@ -194,7 +250,7 @@ export function ComboBox<T, V extends string | number>(
               </Button>
             </div>
           </DrawerTrigger>
-          <DrawerContent className="min-h-[50svh]">
+          <DrawerContent className="max-h-[50svh]">
             <Content />
           </DrawerContent>
         </Drawer>
