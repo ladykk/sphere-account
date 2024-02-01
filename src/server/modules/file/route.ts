@@ -4,6 +4,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { checkAccessControl, deleteObject, getObject, uploadObject } from ".";
+import { getBaseUrl } from "@/trpc/shared";
 
 type FileProps = {
   params: {
@@ -123,6 +124,7 @@ export const PUT_FILE = async (req: NextRequest, props: FileProps) => {
   return new Response(
     JSON.stringify({
       status: "success",
+      url: `${getBaseUrl()}/api/file/${file[0].id}`,
     }),
     {
       status: 201,

@@ -107,8 +107,30 @@ export const authOptions: NextAuthOptions = {
         throw new Error("[Auth]: No User ID");
       }
       session.user.id = token.sub;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.user.image = token.picture;
 
       return session;
+    },
+    jwt: async ({ token, trigger }) => {
+      if (trigger === "update") {
+        const user = await db
+          .select({
+            name: users.name,
+            email: users.email,
+            image: users.image,
+          })
+          .from(users)
+          .where(eq(users.id, token.sub ?? ""))
+          .limit(1);
+        if (user.length > 0) {
+          token.name = user[0].name;
+          token.email = user[0].email;
+          token.picture = user[0].image;
+        }
+      }
+      return token;
     },
   },
 };

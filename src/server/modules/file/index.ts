@@ -82,46 +82,9 @@ export const checkAccessControl = async (accessControl: TAccessControl) => {
   }
 };
 
-export const generatePresignedUrlInputSchema = z.object({
-  fileName: z.string(),
-  fileType: z.string(),
-  fileSize: z.number(),
-});
-
-export type TGeneratePresignedUrlInput = z.infer<
-  typeof generatePresignedUrlInputSchema
->;
-
-export const generatePresignedUrl = async (
-  issuedBy: string,
-  readAccessControl: TAccessControl,
-  writeAccessControl: TAccessControl,
-  options: TGeneratePresignedUrlInput
-) => {
-  const date = new Date();
-  const extenstion = options.fileName.split(".").pop();
-  const result = await db
-    .insert(files)
-    .values({
-      id: `${crypto.randomUUID()}-${date.toISOString()}.${extenstion}`,
-      fileName: options.fileName,
-      fileType: options.fileType,
-      fileSize: options.fileSize,
-      issuedAt: date,
-      expiredAt: new Date(date.getTime() + 86400000), // 24 hours
-      issuedBy: issuedBy,
-      readAccessControl: readAccessControl,
-      writeAccessControl: writeAccessControl,
-    })
-    .returning({
-      key: files.id,
-    });
-  return result[0].key;
-};
-
 export const getIdFromUrl = (url: string | undefined | null) => {
   if (!url) return null;
-  const baseStorageUrl = `${getBaseUrl()}/files/`;
+  const baseStorageUrl = `${getBaseUrl()}/api/file/`;
 
   // Skip if the url is not a storage url
   if (!url.startsWith(baseStorageUrl)) return null;

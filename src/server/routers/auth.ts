@@ -1,12 +1,19 @@
-import { resetPasswordTokens, userCredentials, users } from "@/db/schema/auth";
+import {
+  accounts,
+  resetPasswordTokens,
+  userCredentials,
+  users,
+} from "@/db/schema/auth";
 import { Auth } from "../models/auth";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { sendMail } from "../modules/email";
 import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { env } from "@/env/server.mjs";
 import { getBaseUrl } from "@/trpc/shared";
+import { generatePresignedUrlProcedure } from "../modules/file/trpc";
+import { deleteFileByUrl } from "../modules/file";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -187,6 +194,105 @@ export const authRouter = createTRPCRouter({
             target: userCredentials.userId,
             set: {
               password: newPassword,
+            },
+          });
+      });
+    }),
+  getAccountLoginOptions: protectedProcedure
+    .output(Auth.schemas.getAccountLoginOptionsOutputSchema)
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const accountResults = await trx
+          .select({
+            provider: accounts.provider,
+          })
+          .from(accounts)
+          .where(eq(accounts.userId, ctx.session.user.id));
+
+        const userCredentialResult = await trx
+          .select({
+            userId: userCredentials.userId,
+          })
+          .from(userCredentials)
+          .where(eq(userCredentials.userId, ctx.session.user.id))
+          .limit(1);
+
+        let result = {
+          password: userCredentialResult.length > 0,
+          google: false,
+          facebook: false,
+          line: false,
+        };
+
+        accountResults.forEach((account) => {
+          result[account.provider as keyof typeof result] = true;
+        });
+
+        return result;
+      });
+    }),
+  generateImagePresignedUrl: generatePresignedUrlProcedure((ctx) => ({
+    readAccessControl: {
+      rule: "public",
+    },
+    writeAccessControl: {
+      rule: "userId",
+      userId: ctx.session?.user.id,
+    },
+    isRequireAuth: true,
+  })),
+  updateAccount: protectedProcedure
+    .input(Auth.schemas.updateAccountInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const allowChangeEmail = !ctx.session.user.email;
+
+        if (input.image !== ctx.session.user.image)
+          await deleteFileByUrl(ctx.session.user.image ?? "");
+
+        await trx
+          .update(users)
+          .set({
+            name: `${input.firstName} ${input.lastName}`,
+            email: allowChangeEmail
+              ? input.email
+              : ctx.session.user.email ?? undefined,
+            image: input.image,
+          })
+          .where(eq(users.id, ctx.session.user.id));
+      });
+    }),
+  unlinkLoginProvider: protectedProcedure
+    .input(Auth.schemas.unlinkLoginProviderInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        await trx
+          .delete(accounts)
+          .where(
+            and(
+              eq(accounts.userId, ctx.session.user.id),
+              eq(accounts.provider, input)
+            )
+          );
+      });
+    }),
+  registerPassword: protectedProcedure
+    .input(Auth.schemas.registerPasswordInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const newHashedPassword = await Auth.logics.hashPassword(
+          input.newPassword
+        );
+        await trx
+          .insert(userCredentials)
+          .values({
+            userId: ctx.session.user.id,
+            password: newHashedPassword,
+          })
+          .onConflictDoUpdate({
+            target: userCredentials.userId,
+            set: {
+              password: newHashedPassword,
             },
           });
       });
