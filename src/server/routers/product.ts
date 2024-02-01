@@ -63,6 +63,7 @@ export const productRouter = createTRPCRouter({
                         updatedAt: input.updatedAt,
                         updatedBy: input.updatedBy
                     })
+                    
                     .returning({
                         id: products.id
                     })
