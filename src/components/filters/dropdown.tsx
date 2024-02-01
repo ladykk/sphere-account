@@ -5,6 +5,8 @@ import { useMemo } from "react";
 
 // Assets
 import filter from "@/assets/icon/filter.svg";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
 
 interface DCheckboxDropdownProps<T> extends MultiComboBoxProps<T, string> {
   key: string;
@@ -35,7 +37,12 @@ export function CheckboxDropdown<T>(props: CheckboxDropdownProps<T>) {
       onChange={onChange}
       clearable
       classNames={{
-        trigger: "text-primary hover:text-primary font-medium",
+        trigger: cn(
+          buttonVariants({
+            variant: "light",
+          }),
+          "text-primary hover:text-primary font-medium"
+        ),
       }}
       subfixIcon={filter}
       subfix="filter"

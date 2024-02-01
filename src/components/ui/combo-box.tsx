@@ -220,7 +220,7 @@ export function ComboBox<T, V extends string | number>(
           </PopoverTrigger>
           <PopoverContent
             style={{
-              width: containerRef.current?.offsetWidth,
+              minWidth: containerRef.current?.offsetWidth,
             }}
             className="w-full p-0"
             container={containerRef.current}

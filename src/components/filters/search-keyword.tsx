@@ -30,7 +30,7 @@ export const SearchKeywordInput = (props: SearchKeywordInputProps) => {
       onChange={(e) => setKeyword(e.target.value)}
       placeholder={props.placeholder ?? "Search..."}
       subfixIcon={search}
-      className="min-w-80"
+      className="min-w-80 border-border"
     />
   );
 };
