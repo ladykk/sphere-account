@@ -8,7 +8,7 @@ import { TRPCError } from "@trpc/server";
 export const projectRouter = createTRPCRouter({
   getProject: protectedProcedure
     .input(z.string().uuid("Invalid uuid"))
-    .output(Project.schemas.base)
+    .output(Project.schemas.baseOutput)
     .query(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
         const result = await trx
@@ -42,7 +42,7 @@ export const projectRouter = createTRPCRouter({
       });
     }),
   getProjects: protectedProcedure
-    .output(z.array(Project.schemas.base))
+    .output(z.array(Project.schemas.baseOutput))
     .query(async ({ ctx }) => {
       return ctx.db.transaction(async (trx) => {
         const result = await trx
@@ -109,7 +109,67 @@ export const projectRouter = createTRPCRouter({
         totalPage: Math.ceil(count[0].count / itemsPerPage),
       };
     }),
-});
+  createOrUpdateProject: protectedProcedure
+    .input(Project.schemas.formInput)
+    .output(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        // CASE: Create
+        if (!input.id) {
+          const result = await trx
+            .insert(projects)
+            .values({
+              id: crypto.randomUUID(),
+              name: input.name,
+              customerId: input.customerId,
+              detail: input.detail,
+              createdBy: ctx.session.user.id,
+              updatedBy: ctx.session.user.id,
+            })
+            .returning({
+              id: projects.id,
+            });
 
-//CreateOrUpdate Product
-// return Product.schemas.base.parse(input)
+          return result[0].id;
+        }
+        // CASE: Update
+        else {
+          // Find project
+          const project = await trx
+            .select({
+              id: projects.id,
+            })
+            .from(projects)
+            .where(
+              and(
+                eq(projects.id, input.id),
+                eq(projects.createdBy, ctx.session.user.id)
+              )
+            )
+            .limit(1);
+
+          // Check if project exists
+          if (project.length === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Project not found",
+            });
+          }
+
+          // Update project
+          await trx
+            .update(projects)
+            .set({
+              name: input.name,
+              customerId: input.customerId,
+              detail: input.detail,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+              updatedBy: ctx.session.user.id,
+            })
+            .where(eq(projects.id, input.id));
+
+          return input.id;
+        }
+      });
+    }),
+});
