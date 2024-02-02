@@ -29,7 +29,7 @@ const MENU_ITEMS = [
 
 export function DashboardNavbar() {
   return (
-    <nav className="bg-background flex flex-col gap-3 px-10 py-3 shadow-md">
+    <nav className="bg-background flex flex-col gap-3 px-10 py-3 shadow-md sticky top-0 left-0 right-0 z-30">
       <div className="flex justify-between items-center">
         <div className="w-[300px]">
           <Image src={logo} alt="Sphere Logo" width={281} height={40} />
@@ -47,6 +47,7 @@ export function DashboardNavbar() {
         {/* TODO: Dropdown Nav Items */}
         {MENU_ITEMS.map((item) => (
           <Link
+            key={item.href}
             href={`/app/${item.href}`}
             className={buttonVariants({
               variant: "ghost",

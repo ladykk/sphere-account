@@ -2,14 +2,17 @@
 import { CheckboxDropdown } from "@/components/filters/dropdown";
 import { SearchKeywordInput } from "@/components/filters/search-keyword";
 import { DashboardListContainer } from "@/components/layouts/dashboard";
-import { Button } from "@/components/ui/button";
-import plus from "@/assets/icon/plus.svg";
-
+import { buttonVariants } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { DashboardPagination } from "@/components/dashboard/pagination";
 import { DataTable } from "@/components/ui/data-table";
+import Link from "next/link";
+import Image from "next/image";
+
+// Assets
+import plus from "@/assets/icon/plus.svg";
 
 export default function ProjectsListPage() {
   const searchParams = useSearchParams();
@@ -37,7 +40,10 @@ export default function ProjectsListPage() {
             setMultiLabel={(values) => `${values.length} Customers`}
           />
         </div>
-        <Button prefixIcon={plus}>Create</Button>
+        <Link href="/app/projects/create" className={buttonVariants({})}>
+          <Image src={plus} alt="plus" className="w-3 h-3 mr-2" />
+          Create
+        </Link>
       </div>
       <DataTable
         columns={[
