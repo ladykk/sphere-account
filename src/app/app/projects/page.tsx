@@ -23,7 +23,7 @@ export default function ProjectsListPage() {
   });
   return (
     <DashboardListContainer>
-      <div className="flex items-center gap-3">
+      <div className="flex items-baseline gap-3">
         <h1>Projects</h1>
         {query.isLoading && <Spinner />}
       </div>
