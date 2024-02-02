@@ -112,7 +112,7 @@ export default function PtojectDetailPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project's Name</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -137,7 +137,7 @@ export default function PtojectDetailPage() {
                 name="detail"
                 render={({ field }) => (
                   <FormItem className="col-span-3">
-                    <FormLabel>Project's Detail</FormLabel>
+                    <FormLabel>Detail</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}

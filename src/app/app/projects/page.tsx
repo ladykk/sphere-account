@@ -49,7 +49,7 @@ export default function ProjectsListPage() {
         columns={[
           {
             accessorKey: "name",
-            header: "Project's Name",
+            header: "Name",
           },
           {
             accessorKey: "customerId",
@@ -58,7 +58,7 @@ export default function ProjectsListPage() {
           },
           {
             accessorKey: "detail",
-            header: "Project's Detail",
+            header: "Detail",
           },
           {
             id: "actions",

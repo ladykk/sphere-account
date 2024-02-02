@@ -111,6 +111,9 @@ export function ComboBox<T, V extends string | number>(
             isDesktop ? "max-h-[25svh]" : "max-h-[50svh]"
           )}
         >
+          {options.length === 0 && (
+            <p className="text-center py-5">{searchNoResultText}</p>
+          )}
           {options.map((option) => (
             <CommandItem
               key={props.setValue(option).toString()}
