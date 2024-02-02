@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 
 interface DCheckboxDropdownProps<T> extends MultiComboBoxProps<T, string> {
-  key: string;
+  searchKey: string;
 }
 
 type CheckboxDropdownProps<T> = Omit<
@@ -20,13 +20,13 @@ type CheckboxDropdownProps<T> = Omit<
 export function CheckboxDropdown<T>(props: CheckboxDropdownProps<T>) {
   const searchParams = useSearchParams();
   const value = useMemo(() => {
-    const value = searchParams.get(props.key);
+    const value = searchParams.get(props.searchKey);
     return value ? value.split(",") : [];
-  }, [searchParams.get(props.key)]);
+  }, [searchParams.get(props.searchKey)]);
 
   const onChange = (value: Array<string>) => {
-    if (value.length > 0) searchParams.set(props.key, value.join(","));
-    else searchParams.clear(props.key);
+    if (value.length > 0) searchParams.set(props.searchKey, value.join(","));
+    else searchParams.clear(props.searchKey);
   };
 
   return (
@@ -38,6 +38,12 @@ export function CheckboxDropdown<T>(props: CheckboxDropdownProps<T>) {
       clearable
       classNames={{
         trigger: cn(
+          buttonVariants({
+            variant: "light",
+          }),
+          "text-primary hover:text-primary font-medium"
+        ),
+        drawerTrigger: cn(
           buttonVariants({
             variant: "light",
           }),
