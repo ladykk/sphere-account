@@ -112,7 +112,7 @@ export const projectRouter = createTRPCRouter({
   createOrUpdateProject: protectedProcedure
     .input(Project.schemas.formInput)
     .output(z.string().uuid())
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
         // CASE: Create
         if (!input.id) {
