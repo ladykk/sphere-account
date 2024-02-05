@@ -5,7 +5,6 @@ export const Customer = {
         createCustomerInput: z.object({
             id: z.string().min(1, "Require Customer's id").uuid("Invalid uuid"),
             name: z.string().min(1, "Require Customer's name"),
-            detail: z.string().nullable().default(""),
             taxId: z.string().nullable().default(""),
             address: z.string().nullable().default(""),
             shipping_address: z.string().nullable().default(""),
@@ -33,7 +32,7 @@ export const Customer = {
             id: z.string()
         }),
 
-        createCustomerContact: z.object({
+        createCustomerContactInput: z.object({
             id: z.string().min(1, "Require Customer Contact's id").uuid("Invalid uuid"),
             customerId: z.string().min(1, "Require customerId").uuid("Invalid uuid"),
             contactName: z.string().min(1, "Require Contact's name"),
@@ -49,7 +48,11 @@ export const Customer = {
             id: z.string()
         }),
 
-        createCustomerBankAccounts: z.object({
+        getCustomerContactInput: z.object({
+            id: z.string().min(1, "Require Customer's id").uuid("Invalid uuid"),
+        }),
+
+        createCustomerBankAccountsInput: z.object({
             id: z.string().min(1, "Require project's id").uuid("Invalid uuid"),
             customerId: z.string().min(1, "Require customerId").uuid("Invalid uuid"),
             bank: z.string(),
@@ -62,8 +65,10 @@ export const Customer = {
             updatedBy: z.string().nullable(),
         }),
 
-        createCustomerBankACcounts: z.object({
+        createCustomerBankAccountsOutput: z.object({
             id: z.string(),
-        })
+        }),
+
+        
     }
 }
