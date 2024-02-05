@@ -11,7 +11,6 @@ export const baseOutput = z.object({
     sellingPrice: z.string().min(1, "Require product's selling price").transform((arg) => Number(arg)),
     vatType: z.string().nullable().default(""),
     description: z.string().nullable().default(""),
-    quantity: z.number().nullable().default(0),
     unit: z.string().min(1, "Require product's unit"),
     createdAt: z.date(),
     createdBy: z.string().nullable(),

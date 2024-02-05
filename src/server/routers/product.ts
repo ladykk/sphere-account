@@ -153,8 +153,7 @@ export const productRouter = createTRPCRouter({
                             barcode: input.barcode,
                             sellingPrice: String(input.sellingPrice),
                             vatType: input.vatType,
-                            description: input.description,
-                            quantity: input.quantity,
+                            description: input.description,                   
                             unit: input.unit,
                             createdBy: ctx.session.user.id,
                             updatedBy: ctx.session.user.id
@@ -201,7 +200,6 @@ export const productRouter = createTRPCRouter({
                             sellingPrice: String(input.sellingPrice),
                             vatType: input.vatType,
                             description: input.description,
-                            quantity: input.quantity,
                             unit: input.unit,
                             updatedAt: sql`CURRENT_TIMESTAMP`,
                             updatedBy: ctx.session.user.id
