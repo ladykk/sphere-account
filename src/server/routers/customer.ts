@@ -1,4 +1,4 @@
-import { Customer } from "../models/customer";
+import { Customer, baseBankAccount } from "../models/customer";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
@@ -191,11 +191,22 @@ export const productRouter = createTRPCRouter({
   //Get Customer bank account
   getCustomerBankAccount: protectedProcedure
     .input(z.string().uuid("Invalid uuid"))
-    .output(Customer.schemas.createCustomerBankAccountsInput)
+    .output(baseBankAccount)
     .query(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
         const result = await trx
-          .select()
+          .select({
+            id: customerBankAccounts.id,
+            customerId: customerBankAccounts.customerId,
+            bank: customerBankAccounts.bank,
+            accountNumber: customerBankAccounts.accountNumber,
+            bankBranch: customerBankAccounts.bankBranch,
+            accountType: customerBankAccounts.accountType,
+            createdAt: customerBankAccounts.createdAt,
+            createdBy: customerBankAccounts.createdBy,
+            updatedAt: customerBankAccounts.updatedAt,
+            updatedBy: customerBankAccounts.updatedBy,
+          })
           .from(customerBankAccounts)
           .where(
             eq(customerBankAccounts.id, input)
@@ -220,11 +231,28 @@ export const productRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db.transaction(async (trx) => {
         const result = await trx
-          .select()
+          .select({
+            id: customerContacts.id,
+            customerId: customerContacts.customerId,
+            contactName: customerContacts.contactName,
+            email: customerContacts.email,
+            phoneNumber: customerContacts.phoneNumber,
+            createdAt: customerContacts.createdAt,
+            createdBy: customerContacts.createdBy,
+            updatedAt: customerContacts.updatedAt,
+            updatedBy: customerContacts.updatedBy,
+          })
           .from(customerContacts)
           .where(eq(customerContacts.id, input))
           .limit(1);
-        return result[0];
+        if (result.length > 0) {
+          return result[0];
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to get customer",
+          });
+        }
       });
     }),
 
@@ -263,7 +291,7 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
-  
+
   //Create Customer Bank Accounts
   createCustomerBankAccounts: protectedProcedure
     .input(Customer.schemas.createCustomerBankAccountsInput)

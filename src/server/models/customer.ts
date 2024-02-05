@@ -12,7 +12,7 @@ const baseContact = z.object({
   updatedBy: z.string().nullable(),
 });
 
-const baseBankAccount = z.object({
+export const baseBankAccount = z.object({
   id: z.string().min(1, "Require project's id").uuid("Invalid uuid"),
   customerId: z.string().min(1, "Require customerId").uuid("Invalid uuid"),
   bank: z.string(),
