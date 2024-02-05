@@ -20,7 +20,15 @@ export const productRouter = createTRPCRouter({
                         eq(customers.id, input)
                     )
                     .limit(1)
-                return result[0];
+                if (result.length > 0) {
+                    return result[0];
+                } else {
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to get customer",
+                    });
+                }
+
             });
 
         }),
@@ -95,7 +103,14 @@ export const productRouter = createTRPCRouter({
                         eq(customerContacts.id, input)
                     )
                     .limit(1)
-                return result[0];
+                if (result.length > 0) {
+                    return result[0];
+                } else {
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to get customer",
+                    });
+                }
             });
 
         }),
@@ -148,7 +163,14 @@ export const productRouter = createTRPCRouter({
                         eq(customerBankAccounts.id, input)
                     )
                     .limit(1)
-                return result[0];
+                if (result.length > 0) {
+                    return result[0];
+                } else {
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to get customer",
+                    });
+                }
             });
 
         }),
