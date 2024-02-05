@@ -17,10 +17,10 @@ import plus from "@/assets/icon/plus.svg";
 export default function ProductsListPage() {
   const searchParams = useSearchParams();
   // TODO: Change API Endpoint
-  const query = api.project.getPaginateProjects.useQuery({
+  const query = api.product.getPaginateProduct.useQuery({
     page: Number(searchParams.get("page")) || 1,
     itemsPerPage: Number(searchParams.get("itemsPerPage")) || 10,
-    customerId: searchParams.get("customerId") || undefined,
+    // customerId: searchParams.get("customerId") || undefined,
   });
   return (
     <DashboardListContainer>
@@ -54,6 +54,7 @@ export default function ProductsListPage() {
             accessorKey: "name",
             header: "Name",
           },
+          
           {
             accessorKey: "customerId",
             header: "Customer",

@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function PtojectDetailPage() {
+export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.productId as string;
@@ -34,20 +34,20 @@ export default function PtojectDetailPage() {
   const [isDisabled, setIsDisabled] = useState(false);
 
   // TODO: Change API Endpoint
-  const query = api.project.getProject.useQuery(productId, {
+  const query = api.product.getProduct.useQuery(productId, {
     enabled: !isCreate,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
-  const form = useForm<RouterInputs["project"]["createOrUpdateProject"]>({
+  const form = useForm<RouterInputs["product"]["createOrUpdateProduct"]>({
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
   });
 
-  const mutation = api.project.createOrUpdateProject.useMutation({
+  const mutation = api.product.createOrUpdateProduct.useMutation({
     onSuccess: (id, variables) => {
-      router.replace(`/app/projects/${id}`);
+      router.replace(`/app/products/${id}`);
       form.reset(variables);
     },
     onError: (error) =>
@@ -61,14 +61,20 @@ export default function PtojectDetailPage() {
     if (!query.data) return;
     form.reset({
       id: query.data.id,
+      type: query.data.type,
       name: query.data.name,
-      customerId: query.data.customerId,
-      detail: query.data.detail,
+      code: query.data.code,
+      category: query.data.category,
+      barcode: query.data.barcode,
+      sellingPrice: String(query.data.sellingPrice),
+      vatType: query.data.vatType,
+      description: query.data.description,
+      unit: query.data.unit,
     });
   }, [query.data]);
 
   const onSubmit = (
-    input: RouterInputs["project"]["createOrUpdateProject"]
+    input: RouterInputs["product"]["createOrUpdateProduct"]
   ) => {
     toast.promise(mutation.mutateAsync(input), {
       loading: "Saving Product...",
@@ -117,46 +123,107 @@ export default function PtojectDetailPage() {
               </FormItem>
               <div className="flex flex-col gap-y-3">
                 <div className="grid grid-cols-5 gap-x-5">
-                  <FormItem>
-                    <Label>Product Number</Label>
-                    <Input />
-                  </FormItem>
-                  <FormItem className=" col-span-2">
-                    <Label>Name</Label>
-                    <Input />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel> Code </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className=" col-span-2">
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormItem>
                     <Label>Type</Label>
                     <p>TODO: Select</p>
                   </FormItem>
                 </div>
-                <FormItem className=" col-span-2 flex-1 flex flex-col">
-                  <Label>Description</Label>
-                  <Textarea className="flex-1" />
-                </FormItem>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className=" col-span-2 flex-1 flex flex-col">
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value ?? ""}
+                          className="flex-1" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10">
-              <FormItem>
-                <Label>Barcode</Label>
-                <Input />
-              </FormItem>
-              <FormItem>
-                <Label>Code</Label>
-                <Input />
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="barcode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Barcode</FormLabel>
+                    <FormControl>
+                      <Input {...field} 
+                      value = {field.value ?? ""}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
               <FormItem>
                 <Label>Category</Label>
                 <p>TODO: Combobox with Create Value</p>
               </FormItem>
-              <FormItem>
-                <Label>Selling Price</Label>
-                <Input />
-              </FormItem>
-              <FormItem>
-                <Label>VAT</Label>
-                <Input />
-              </FormItem>
+
+              <FormField
+                control={form.control}
+                name="sellingPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Selling Price</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="vatType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>VAT</FormLabel>
+                    <FormControl>
+                      <Input {...field}
+                      value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormItem>
                 <Label>Income Account</Label>
                 <Input value="NEXT PHASE IGNORE" disabled />
