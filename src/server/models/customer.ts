@@ -55,6 +55,31 @@ const base = z.object({
   bankAccounts: z.array(baseBankAccount),
 });
 
+export const customerContactInput = baseContact
+.omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+  updatedAt: true,
+  updatedBy: true,
+})
+.extend({
+  id: z.string().uuid("Invalid uuid").optional(),
+});
+
+const customerAccountInput = baseBankAccount
+.omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+  updatedAt: true,
+  updatedBy: true,
+})
+.extend({
+  id: z.string().uuid("Invalid uuid").optional(),
+});
+
+
 export const formInput = base
   .omit({
     id: true,
@@ -62,14 +87,19 @@ export const formInput = base
     createdBy: true,
     updatedAt: true,
     updatedBy: true,
+    contacts: true,
+    bankAccounts: true,
   })
   .extend({
     id: z.string().uuid("Invalid uuid").optional(),
+    contacts: z.array(customerContactInput),
+    bankAccount: z.array(customerAccountInput),
   });
 
 export const Customer = {
   schemas: {
     base: base,
+
     createCustomerInput: z.object({
       id: z.string().min(1, "Require Customer's id").uuid("Invalid uuid"),
       name: z.string().min(1, "Require Customer's name"),
@@ -105,9 +135,8 @@ export const Customer = {
     formInput,
 
 
-    createCustomerOutputSchema: z.object({
-      id: z.string(),
-    }),
+    createCustomerOutputSchema: z.string().uuid(),
+    
 
     createCustomerContactInput: z.object({
       id: z

@@ -1,6 +1,6 @@
 import { Customer, baseBankAccount } from "../models/customer";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { z } from "zod";
+import { string, z } from "zod";
 import { and, eq, inArray, like, sql } from "drizzle-orm";
 import {
   customers,
@@ -448,6 +448,199 @@ export const productRouter = createTRPCRouter({
           });
 
         return { id: createResult[0].id };
+      });
+    }),
+
+  //CreateOrUpdate Customer 
+  createCustomer: protectedProcedure
+    .input(Customer.schemas.formInput)
+    .output(Customer.schemas.createCustomerOutputSchema)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.db.transaction(async (trx) => {
+        // CASE: Create
+        if (!input.id) {
+          const createResult = await trx
+            .insert(customers)
+            .values({
+              id: crypto.randomUUID(),
+              name: String(input.name),
+              taxId: String(input.taxId),
+              address: String(input.address),
+              shippingAddress: String(input.shippingAddress),
+              zipcode: String(input.zipcode),
+              isBranch: Boolean(input.isBranch),
+              branchCode: String(input.branchCode),
+              branchName: String(input.branchName),
+              businessType: String(input.businessType),
+              email: String(input.email),
+              telephoneNumber: String(input.telephoneNumber),
+              phoneNumber: String(input.phoneNumber),
+              faxNumber: String(input.faxNumber),
+              website: String(input.website),
+              notes: String(input.notes),
+              createdBy: ctx.session.user.id,
+            })
+            .returning({
+              id: customers.id,
+            });
+
+          // Throw error if createResult is empty
+          if (createResult.length === 0)
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Failed to create user",
+            });
+
+          if (input.contacts.length > 0) {
+            const createCustomerContact = await trx
+              .insert(customerContacts)
+              .values(input.contacts.map(Contact => ({
+                id: crypto.randomUUID(),
+                customerId: createResult[0].id,
+                contactName: Contact.contactName,
+                email: Contact.email,
+                phoneNumber: Contact.phoneNumber
+              })))
+              .returning({
+                id: customerContacts.id,
+              });
+          }
+
+          if (input.bankAccount.length > 0) {
+            const createCustomerBankAccount = await trx
+              .insert(customerBankAccounts)
+              .values(input.bankAccount.map(BankAccount => ({
+                id: crypto.randomUUID(),
+                customerId: createResult[0].id,
+                bank: String(BankAccount.bank),
+                accountNumber: String(BankAccount.accountNumber),
+                bankBranch: String(BankAccount.bankBranch),
+                accountType: String(BankAccount.accountType),
+              })))
+              .returning({
+                id: customerBankAccounts.id,
+              })
+          }
+          return createResult[0].id;
+        } // CASE: Update
+        else {
+          // Find Customer
+          const customer = await trx
+            .select({
+              id: customers.id,
+            })
+            .from(customers)
+            .where(
+              and(
+                eq(customers.id, input.id),
+                eq(customers.createdBy, ctx.session.user.id)
+              )
+            )
+            .limit(1)
+
+          if (customer.length === 0) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Customer not found",
+            });
+          }
+
+          // Update Customer
+          await trx
+            .update(customers)
+            .set({
+              name: String(input.name),
+              taxId: String(input.taxId),
+              address: String(input.address),
+              shippingAddress: String(input.shippingAddress),
+              zipcode: String(input.zipcode),
+              isBranch: Boolean(input.isBranch),
+              branchCode: String(input.branchCode),
+              branchName: String(input.branchName),
+              businessType: String(input.businessType),
+              email: String(input.email),
+              telephoneNumber: String(input.telephoneNumber),
+              phoneNumber: String(input.phoneNumber),
+              faxNumber: String(input.faxNumber),
+              website: String(input.website),
+              notes: String(input.notes),
+              updatedBy: ctx.session.user.id,
+            })
+            .where(eq(customers.id, input.id))
+
+          //update contact
+
+          if (input.contacts.length > 0) {
+            await trx
+              .insert(customerContacts)
+              .values(input.contacts.map(Contact => ({
+                id: String(Contact.id),
+                customerId: Contact.customerId,
+                contactName: Contact.contactName,
+                email: Contact.email,
+                phoneNumber: Contact.phoneNumber
+              })))
+              .onConflictDoUpdate({
+                target: [customerContacts.id],
+                set: {
+                  id: "TODO"
+                }
+              });
+          }
+          return input.id;
+        }
+      });
+    }),
+
+  //Delete customerContacts
+  deleteCustomerContact: protectedProcedure
+    .input(z.string().uuid("Invalid uuid"))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const getContactsResult = await trx
+          .select({
+            id: customerContacts.id,
+          })
+          .from(customerContacts)
+          .where(eq(customerContacts.customerId, input))
+          .limit(1);
+        if (getContactsResult.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Customer not found",
+          });
+        }
+        const deleteResult = await trx
+          .delete(customerContacts)
+          .where(
+            eq(customerContacts.id, input)
+          )
+      });
+    }),
+
+  //Delete BankAccount
+  deleteCustomerBankAccount: protectedProcedure
+    .input(z.string().uuid("Invalid uuid"))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const getBankAccountResult = await trx
+          .select({
+            id: customerBankAccounts.id,
+          })
+          .from(customerBankAccounts)
+          .where(eq(customerBankAccounts.customerId, input))
+          .limit(1);
+        if (getBankAccountResult.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Customer not found",
+          });
+        }
+        const deleteResult = await trx
+          .delete(customerBankAccounts)
+          .where(
+            eq(customerBankAccounts.id, input)
+          )
       });
     }),
 });
