@@ -1,13 +1,14 @@
 import { Customer, baseBankAccount } from "../models/customer";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, like, sql } from "drizzle-orm";
 import {
   customers,
   customerBankAccounts,
   customerContacts,
 } from "@/db/schema/customer";
 import { TRPCError } from "@trpc/server";
+import { Contact } from "lucide-react";
 
 export const productRouter = createTRPCRouter({
   //Get Customer
@@ -187,6 +188,128 @@ export const productRouter = createTRPCRouter({
         });
       });
     }),
+
+  getPaginateCustomers: protectedProcedure
+    .input(Customer.schemas.paginateInput)
+    .output(Customer.schemas.paginateOutput)
+    .query(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const { page, itemsPerPage, ...filters } = input;
+
+        // Filters
+        const whereClause = and(
+          eq(customers.createdBy, ctx.session.user.id),
+          filters.keyword // Filter: Keyword
+            ? like(customers.name, `%${filters.keyword}%`)
+            : undefined,
+        );
+
+        const count = await ctx.db
+          .select({
+            count: sql<number>`CAST(COUNT(*) AS INT)`,
+          })
+          .from(customers)
+          .where(whereClause);
+
+        const list = await ctx.db
+          .select({
+            id: customers.id,
+            name: customers.name,
+            taxId: customers.taxId,
+            address: customers.address,
+            shippingAddress: customers.shippingAddress,
+            zipcode: customers.zipcode,
+            isBranch: customers.isBranch,
+            branchCode: customers.branchCode,
+            branchName: customers.branchName,
+            businessType: customers.businessType,
+            email: customers.email,
+            telephoneNumber: customers.telephoneNumber,
+            phoneNumber: customers.phoneNumber,
+            faxNumber: customers.faxNumber,
+            website: customers.website,
+            notes: customers.notes,
+            createdAt: customers.createdAt,
+            createdBy: customers.createdBy,
+            updatedAt: customers.updatedAt,
+            updatedBy: customers.updatedBy,
+          })
+          .from(customers)
+          .where(whereClause)
+          .limit(itemsPerPage)
+          .offset((page - 1) * itemsPerPage);
+
+        const ids = list.map((r) => r.id);
+
+        const contactsResult = await trx
+          .select({
+            id: customerContacts.id,
+            customerId: customerContacts.customerId,
+            contactName: customerContacts.contactName,
+            email: customerContacts.email,
+            phoneNumber: customerContacts.phoneNumber,
+            createdAt: customerContacts.createdAt,
+            createdBy: customerContacts.createdBy,
+            updatedAt: customerContacts.updatedAt,
+            updatedBy: customerContacts.updatedBy,
+          })
+          .from(customerContacts)
+          .where(inArray(customerContacts.customerId, ids));
+
+        const contactsByCustomerId = contactsResult.reduce((acc, contact) => {
+          if (!acc[contact.customerId]) {
+            acc[contact.customerId] = [];
+          }
+          acc[contact.customerId].push(contact);
+          return acc;
+        }, {} as Record<string, typeof contactsResult>);
+
+        const bankAccountsResult = await trx
+          .select({
+            id: customerBankAccounts.id,
+            customerId: customerBankAccounts.customerId,
+            bank: customerBankAccounts.bank,
+            accountNumber: customerBankAccounts.accountNumber,
+            bankBranch: customerBankAccounts.bankBranch,
+            accountType: customerBankAccounts.accountType,
+            createdAt: customerBankAccounts.createdAt,
+            createdBy: customerBankAccounts.createdBy,
+            updatedAt: customerBankAccounts.updatedAt,
+            updatedBy: customerBankAccounts.updatedBy,
+          })
+          .from(customerBankAccounts)
+          .where(inArray(customerBankAccounts.customerId, ids));
+
+        const bankAccountsByCustomerId = bankAccountsResult.reduce(
+          (acc, bankAccount) => {
+            if (!acc[bankAccount.customerId]) {
+              acc[bankAccount.customerId] = [];
+            }
+            acc[bankAccount.customerId].push(bankAccount);
+            return acc;
+          },
+          {} as Record<string, typeof bankAccountsResult>
+        );
+
+        const returnList = list.map((r) => {
+          const contacts = contactsByCustomerId[r.id] || [];
+          const bankAccounts = bankAccountsByCustomerId[r.id] || [];
+          return {
+            ...r,
+            contacts,
+            bankAccounts,
+          };
+        });
+
+        return {
+          count: count[0].count,
+          list: returnList,
+          currentPage: page,
+          totalPage: Math.ceil(count[0].count / itemsPerPage),
+        };
+      });
+    }),
+
 
   //Get Customer bank account
   getCustomerBankAccount: protectedProcedure

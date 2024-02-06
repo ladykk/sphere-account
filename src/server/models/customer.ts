@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { paginateInputSchema, paginateOutputSchema } from ".";
 
 const baseContact = z.object({
   id: z.string().min(1, "Require Customer Contact's id").uuid("Invalid uuid"),
@@ -54,6 +55,18 @@ const base = z.object({
   bankAccounts: z.array(baseBankAccount),
 });
 
+export const formInput = base
+  .omit({
+    id: true,
+    createdAt: true,
+    createdBy: true,
+    updatedAt: true,
+    updatedBy: true,
+  })
+  .extend({
+    id: z.string().uuid("Invalid uuid").optional(),
+  });
+
 export const Customer = {
   schemas: {
     base: base,
@@ -82,6 +95,15 @@ export const Customer = {
       updatedAt: z.date(),
       updatedBy: z.string().nullable(),
     }),
+
+    paginateInput: paginateInputSchema({
+      keyword: z.string().optional(),
+      customerId: z.string().uuid("Invalid uuid").optional(),
+    }),
+
+    paginateOutput: paginateOutputSchema(base),
+    formInput,
+
 
     createCustomerOutputSchema: z.object({
       id: z.string(),
