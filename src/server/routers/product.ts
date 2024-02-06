@@ -1,4 +1,4 @@
-import { Product } from "../models/product";
+import { Product, category, unit } from "../models/product";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod"
 import { eq, and, like, sql } from "drizzle-orm"
@@ -149,11 +149,11 @@ export const productRouter = createTRPCRouter({
                             type: input.type,
                             name: input.name,
                             code: input.code,
-                            category:  String(input.category),
+                            category: String(input.category),
                             barcode: input.barcode,
                             sellingPrice: String(input.sellingPrice),
                             vatType: input.vatType,
-                            description: input.description,                   
+                            description: input.description,
                             unit: input.unit,
                             createdBy: ctx.session.user.id,
                             updatedBy: ctx.session.user.id
@@ -211,6 +211,34 @@ export const productRouter = createTRPCRouter({
                 }
             });
 
+        }),
+
+    getCatagories: protectedProcedure
+        .output(z.array(category))
+        .query(async ({ ctx }) => {
+            return ctx.db.transaction(async (trx) => {
+                const categories = await trx
+                    .select({
+                        category: products.category,
+                    })
+                    .from(products)
+                    .groupBy(products.category)
+                return categories.map((str) => str.category);
+            });
+        }),
+
+    getUnits: protectedProcedure
+        .output(z.array(unit))
+        .query(async ({ ctx }) => {
+            return ctx.db.transaction(async (trx) => {
+                const units = await trx
+                    .select({
+                        unit: products.unit,
+                    })
+                    .from(products)
+                    .groupBy(products.unit)
+                return units.map((str) => str.unit);
+            });
         }),
 
 });

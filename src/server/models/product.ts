@@ -40,3 +40,7 @@ export const Product = {
         formInput,
     },
 };
+
+export const category =  z.string().nullable().default("")
+
+export const unit = z.string().min(1, "Require product's unit")

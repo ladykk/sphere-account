@@ -3,6 +3,7 @@
 import { DashboardFormContainer } from "@/components/layouts/dashboard";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { ComboBox } from "@/components/ui/combo-box";
 import {
   Form,
   FormControl,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { handleTRPCFormError } from "@/lib/utils";
@@ -55,6 +57,9 @@ export default function ProductDetailPage() {
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
   });
+
+  const catagories = api.product.getCatagories.useQuery();
+  const units = api.product.getUnits.useQuery();
 
   // Set form data if query is successful
   useEffect(() => {
@@ -151,10 +156,28 @@ export default function ProductDetailPage() {
                     )}
                   />
 
-                  <FormItem>
-                    <Label>Type</Label>
-                    <p>TODO: Select</p>
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Type"></SelectValue>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Stock"> Stock </SelectItem>
+                            <SelectItem value="Service"> Service </SelectItem>
+                          </SelectContent>
+
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
                 </div>
                 <FormField
                   control={form.control}
@@ -182,19 +205,35 @@ export default function ProductDetailPage() {
                   <FormItem>
                     <FormLabel>Barcode</FormLabel>
                     <FormControl>
-                      <Input {...field} 
-                      value = {field.value ?? ""}/>
+                      <Input {...field}
+                        value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <ComboBox
+                        options={catagories.data}
+                        setLabel={(label) => label ?? ""}
+                        setValue={(value) => value ?? ""}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        multiple={false}
+                        creatable={true}
+                      ></ComboBox>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-              <FormItem>
-                <Label>Category</Label>
-                <p>TODO: Combobox with Create Value</p>
-              </FormItem>
 
               <FormField
                 control={form.control}
@@ -218,7 +257,7 @@ export default function ProductDetailPage() {
                     <FormLabel>VAT</FormLabel>
                     <FormControl>
                       <Input {...field}
-                      value={field.value ?? ""} />
+                        value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -232,10 +271,28 @@ export default function ProductDetailPage() {
                 <Label>Stock</Label>
                 <Input />
               </FormItem>
-              <FormItem>
-                <Label>Unit</Label>
-                <p>TODO: Combobox with Create Value</p>
-              </FormItem>
+
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit</FormLabel>
+                    <FormControl>
+                      <ComboBox
+                        options={units.data}
+                        setLabel={(label) => label ?? ""}
+                        setValue={(value) => value ?? ""}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        multiple={false}
+                        creatable={true}
+                      ></ComboBox>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
             </div>
             {/* <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10">
               <FormField
