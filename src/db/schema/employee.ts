@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { files } from "./file";
 
 export const employees = pgTable("employee", {
   id: uuid("id").notNull().primaryKey(),
@@ -9,7 +10,9 @@ export const employees = pgTable("employee", {
   name: text("name").notNull(),
   email: text("email"),
   phoneNumber: text("phone_number"),
-  image: text("image"),
+  image: text("image").references(() => files.id, {
+    onDelete: "set null",
+  }),
   // Metadata
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
