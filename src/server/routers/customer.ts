@@ -587,6 +587,25 @@ export const productRouter = createTRPCRouter({
                 }
               });
           }
+
+          if (input.bankAccount.length > 0) {
+            await trx
+              .insert(customerBankAccounts)
+              .values(input.bankAccount.map(BankAccount => ({
+                id: String(BankAccount.id),
+                customerId: BankAccount.customerId,
+                bank: String(BankAccount.bank),
+                accountNumber: String(BankAccount.accountNumber),
+                bankBranch: String(BankAccount.bankBranch),
+                accountType: String(BankAccount.accountType),
+              })))
+              .onConflictDoUpdate({
+                target: [customerBankAccounts.id],
+                set: {
+                  id: "TODO"
+                }
+              })
+          }
           return input.id;
         }
       });
