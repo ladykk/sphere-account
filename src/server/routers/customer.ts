@@ -574,13 +574,13 @@ export const productRouter = createTRPCRouter({
             input.contacts.map(async (Contact) => {
               await trx
                 .insert(customerContacts)
-                .values(input.contacts.map(Contact => ({
+                .values({
                   id: String(Contact.id),
                   customerId: Contact.customerId,
                   contactName: Contact.contactName,
                   email: Contact.email,
                   phoneNumber: Contact.phoneNumber
-                })))
+                })
                 .onConflictDoUpdate({
                   target: customerContacts.id,
                   set: {
@@ -594,19 +594,19 @@ export const productRouter = createTRPCRouter({
                 });
             });
           }
-
+          //update bankAccount
           if (input.bankAccount.length > 0) {
             input.bankAccount.map(async (BankAccount) => {
               await trx
                 .insert(customerBankAccounts)
-                .values(input.bankAccount.map(BankAccount => ({
+                .values({
                   id: String(BankAccount.id),
                   customerId: BankAccount.customerId,
                   bank: String(BankAccount.bank),
                   accountNumber: String(BankAccount.accountNumber),
                   bankBranch: String(BankAccount.bankBranch),
                   accountType: String(BankAccount.accountType),
-                })))
+                })
                 .onConflictDoUpdate({
                   target: customerBankAccounts.id,
                   set: {
