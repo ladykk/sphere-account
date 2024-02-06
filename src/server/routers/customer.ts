@@ -452,7 +452,7 @@ export const productRouter = createTRPCRouter({
     }),
 
   //CreateOrUpdate Customer 
-  createCustomer: protectedProcedure
+  createOrCustomer: protectedProcedure
     .input(Customer.schemas.formInput)
     .output(Customer.schemas.createCustomerOutputSchema)
     .mutation(async ({ input, ctx }) => {
@@ -571,40 +571,55 @@ export const productRouter = createTRPCRouter({
           //update contact
 
           if (input.contacts.length > 0) {
-            await trx
-              .insert(customerContacts)
-              .values(input.contacts.map(Contact => ({
-                id: String(Contact.id),
-                customerId: Contact.customerId,
-                contactName: Contact.contactName,
-                email: Contact.email,
-                phoneNumber: Contact.phoneNumber
-              })))
-              .onConflictDoUpdate({
-                target: [customerContacts.id],
-                set: {
-                  id: "TODO"
-                }
-              });
+            input.contacts.map(async (Contact) => {
+              await trx
+                .insert(customerContacts)
+                .values(input.contacts.map(Contact => ({
+                  id: String(Contact.id),
+                  customerId: Contact.customerId,
+                  contactName: Contact.contactName,
+                  email: Contact.email,
+                  phoneNumber: Contact.phoneNumber
+                })))
+                .onConflictDoUpdate({
+                  target: customerContacts.id,
+                  set: {
+                    id: String(Contact.id),
+                    customerId: Contact.customerId,
+                    contactName: Contact.contactName,
+                    email: Contact.email,
+                    phoneNumber: Contact.phoneNumber,
+                    updatedBy: ctx.session.user.id
+                  }
+                });
+            });
           }
 
           if (input.bankAccount.length > 0) {
-            await trx
-              .insert(customerBankAccounts)
-              .values(input.bankAccount.map(BankAccount => ({
-                id: String(BankAccount.id),
-                customerId: BankAccount.customerId,
-                bank: String(BankAccount.bank),
-                accountNumber: String(BankAccount.accountNumber),
-                bankBranch: String(BankAccount.bankBranch),
-                accountType: String(BankAccount.accountType),
-              })))
-              .onConflictDoUpdate({
-                target: [customerBankAccounts.id],
-                set: {
-                  id: "TODO"
-                }
-              })
+            input.bankAccount.map(async (BankAccount) => {
+              await trx
+                .insert(customerBankAccounts)
+                .values(input.bankAccount.map(BankAccount => ({
+                  id: String(BankAccount.id),
+                  customerId: BankAccount.customerId,
+                  bank: String(BankAccount.bank),
+                  accountNumber: String(BankAccount.accountNumber),
+                  bankBranch: String(BankAccount.bankBranch),
+                  accountType: String(BankAccount.accountType),
+                })))
+                .onConflictDoUpdate({
+                  target: customerBankAccounts.id,
+                  set: {
+                    id: String(BankAccount.id),
+                    customerId: BankAccount.customerId,
+                    bank: BankAccount.bank,
+                    accountNumber: BankAccount.accountNumber,
+                    bankBranch: BankAccount.bankBranch,
+                    accountType: BankAccount.accountType,
+                    updatedBy: ctx.session.user.id
+                  }
+                });
+            });
           }
           return input.id;
         }
