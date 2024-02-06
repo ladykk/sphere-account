@@ -24,6 +24,19 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Image from "next/image";
+import trash from "@/assets/icon/trash.svg";
+import pluscircle from "@/assets/icon/plus-circle.svg";
 
 export default function ProjectDetailPage(props) {
   const router = useRouter();
@@ -110,7 +123,7 @@ export default function ProjectDetailPage(props) {
         <>
           <div className="w-full bg-orange-500 p-3 rounded-t-lg">
             {" "}
-            <p className=" text-white ml-4 font-semibold">Contact</p>
+            <p className=" text-white ml-4 font-semibold">Customer</p>
           </div>
           <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
             <FormField
@@ -131,12 +144,18 @@ export default function ProjectDetailPage(props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>Tax ID</FormLabel>
                   <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
+          <div className="w-full bg-orange-500 p-3 rounded-t-lg">
+            {" "}
+            <p className=" text-white ml-4 font-semibold">Contact</p>
+          </div>
+          <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
             <FormField
               control={form.control}
               name="name"
@@ -159,6 +178,12 @@ export default function ProjectDetailPage(props) {
                 </FormItem>
               )}
             />
+          </div>
+          <div className="w-full bg-orange-500 p-3 rounded-t-lg">
+            {" "}
+            <p className=" text-white ml-4 font-semibold">Business</p>
+          </div>
+          <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
             <FormField
               control={form.control}
               name="name"
@@ -225,52 +250,99 @@ export default function ProjectDetailPage(props) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Selling Price</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vat</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Income Account</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div />
           </div>
+
+          <Table className=" rounded-lg overflow-hidden">
+            <TableHeader>
+              <TableRow>
+                <TableHead> Bank</TableHead>
+                <TableHead> Bank Branch</TableHead>
+                <TableHead> Account Number</TableHead>
+                <TableHead> Account Type</TableHead>
+                <TableHead> Credit Date</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className=" border-solid border-2">
+              <TableRow>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  {" "}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  {" "}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell className="text-right flex items-center">
+                  <Button variant="ghost">
+                    <Image src={trash} alt="Trash"></Image>
+                  </Button>{" "}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <div className="flex w-full justify-end">
+            {" "}
+            <Button>
+              <Image src={pluscircle} alt="plus"></Image>
+            </Button>{" "}
+          </div>
+          <div />
+
           <div className="w-full bg-orange-500 p-3 rounded-t-lg">
             {" "}
             <p className=" text-white ml-4 font-semibold">Contact</p>
