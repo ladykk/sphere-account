@@ -11,13 +11,13 @@ const baseOutput = z.object({
   id: id,
   saleNo: z.string().default(""),
   name: z.string().min(1, "Employee's name required"),
-  email: z.string().email().nullable(),
-  phoneNumber: z.string().nullable(),
-  image: z.string().url().nullable(),
+  email: z.string().email().nullable().default(null),
+  phoneNumber: z.string().nullable().default(null),
+  image: z.string().url().nullable().default(null),
   createdAt: z.date(),
-  createdBy: z.string().nullable(),
+  createdBy: z.string().nullable().default(null),
   updatedAt: z.date(),
-  updatedBy: z.string().nullable(),
+  updatedBy: z.string().nullable().default(null),
 });
 
 const formInput = baseOutput

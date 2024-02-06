@@ -4,7 +4,12 @@ import { Employee } from "../models/employee";
 import { employees } from "@/db/schema/employee";
 import { eq, and, like, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { getIdFromUrl, getUrlById } from "../modules/file";
+import {
+  deleteFileById,
+  deleteFileByUrl,
+  getIdFromUrl,
+  getUrlById,
+} from "../modules/file";
 import { generatePresignedUrlProcedure } from "../modules/file/trpc";
 
 export const employeeRouter = createTRPCRouter({
@@ -132,7 +137,35 @@ export const employeeRouter = createTRPCRouter({
       return ctx.db.transaction(async (trx) => {
         // CASE: Update
         if (input.id) {
-          const result = await trx
+          const oldData = await trx
+            .select({
+              id: employees.id,
+              image: employees.image,
+            })
+            .from(employees)
+            .where(
+              and(
+                eq(employees.id, input.id),
+                eq(employees.createdBy, ctx.session.user.id)
+              )
+            )
+            .limit(1);
+
+          if (oldData.length === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Employee not found",
+            });
+          }
+
+          if (
+            oldData[0].image &&
+            oldData[0].image !== getIdFromUrl(input.image)
+          ) {
+            await deleteFileById(oldData[0].image);
+          }
+
+          await trx
             .update(employees)
             .set({
               saleNo: input.saleNo,
@@ -148,19 +181,9 @@ export const employeeRouter = createTRPCRouter({
                 eq(employees.id, input.id),
                 eq(employees.createdBy, ctx.session.user.id)
               )
-            )
-            .returning({
-              id: employees.id,
-            });
+            );
 
-          if (result.length === 0) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Employee not found",
-            });
-          }
-
-          return result[0].id;
+          return input.id;
         }
         // CASE: Create
         else {
@@ -187,11 +210,11 @@ export const employeeRouter = createTRPCRouter({
   generatePresignUrl: generatePresignedUrlProcedure((ctx) => ({
     readAccessControl: {
       rule: "userId",
-      value: ctx.session?.user.id,
+      userId: ctx.session?.user.id,
     },
     writeAccessControl: {
       rule: "userId",
-      value: ctx.session?.user.id,
+      userId: ctx.session?.user.id,
     },
     isRequireAuth: true,
   })),

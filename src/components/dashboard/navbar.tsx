@@ -25,6 +25,10 @@ const MENU_ITEMS = [
     label: "Customers",
     href: "customers",
   },
+  {
+    label: "Employees",
+    href: "employees",
+  },
 ];
 
 export function DashboardNavbar() {
