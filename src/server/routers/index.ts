@@ -1,5 +1,6 @@
 import { publicProcedure, createTRPCRouter } from "../trpc";
 import { authRouter } from "./auth";
+import { employeeRouter } from "./employee";
 import { projectRouter } from "./project";
 
 export const appRouter = createTRPCRouter({
@@ -8,6 +9,7 @@ export const appRouter = createTRPCRouter({
   }),
   auth: authRouter,
   project: projectRouter,
+  employee: employeeRouter,
 });
 
 export type AppRouter = typeof appRouter;
