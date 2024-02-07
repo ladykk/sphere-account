@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { RouterInputs } from "@/trpc/shared";
-import { Separator } from "@radix-ui/react-separator";
 import { Home, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -37,13 +36,15 @@ import {
 import Image from "next/image";
 import trash from "@/assets/icon/trash.svg";
 import pluscircle from "@/assets/icon/plus-circle.svg";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
-export default function ProjectDetailPage(props) {
+export default function ProjectDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const projectId = params.projectId as string;
+  const projectId = params.customerId as string;
   const isCreate = projectId === "create";
-  const { children, ...fileUploadProps } = props;
+
   const [isEdit, setIsEdit] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -121,36 +122,47 @@ export default function ProjectDetailPage(props) {
           </>
         ) : ( */}
         <>
-          <div className="w-full bg-orange-500 p-3 rounded-t-lg">
-            {" "}
-            <p className=" text-white ml-4 font-semibold">Customer</p>
-          </div>
-          <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Customer Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tax ID</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <Tabs>
+            <TabsList defaultValue="information">
+              <TabsTrigger value="information">information</TabsTrigger>
+              <TabsTrigger value="account">Bank Account</TabsTrigger>
+              <TabsTrigger value="contact">Contact</TabsTrigger>
+              <TabsTrigger value="attachment">Attachment</TabsTrigger>
+              <TabsTrigger value="note">Note</TabsTrigger>
+            </TabsList>
+            <TabsContent value="information">
+              <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-4 mt-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Customer Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tax ID</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <h3>Business Detail</h3>
+              <Separator className="mt-2 bg-black"></Separator>
+              <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-4 mt-4"></div>
+            </TabsContent>
+          </Tabs>
+
           <div className="w-full bg-orange-500 p-3 rounded-t-lg">
             {" "}
             <p className=" text-white ml-4 font-semibold">Contact</p>
@@ -445,7 +457,7 @@ export default function ProjectDetailPage(props) {
             <p className=" text-white ml-4 font-semibold">Attachment</p>
           </div>
           <div className=" h-8 border-dotted bg-slate-300 flex items-center justify-center">
-            <FileUploadDropzone
+            {/* <FileUploadDropzone
               {...fileUploadProps}
               multiple={false}
               accept={{
@@ -454,7 +466,7 @@ export default function ProjectDetailPage(props) {
                 "image/jpeg": [".jpeg"],
                 "image/webp": [".webp"],
               }}
-            />
+            /> */}
           </div>
           <div className="flex justify-end items-center gap-5  mt-10">
             {isCreate ? (
