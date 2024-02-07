@@ -58,6 +58,7 @@ const base = z.object({
 export const customerContactInput = baseContact
 .omit({
   id: true,
+  customerId: true,
   createdAt: true,
   createdBy: true,
   updatedAt: true,

@@ -1,7 +1,7 @@
 import { Customer, baseBankAccount } from "../models/customer";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { string, z } from "zod";
-import { and, eq, inArray, like, sql } from "drizzle-orm";
+import { and, eq, inArray, like, sql, ne, notInArray } from "drizzle-orm";
 import {
   customers,
   customerBankAccounts,
@@ -9,6 +9,7 @@ import {
 } from "@/db/schema/customer";
 import { TRPCError } from "@trpc/server";
 import { Contact } from "lucide-react";
+import { Result } from "postcss";
 
 export const productRouter = createTRPCRouter({
   //Get Customer
@@ -390,10 +391,10 @@ export const productRouter = createTRPCRouter({
           .insert(customerContacts)
           .values({
             id: crypto.randomUUID(),
-            customerId: String(input.customerId),
-            contactName: String(input.contactName),
-            email: String(input.email),
-            phoneNumber: String(input.phoneNumber),
+            customerId: input.customerId,
+            contactName: input.contactName,
+            email: input.email,
+            phoneNumber: input.phoneNumber,
             createdAt: new Date(Date.now()),
             createdBy: input.createdBy,
             updatedAt: new Date(Date.now()),
@@ -426,11 +427,11 @@ export const productRouter = createTRPCRouter({
           .insert(customerBankAccounts)
           .values({
             id: crypto.randomUUID(),
-            customerId: String(input.customerId),
-            bank: String(input.bank),
-            accountNumber: String(input.accountNumber),
-            bankBranch: String(input.bankBranch),
-            accountType: String(input.accountType),
+            customerId: input.customerId,
+            bank: input.bank,
+            accountNumber: input.accountNumber,
+            bankBranch: input.bankBranch,
+            accountType: input.accountType,
             createdAt: new Date(Date.now()),
             createdBy: input.createdBy,
             updatedAt: new Date(Date.now()),
@@ -458,26 +459,27 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await ctx.db.transaction(async (trx) => {
         // CASE: Create
-        if (!input.id) {
+        const id = input.id;
+        if (!id) {
           const createResult = await trx
             .insert(customers)
             .values({
               id: crypto.randomUUID(),
-              name: String(input.name),
-              taxId: String(input.taxId),
-              address: String(input.address),
-              shippingAddress: String(input.shippingAddress),
-              zipcode: String(input.zipcode),
-              isBranch: Boolean(input.isBranch),
-              branchCode: String(input.branchCode),
-              branchName: String(input.branchName),
-              businessType: String(input.businessType),
-              email: String(input.email),
-              telephoneNumber: String(input.telephoneNumber),
-              phoneNumber: String(input.phoneNumber),
-              faxNumber: String(input.faxNumber),
-              website: String(input.website),
-              notes: String(input.notes),
+              name: input.name,
+              taxId: input.taxId,
+              address: input.address,
+              shippingAddress: input.shippingAddress,
+              zipcode: input.zipcode,
+              isBranch: input.isBranch,
+              branchCode: input.branchCode,
+              branchName: input.branchName,
+              businessType: input.businessType,
+              email: input.email,
+              telephoneNumber: input.telephoneNumber,
+              phoneNumber: input.phoneNumber,
+              faxNumber: input.faxNumber,
+              website: input.website,
+              notes: input.notes,
               createdBy: ctx.session.user.id,
             })
             .returning({
@@ -488,7 +490,7 @@ export const productRouter = createTRPCRouter({
           if (createResult.length === 0)
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
-              message: "Failed to create user",
+              message: "Failed to create customer",
             });
 
           if (input.contacts.length > 0) {
@@ -512,10 +514,10 @@ export const productRouter = createTRPCRouter({
               .values(input.bankAccount.map(BankAccount => ({
                 id: crypto.randomUUID(),
                 customerId: createResult[0].id,
-                bank: String(BankAccount.bank),
-                accountNumber: String(BankAccount.accountNumber),
-                bankBranch: String(BankAccount.bankBranch),
-                accountType: String(BankAccount.accountType),
+                bank: BankAccount.bank,
+                accountNumber: BankAccount.accountNumber,
+                bankBranch: BankAccount.bankBranch,
+                accountType: BankAccount.accountType,
               })))
               .returning({
                 id: customerBankAccounts.id,
@@ -532,12 +534,11 @@ export const productRouter = createTRPCRouter({
             .from(customers)
             .where(
               and(
-                eq(customers.id, input.id),
+                eq(customers.id, id),
                 eq(customers.createdBy, ctx.session.user.id)
               )
             )
             .limit(1)
-
           if (customer.length === 0) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
@@ -549,132 +550,102 @@ export const productRouter = createTRPCRouter({
           await trx
             .update(customers)
             .set({
-              name: String(input.name),
-              taxId: String(input.taxId),
-              address: String(input.address),
-              shippingAddress: String(input.shippingAddress),
-              zipcode: String(input.zipcode),
-              isBranch: Boolean(input.isBranch),
-              branchCode: String(input.branchCode),
-              branchName: String(input.branchName),
-              businessType: String(input.businessType),
-              email: String(input.email),
-              telephoneNumber: String(input.telephoneNumber),
-              phoneNumber: String(input.phoneNumber),
-              faxNumber: String(input.faxNumber),
-              website: String(input.website),
-              notes: String(input.notes),
+              name: input.name,
+              taxId: input.taxId,
+              address: input.address,
+              shippingAddress: input.shippingAddress,
+              zipcode: input.zipcode,
+              isBranch: input.isBranch,
+              branchCode: input.branchCode,
+              branchName: input.branchName,
+              businessType: input.businessType,
+              email: input.email,
+              telephoneNumber: input.telephoneNumber,
+              phoneNumber: input.phoneNumber,
+              faxNumber: input.faxNumber,
+              website: input.website,
+              notes: input.notes,
               updatedBy: ctx.session.user.id,
+              updatedAt: new Date(Date.now())
             })
-            .where(eq(customers.id, input.id))
+            .where(eq(customers.id, id))
 
+          const currentContactIds: string[] = []
           //update contact
-
           if (input.contacts.length > 0) {
-            input.contacts.map(async (Contact) => {
+            input.contacts.forEach(async (Contact) => {
+              const currentId = Contact.id ?? crypto.randomUUID();
               await trx
                 .insert(customerContacts)
                 .values({
-                  id: String(Contact.id),
-                  customerId: Contact.customerId,
+                  id: currentId,
+                  customerId: id,
                   contactName: Contact.contactName,
                   email: Contact.email,
-                  phoneNumber: Contact.phoneNumber
+                  phoneNumber: Contact.phoneNumber,
+                  createdBy: ctx.session.user.id,
+                  createdAt: new Date(Date.now())
                 })
                 .onConflictDoUpdate({
                   target: customerContacts.id,
                   set: {
-                    id: String(Contact.id),
-                    customerId: Contact.customerId,
+                    id: currentId,
+                    customerId: id,
                     contactName: Contact.contactName,
                     email: Contact.email,
                     phoneNumber: Contact.phoneNumber,
-                    updatedBy: ctx.session.user.id
+                    updatedBy: ctx.session.user.id,
+                    updatedAt: new Date(Date.now())
                   }
                 });
+              currentContactIds.push(currentId)
             });
           }
+          //Delete Customer Contact
+          await trx
+            .delete(customerContacts)
+            .where(and(notInArray(customerContacts.id, currentContactIds), eq(customerContacts.customerId, id)))
+
+          const currentBankAccountIds: string[] = []
           //update bankAccount
           if (input.bankAccount.length > 0) {
-            input.bankAccount.map(async (BankAccount) => {
+            input.bankAccount.forEach(async (BankAccount) => {
+              const currentId = BankAccount.id ?? crypto.randomUUID();
               await trx
                 .insert(customerBankAccounts)
                 .values({
-                  id: String(BankAccount.id),
+                  id: currentId,
                   customerId: BankAccount.customerId,
-                  bank: String(BankAccount.bank),
-                  accountNumber: String(BankAccount.accountNumber),
-                  bankBranch: String(BankAccount.bankBranch),
-                  accountType: String(BankAccount.accountType),
+                  bank: BankAccount.bank,
+                  accountNumber: BankAccount.accountNumber,
+                  bankBranch: BankAccount.bankBranch,
+                  accountType: BankAccount.accountType,
+                  createdBy: ctx.session.user.id,
+                  createdAt: new Date(Date.now())
                 })
                 .onConflictDoUpdate({
                   target: customerBankAccounts.id,
                   set: {
-                    id: String(BankAccount.id),
+                    id: currentId,
                     customerId: BankAccount.customerId,
                     bank: BankAccount.bank,
                     accountNumber: BankAccount.accountNumber,
                     bankBranch: BankAccount.bankBranch,
                     accountType: BankAccount.accountType,
-                    updatedBy: ctx.session.user.id
+                    updatedBy: ctx.session.user.id,
+                    updatedAt: new Date(Date.now())
                   }
                 });
+              currentBankAccountIds.push(currentId)
             });
           }
-          return input.id;
-        }
-      });
-    }),
+          //Delete Customer BankAccount
+          await trx
+            .delete(customerBankAccounts)
+            .where(and(notInArray(customerBankAccounts.id, currentBankAccountIds), eq(customerBankAccounts.customerId, id)))
 
-  //Delete customerContacts
-  deleteCustomerContact: protectedProcedure
-    .input(z.string().uuid("Invalid uuid"))
-    .query(async ({ ctx, input }) => {
-      return ctx.db.transaction(async (trx) => {
-        const getContactsResult = await trx
-          .select({
-            id: customerContacts.id,
-          })
-          .from(customerContacts)
-          .where(eq(customerContacts.customerId, input))
-          .limit(1);
-        if (getContactsResult.length === 0) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Customer not found",
-          });
+          return id;
         }
-        const deleteResult = await trx
-          .delete(customerContacts)
-          .where(
-            eq(customerContacts.id, input)
-          )
-      });
-    }),
-
-  //Delete BankAccount
-  deleteCustomerBankAccount: protectedProcedure
-    .input(z.string().uuid("Invalid uuid"))
-    .query(async ({ ctx, input }) => {
-      return ctx.db.transaction(async (trx) => {
-        const getBankAccountResult = await trx
-          .select({
-            id: customerBankAccounts.id,
-          })
-          .from(customerBankAccounts)
-          .where(eq(customerBankAccounts.customerId, input))
-          .limit(1);
-        if (getBankAccountResult.length === 0) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Customer not found",
-          });
-        }
-        const deleteResult = await trx
-          .delete(customerBankAccounts)
-          .where(
-            eq(customerBankAccounts.id, input)
-          )
       });
     }),
 });
