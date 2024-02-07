@@ -27,7 +27,7 @@ export const AvatarInput = (props: AvatarInputProps) => {
   }, [props.value]);
 
   return (
-    <Dialog>
+    <Dialog open={props.disabled ? false : undefined}>
       <DialogTrigger asChild>{children(fileUrl)}</DialogTrigger>
       <DialogContent className=" max-w-xl" hideClose>
         <DialogHeader>

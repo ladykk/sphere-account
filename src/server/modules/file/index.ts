@@ -75,11 +75,16 @@ export const checkAccessControl = async (accessControl: TAccessControl) => {
       const session = await getServerAuthSession();
       if (!session) return false;
       if (session.user.id === accessControl.userId) return true;
+
       return false;
     default:
       console.warn(`[R2]: Not implemented access control rule. ${unknownRule}`);
       return false;
   }
+};
+
+export const getUrlById = (id: string) => {
+  return `${getBaseUrl()}/api/file/${id}`;
 };
 
 export const getIdFromUrl = (url: string | undefined | null) => {
