@@ -53,21 +53,26 @@ export default function ProductsListPage() {
           {
             accessorKey: "name",
             header: "Name",
+            cell:({row}) => (
+              <div>
+                <Link href= {`/app/products/${row.original.id}`}> {row.original.name}</Link>
+              </div>
+            )
           },
           
           {
-            accessorKey: "customerId",
-            header: "Customer",
-            cell: ({ row }) => "TODO: Customer Display",
+            accessorKey: "code",
+            header: "Code",
+            // cell: ({ row }) => "TODO: Customer Display",
           },
           {
-            accessorKey: "detail",
-            header: "Detail",
+            accessorKey: "sellingPrice",
+            header: "Selling Price",
           },
           {
-            id: "actions",
-            header: "Actions",
-            cell: ({ row }) => "TODO: Action Buttons",
+            id: "unit",
+            header: "Unit",
+            // cell: ({ row }) => "TODO: Action Buttons",
           },
         ]}
         data={query.data?.list}

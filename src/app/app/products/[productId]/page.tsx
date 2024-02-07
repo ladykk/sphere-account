@@ -20,11 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { RouterInputs } from "@/trpc/shared";
+import { useMutation } from "@tanstack/react-query";
 import { Home, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+type FormInput = RouterInputs["product"]["createOrUpdateProduct"];
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -43,17 +46,34 @@ export default function ProductDetailPage() {
     refetchOnReconnect: false,
   });
 
-  const form = useForm<RouterInputs["product"]["createOrUpdateProduct"]>({
+  const form = useForm<FormInput>({
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
   });
 
-  const mutation = api.product.createOrUpdateProduct.useMutation({
+  
+  const createOrUpdateMutation  = api.product.createOrUpdateProduct.useMutation({
     onSuccess: (id, variables) => {
       router.replace(`/app/products/${id}`);
       form.reset(variables);
     },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
+    onMutate: () => setIsDisabled(true),
+    onSettled: () => setIsDisabled(false),
+  });
+
+  const mutation = useMutation<void, Error, FormInput>({
+    mutationFn: async (input)=> {
+      let{...data} = input;
+
+      //Create or Update product
+      await createOrUpdateMutation.mutateAsync({
+        ...data,
+
+      });
+      setIsEdit(false);
+      setTimeout(() => query.refetch(),1000);
+    },
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
   });
@@ -78,9 +98,7 @@ export default function ProductDetailPage() {
     });
   }, [query.data]);
 
-  const onSubmit = (
-    input: RouterInputs["product"]["createOrUpdateProduct"]
-  ) => {
+  const onSubmit = (input: FormInput) => {
     toast.promise(mutation.mutateAsync(input), {
       loading: "Saving Product...",
       success: "Product Saved",
