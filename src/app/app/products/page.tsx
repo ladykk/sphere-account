@@ -1,0 +1,83 @@
+"use client";
+import { CheckboxDropdown } from "@/components/filters/dropdown";
+import { SearchKeywordInput } from "@/components/filters/search-keyword";
+import { DashboardListContainer } from "@/components/layouts/dashboard";
+import { buttonVariants } from "@/components/ui/button";
+import { api } from "@/trpc/react";
+import { useSearchParams } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { DashboardPagination } from "@/components/dashboard/pagination";
+import { DataTable } from "@/components/ui/data-table";
+import Link from "next/link";
+import Image from "next/image";
+
+// Assets
+import plus from "@/assets/icon/plus.svg";
+
+export default function ProductsListPage() {
+  const searchParams = useSearchParams();
+  // TODO: Change API Endpoint
+  const query = api.product.getPaginateProduct.useQuery({
+    page: Number(searchParams.get("page")) || 1,
+    itemsPerPage: Number(searchParams.get("itemsPerPage")) || 10,
+    // customerId: searchParams.get("customerId") || undefined,
+  });
+  return (
+    <DashboardListContainer>
+      <div className="flex items-baseline gap-3">
+        <h1>Products</h1>
+        {query.isLoading && <Spinner />}
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          // TODO: Change Filters
+          <SearchKeywordInput placeholder="Search by Name..." />
+          <CheckboxDropdown
+            searchKey="customerId"
+            placeholder="Filter by Customer"
+            searchPlaceholder="Search Customer..."
+            options={[]} // TODO: Set Options
+            setLabel={(option) => "TODO: Set Label"}
+            setValue={(option) => "TODO: Set Value"}
+            setMultiLabel={(values) => `${values.length} Customers`}
+          />
+        </div>
+        <Link href="/app/products/create" className={buttonVariants({})}>
+          <Image src={plus} alt="plus" className="w-3 h-3 mr-2" />
+          Create
+        </Link>
+      </div>
+      <DataTable
+        // TODO: Change Columns and Data
+        columns={[
+          {
+            accessorKey: "name",
+            header: "Name",
+            cell:({row}) => (
+              <div>
+                <Link href= {`/app/products/${row.original.id}`}> {row.original.name}</Link>
+              </div>
+            )
+          },
+          
+          {
+            accessorKey: "code",
+            header: "Code",
+            // cell: ({ row }) => "TODO: Customer Display",
+          },
+          {
+            accessorKey: "sellingPrice",
+            header: "Selling Price",
+          },
+          {
+            id: "unit",
+            header: "Unit",
+            // cell: ({ row }) => "TODO: Action Buttons",
+          },
+        ]}
+        data={query.data?.list}
+      />
+      <DashboardPagination {...query.data} />
+    </DashboardListContainer>
+  );
+}
