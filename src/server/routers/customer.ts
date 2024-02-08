@@ -11,7 +11,7 @@ import { TRPCError } from "@trpc/server";
 import { Contact } from "lucide-react";
 import { Result } from "postcss";
 
-export const productRouter = createTRPCRouter({
+export const customerRouter = createTRPCRouter({
   //Get Customer
   getCustomer: protectedProcedure
     .input(z.string().uuid("Invalid uuid"))
@@ -202,7 +202,7 @@ export const productRouter = createTRPCRouter({
           eq(customers.createdBy, ctx.session.user.id),
           filters.keyword // Filter: Keyword
             ? like(customers.name, `%${filters.keyword}%`)
-            : undefined,
+            : undefined
         );
 
         const count = await ctx.db
@@ -311,7 +311,6 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
-
   //Get Customer bank account
   getCustomerBankAccount: protectedProcedure
     .input(z.string().uuid("Invalid uuid"))
@@ -332,10 +331,8 @@ export const productRouter = createTRPCRouter({
             updatedBy: customerBankAccounts.updatedBy,
           })
           .from(customerBankAccounts)
-          .where(
-            eq(customerBankAccounts.id, input)
-          )
-          .limit(1)
+          .where(eq(customerBankAccounts.id, input))
+          .limit(1);
         if (result.length > 0) {
           return result[0];
         } else {
@@ -345,7 +342,6 @@ export const productRouter = createTRPCRouter({
           });
         }
       });
-
     }),
 
   //Get Customer contact
@@ -415,7 +411,6 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
-
   //Create Customer Bank Accounts
   createCustomerBankAccounts: protectedProcedure
     .input(Customer.schemas.createCustomerBankAccountsInput)
@@ -452,7 +447,7 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
-  //CreateOrUpdate Customer 
+  //CreateOrUpdate Customer
   createOrCustomer: protectedProcedure
     .input(Customer.schemas.formInput)
     .output(Customer.schemas.createCustomerOutputSchema)
@@ -496,13 +491,15 @@ export const productRouter = createTRPCRouter({
           if (input.contacts.length > 0) {
             const createCustomerContact = await trx
               .insert(customerContacts)
-              .values(input.contacts.map(Contact => ({
-                id: crypto.randomUUID(),
-                customerId: createResult[0].id,
-                contactName: Contact.contactName,
-                email: Contact.email,
-                phoneNumber: Contact.phoneNumber
-              })))
+              .values(
+                input.contacts.map((Contact) => ({
+                  id: crypto.randomUUID(),
+                  customerId: createResult[0].id,
+                  contactName: Contact.contactName,
+                  email: Contact.email,
+                  phoneNumber: Contact.phoneNumber,
+                }))
+              )
               .returning({
                 id: customerContacts.id,
               });
@@ -511,17 +508,19 @@ export const productRouter = createTRPCRouter({
           if (input.bankAccount.length > 0) {
             const createCustomerBankAccount = await trx
               .insert(customerBankAccounts)
-              .values(input.bankAccount.map(BankAccount => ({
-                id: crypto.randomUUID(),
-                customerId: createResult[0].id,
-                bank: BankAccount.bank,
-                accountNumber: BankAccount.accountNumber,
-                bankBranch: BankAccount.bankBranch,
-                accountType: BankAccount.accountType,
-              })))
+              .values(
+                input.bankAccount.map((BankAccount) => ({
+                  id: crypto.randomUUID(),
+                  customerId: createResult[0].id,
+                  bank: BankAccount.bank,
+                  accountNumber: BankAccount.accountNumber,
+                  bankBranch: BankAccount.bankBranch,
+                  accountType: BankAccount.accountType,
+                }))
+              )
               .returning({
                 id: customerBankAccounts.id,
-              })
+              });
           }
           return createResult[0].id;
         } // CASE: Update
@@ -538,7 +537,7 @@ export const productRouter = createTRPCRouter({
                 eq(customers.createdBy, ctx.session.user.id)
               )
             )
-            .limit(1)
+            .limit(1);
           if (customer.length === 0) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
@@ -566,11 +565,11 @@ export const productRouter = createTRPCRouter({
               website: input.website,
               notes: input.notes,
               updatedBy: ctx.session.user.id,
-              updatedAt: new Date(Date.now())
+              updatedAt: new Date(Date.now()),
             })
-            .where(eq(customers.id, id))
+            .where(eq(customers.id, id));
 
-          const currentContactIds: string[] = []
+          const currentContactIds: string[] = [];
           //update contact
           if (input.contacts.length > 0) {
             input.contacts.forEach(async (Contact) => {
@@ -584,7 +583,7 @@ export const productRouter = createTRPCRouter({
                   email: Contact.email,
                   phoneNumber: Contact.phoneNumber,
                   createdBy: ctx.session.user.id,
-                  createdAt: new Date(Date.now())
+                  createdAt: new Date(Date.now()),
                 })
                 .onConflictDoUpdate({
                   target: customerContacts.id,
@@ -595,18 +594,23 @@ export const productRouter = createTRPCRouter({
                     email: Contact.email,
                     phoneNumber: Contact.phoneNumber,
                     updatedBy: ctx.session.user.id,
-                    updatedAt: new Date(Date.now())
-                  }
+                    updatedAt: new Date(Date.now()),
+                  },
                 });
-              currentContactIds.push(currentId)
+              currentContactIds.push(currentId);
             });
           }
           //Delete Customer Contact
           await trx
             .delete(customerContacts)
-            .where(and(notInArray(customerContacts.id, currentContactIds), eq(customerContacts.customerId, id)))
+            .where(
+              and(
+                notInArray(customerContacts.id, currentContactIds),
+                eq(customerContacts.customerId, id)
+              )
+            );
 
-          const currentBankAccountIds: string[] = []
+          const currentBankAccountIds: string[] = [];
           //update bankAccount
           if (input.bankAccount.length > 0) {
             input.bankAccount.forEach(async (BankAccount) => {
@@ -621,7 +625,7 @@ export const productRouter = createTRPCRouter({
                   bankBranch: BankAccount.bankBranch,
                   accountType: BankAccount.accountType,
                   createdBy: ctx.session.user.id,
-                  createdAt: new Date(Date.now())
+                  createdAt: new Date(Date.now()),
                 })
                 .onConflictDoUpdate({
                   target: customerBankAccounts.id,
@@ -633,16 +637,21 @@ export const productRouter = createTRPCRouter({
                     bankBranch: BankAccount.bankBranch,
                     accountType: BankAccount.accountType,
                     updatedBy: ctx.session.user.id,
-                    updatedAt: new Date(Date.now())
-                  }
+                    updatedAt: new Date(Date.now()),
+                  },
                 });
-              currentBankAccountIds.push(currentId)
+              currentBankAccountIds.push(currentId);
             });
           }
           //Delete Customer BankAccount
           await trx
             .delete(customerBankAccounts)
-            .where(and(notInArray(customerBankAccounts.id, currentBankAccountIds), eq(customerBankAccounts.customerId, id)))
+            .where(
+              and(
+                notInArray(customerBankAccounts.id, currentBankAccountIds),
+                eq(customerBankAccounts.customerId, id)
+              )
+            );
 
           return id;
         }
