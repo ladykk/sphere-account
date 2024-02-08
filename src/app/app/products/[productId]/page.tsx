@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { handleTRPCFormError } from "@/lib/utils";
@@ -38,20 +44,20 @@ export default function ProductDetailPage() {
   const [isEdit, setIsEdit] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  // TODO: Change API Endpoint
   const query = api.product.getProduct.useQuery(productId, {
     enabled: !isCreate,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const catagoriesQuery = api.product.getCatagories.useQuery();
+  const unitsQuery = api.product.getUnits.useQuery();
 
   const form = useForm<FormInput>({
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
   });
 
-  
-  const createOrUpdateMutation  = api.product.createOrUpdateProduct.useMutation({
+  const createOrUpdateMutation = api.product.createOrUpdateProduct.useMutation({
     onSuccess: (id, variables) => {
       router.replace(`/app/products/${id}`);
       form.reset(variables);
@@ -63,23 +69,23 @@ export default function ProductDetailPage() {
   });
 
   const mutation = useMutation<void, Error, FormInput>({
-    mutationFn: async (input)=> {
-      let{...data} = input;
+    mutationFn: async (input) => {
+      let { ...data } = input;
 
-      //Create or Update product
       await createOrUpdateMutation.mutateAsync({
         ...data,
-
       });
+
       setIsEdit(false);
-      setTimeout(() => query.refetch(),1000);
+      setTimeout(() => {
+        query.refetch();
+        catagoriesQuery.refetch();
+        unitsQuery.refetch();
+      }, 1000);
     },
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
   });
-
-  const catagories = api.product.getCatagories.useQuery();
-  const units = api.product.getUnits.useQuery();
 
   // Set form data if query is successful
   useEffect(() => {
@@ -159,12 +165,11 @@ export default function ProductDetailPage() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
-                      <FormItem className=" col-span-2">
+                      <FormItem className="col-span-2">
                         <FormLabel>Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
@@ -173,29 +178,30 @@ export default function ProductDetailPage() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="type"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className=" col-span-2">
                         <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          value={field.value ?? undefined}
+                          onValueChange={field.onChange}
+                          disabled={field.disabled}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Type"></SelectValue>
+                              <SelectValue placeholder="Select Type" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Stock"> Stock </SelectItem>
-                            <SelectItem value="Service"> Service </SelectItem>
+                            <SelectItem value="stock">Stock</SelectItem>
+                            <SelectItem value="service">Service</SelectItem>
                           </SelectContent>
-
                         </Select>
                       </FormItem>
                     )}
                   />
-
                 </div>
                 <FormField
                   control={form.control}
@@ -207,7 +213,8 @@ export default function ProductDetailPage() {
                         <Textarea
                           {...field}
                           value={field.value ?? ""}
-                          className="flex-1" />
+                          className="flex-1"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -223,14 +230,12 @@ export default function ProductDetailPage() {
                   <FormItem>
                     <FormLabel>Barcode</FormLabel>
                     <FormControl>
-                      <Input {...field}
-                        value={field.value ?? ""} />
+                      <Input {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="category"
@@ -239,57 +244,19 @@ export default function ProductDetailPage() {
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <ComboBox
-                        options={catagories.data}
+                        options={catagoriesQuery.data}
                         setLabel={(label) => label ?? ""}
                         setValue={(value) => value ?? ""}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                         multiple={false}
                         creatable={true}
+                        disabled={field.disabled}
                       ></ComboBox>
                     </FormControl>
                   </FormItem>
                 )}
               />
-
-
-              <FormField
-                control={form.control}
-                name="sellingPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Selling Price</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="vatType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>VAT</FormLabel>
-                    <FormControl>
-                      <Input {...field}
-                        value={field.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormItem>
-                <Label>Income Account</Label>
-                <Input value="NEXT PHASE IGNORE" disabled />
-              </FormItem>
-              <FormItem>
-                <Label>Stock</Label>
-                <Input />
-              </FormItem>
-
               <FormField
                 control={form.control}
                 name="unit"
@@ -298,64 +265,76 @@ export default function ProductDetailPage() {
                     <FormLabel>Unit</FormLabel>
                     <FormControl>
                       <ComboBox
-                        options={units.data}
+                        options={unitsQuery.data}
                         setLabel={(label) => label ?? ""}
                         setValue={(value) => value ?? ""}
                         value={field.value ?? ""}
                         onChange={field.onChange}
                         multiple={false}
                         creatable={true}
+                        disabled={field.disabled}
                       ></ComboBox>
                     </FormControl>
                   </FormItem>
                 )}
               />
-
-            </div>
-            {/* <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10">
               <FormField
                 control={form.control}
-                name="name"
+                name="sellingPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Selling Price (Baht)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="customerId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Customer</FormLabel>
-                    <p>TODO: Customer Selector</p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div />
-              <FormField
-                control={form.control}
-                name="detail"
-                render={({ field }) => (
-                  <FormItem className="col-span-3">
-                    <FormLabel>Detail</FormLabel>
-                    <FormControl>
-                      <Textarea
+                      <Input
                         {...field}
-                        value={field.value ?? ""}
-                        className=" h-48"
+                        type="number"
+                        value={field.value}
+                        onBlur={(e) => {
+                          // Format to 2 decimal places
+                          const value = parseFloat(e.target.value);
+                          field.onChange(value.toFixed(2));
+                        }}
+                        step={0.01}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div> */}
+              <FormField
+                control={form.control}
+                name="vatType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>VAT Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? undefined}
+                      disabled={field.disabled}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="include">Include VAT</SelectItem>
+                        <SelectItem value="exclude">Exclude VAT</SelectItem>
+                        <SelectItem value="exempt">VAT Exempt</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormItem>
+                <Label>Income Account</Label>
+                <Input disabled />
+              </FormItem>
+              <FormItem>
+                <Label>Stock</Label>
+                <Input disabled />
+              </FormItem>
+            </div>
             <div className="flex justify-end items-center gap-5">
               {isCreate ? (
                 <Button type="submit" disabled={!form.formState.isDirty}>

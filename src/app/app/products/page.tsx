@@ -10,18 +10,25 @@ import { DashboardPagination } from "@/components/dashboard/pagination";
 import { DataTable } from "@/components/ui/data-table";
 import Link from "next/link";
 import Image from "next/image";
+import Barcode from "react-barcode";
 
 // Assets
 import plus from "@/assets/icon/plus.svg";
+import { Edit } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function ProductsListPage() {
   const searchParams = useSearchParams();
-  // TODO: Change API Endpoint
   const query = api.product.getPaginateProduct.useQuery({
     page: Number(searchParams.get("page")) || 1,
     itemsPerPage: Number(searchParams.get("itemsPerPage")) || 10,
-    // customerId: searchParams.get("customerId") || undefined,
+    keyword: searchParams.get("keyword") || undefined,
+    category: searchParams.get("category") || undefined,
+    type: searchParams.get("type") || undefined,
   });
+
+  const categoryQuery = api.product.getCatagories.useQuery();
+
   return (
     <DashboardListContainer>
       <div className="flex items-baseline gap-3">
@@ -30,16 +37,32 @@ export default function ProductsListPage() {
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          // TODO: Change Filters
-          <SearchKeywordInput placeholder="Search by Name..." />
+          <SearchKeywordInput placeholder="Search by Name, Code, Barcode..." />
           <CheckboxDropdown
-            searchKey="customerId"
-            placeholder="Filter by Customer"
-            searchPlaceholder="Search Customer..."
-            options={[]} // TODO: Set Options
-            setLabel={(option) => "TODO: Set Label"}
-            setValue={(option) => "TODO: Set Value"}
-            setMultiLabel={(values) => `${values.length} Customers`}
+            searchKey="category"
+            placeholder="Filter by Category"
+            options={categoryQuery.data}
+            setLabel={(option) => option}
+            setValue={(option) => option}
+            loading={categoryQuery.isLoading}
+            setMultiLabel={(values) => `${values.length} Categories`}
+          />
+          <CheckboxDropdown
+            searchKey="type"
+            placeholder="Filter by Type"
+            options={[
+              {
+                label: "Stock",
+                value: "stock",
+              },
+              {
+                label: "Service",
+                value: "service",
+              },
+            ]}
+            setLabel={(option) => option.label}
+            setValue={(option) => option.value}
+            setMultiLabel={(values) => `${values.length} Types`}
           />
         </div>
         <Link href="/app/products/create" className={buttonVariants({})}>
@@ -48,31 +71,81 @@ export default function ProductsListPage() {
         </Link>
       </div>
       <DataTable
-        // TODO: Change Columns and Data
         columns={[
-          {
-            accessorKey: "name",
-            header: "Name",
-            cell:({row}) => (
-              <div>
-                <Link href= {`/app/products/${row.original.id}`}> {row.original.name}</Link>
-              </div>
-            )
-          },
-          
           {
             accessorKey: "code",
             header: "Code",
-            // cell: ({ row }) => "TODO: Customer Display",
+          },
+          {
+            accessorKey: "barcode",
+            header: "Barcode",
+            cell: ({ row }) =>
+              row.original.barcode ? (
+                <Barcode
+                  value={row.original.barcode}
+                  width={1.5}
+                  height={30}
+                  fontSize={14}
+                />
+              ) : (
+                "Not Registerd"
+              ),
+          },
+          {
+            accessorKey: "name",
+            header: "Name",
+          },
+          {
+            accessorKey: "category",
+            header: "Category",
           },
           {
             accessorKey: "sellingPrice",
             header: "Selling Price",
+            cell: ({ row }) => (
+              <div>
+                <p className="font-semibold">
+                  {row.original.sellingPrice.toFixed(2) + " Baht"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {row.original.vatType?.toUpperCase()} VAT
+                </p>
+              </div>
+            ),
           },
           {
-            id: "unit",
-            header: "Unit",
-            // cell: ({ row }) => "TODO: Action Buttons",
+            id: "stock",
+            header: "Stock",
+            cell: ({ row }) => (
+              <div>
+                {row.original.type === "stock" ? (
+                  <>
+                    <p className="font-semibold">{row.original.stock}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {row.original.unit}(s)
+                    </p>
+                  </>
+                ) : (
+                  <p>Service</p>
+                )}
+              </div>
+            ),
+          },
+          {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => (
+              <div className="space-x-3">
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "icon" })
+                  )}
+                  href={`/app/products/${row.original.id}`}
+                >
+                  <Edit />
+                </Link>
+              </div>
+            ),
           },
         ]}
         data={query.data?.list}

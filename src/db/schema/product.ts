@@ -20,7 +20,7 @@ export const products = pgTable("product", {
   sellingPrice: numeric("selling_price").notNull().default("0.00"),
   vatType: text("vat_type"),
   description: text("description"),
-  quantity: integer("quantity").default(0),
+  stock: integer("stock").notNull().default(0),
   unit: text("main_unit").notNull().default("Unit"),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()

@@ -98,9 +98,10 @@ function CommandOptions<T, V extends string | number>(
               type="button"
               variant="ghost"
               size="sm"
-              className=" justify-start relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 w-full"
+              className="justify-start relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 w-full font-normal"
               onClick={() => {
                 props.onChange(search as unknown as V);
+                props.setOpen(false);
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
