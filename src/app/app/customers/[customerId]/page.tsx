@@ -15,10 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { handleTRPCFormError } from "@/lib/utils";
+import { cn, handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { RouterInputs } from "@/trpc/shared";
-import { Home, X } from "lucide-react";
+import { CheckIcon, Home, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -38,6 +38,23 @@ import trash from "@/assets/icon/trash.svg";
 import pluscircle from "@/assets/icon/plus-circle.svg";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import React from "react";
+import { CaretSortIcon } from "@radix-ui/react-icons";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import TrashRed from "@/assets/icon/Trash-Red.png";
 
 export default function ProjectDetailPage() {
   const router = useRouter();
@@ -47,6 +64,31 @@ export default function ProjectDetailPage() {
 
   const [isEdit, setIsEdit] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+
+  const frameworks = [
+    {
+      value: "next.js",
+      label: "Next.js",
+    },
+    {
+      value: "sveltekit",
+      label: "SvelteKit",
+    },
+    {
+      value: "nuxt.js",
+      label: "Nuxt.js",
+    },
+    {
+      value: "remix",
+      label: "Remix",
+    },
+    {
+      value: "astro",
+      label: "Astro",
+    },
+  ];
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
 
   const query = api.project.getProject.useQuery(projectId, {
     enabled: !isCreate,
@@ -130,7 +172,7 @@ export default function ProjectDetailPage() {
               <TabsTrigger value="attachment">Attachment</TabsTrigger>
               <TabsTrigger value="note">Note</TabsTrigger>
             </TabsList>
-            <TabsContent value="information">
+            <TabsContent value="information" className="p-6 shadow-lg">
               <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-4 mt-4">
                 <FormField
                   control={form.control}
@@ -159,38 +201,183 @@ export default function ProjectDetailPage() {
               </div>
               <h3>Business Detail</h3>
               <Separator className="mt-2 bg-black"></Separator>
+              <div className=" space-y-3 mt-3">
+                <p> Business Type</p>
+                <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between h-12"
+                      >
+                        {value
+                          ? frameworks.find(
+                              (framework) => framework.value === value
+                            )?.label
+                          : "Select framework..."}
+                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search framework..."
+                          className="h-9"
+                        />
+                        <CommandEmpty>No framework found.</CommandEmpty>
+                        <CommandGroup>
+                          {frameworks.map((framework) => (
+                            <CommandItem
+                              key={framework.value}
+                              value={framework.value}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  currentValue === value ? "" : currentValue
+                                );
+                                setOpen(false);
+                              }}
+                            >
+                              {framework.label}
+                              <CheckIcon
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  value === framework.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch id="Is-Branch" />
+                  <Label htmlFor="Is-Branch">Is Branch</Label>
+                </div>
+                <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Branch Name</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Branch</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Branch Code</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-4 mt-4"></div>
+            </TabsContent>
+            <TabsContent value="account" className="p-6 shadow-lg">
+              <h3>Account Information</h3>
+              <Separator className="mt-2 bg-black"></Separator>
+              <div className=" mt-6 flex justify-between items-center">
+                <p className=" text-orange-500 font-semibold"> Account 1</p>
+                <Button variant="link">
+                  <div className="flex gap-2 text-red-500">
+                    <p>remove</p>
+                    <Image src={TrashRed} alt="Trash"></Image>
+                  </div>
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bank</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bank Branch</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account Number</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account Type</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Credit Date</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col">
+                <Button variant="link" className=" text-orange-500 w-36">
+                  <p> + Add Account </p>
+                </Button>
+                <Button variant="link" className=" text-orange-500 w-36">
+                  <p> + Add Attachment </p>
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
 
-          <div className="w-full bg-orange-500 p-3 rounded-t-lg">
-            {" "}
-            <p className=" text-white ml-4 font-semibold">Contact</p>
-          </div>
-          <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10 mt-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Zip Code</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tax ID</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <div className="w-full bg-orange-500 p-3 rounded-t-lg">
             {" "}
             <p className=" text-white ml-4 font-semibold">Business</p>
