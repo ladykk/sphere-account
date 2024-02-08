@@ -26,7 +26,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { getNamePrefix } from "@/lib/auth";
-import { fileToPresignedUrlInput } from "@/lib/file";
+import { fileToPresignedUrlInput, uploadFile } from "@/lib/file";
 import { handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { RouterInputs } from "@/trpc/shared";
@@ -79,7 +79,24 @@ export default function ProductDetailPage() {
 
   const mutation = useMutation<void, Error, FormInput>({
     mutationFn: async (input)=> {
-      let{...data} = input;
+      let{files, ...data} = input;
+
+      //Upload image
+      if (files.image) {
+        const presignedUrl = await presignImageMutation.mutateAsync([
+          fileToPresignedUrlInput(files.image),
+        ]);
+
+        data.image = (
+          await uploadFile(presignedUrl[0], files.image).catch((err) => {
+            form.setError("files.image", {
+              type: "manual",
+              message: err.message,
+            });
+            throw err;
+          })
+        ).url;
+      }
 
       await createOrUpdateMutation.mutateAsync({
         ...data,
@@ -160,7 +177,8 @@ export default function ProductDetailPage() {
                       <AvatarInput {...field}>
                         {(fileUrl) => (
                           <Avatar className="w-60 h-60 rounded-md border shadow border-input cursor-pointer hover:opacity-70 transition-opacity">
-                            <AvatarImage src={fileUrl ?? query.data?.image ?? ""}>
+                            <AvatarImage 
+                            src={fileUrl ?? query.data?.image ?? ""}>
                             </AvatarImage>
                             <AvatarFallback className="text-3xl rounded-md">
                               {getNamePrefix(query.data?.name)}
@@ -169,6 +187,7 @@ export default function ProductDetailPage() {
                         )}
                       </AvatarInput>
                     </FormControl>
+                    <FormMessage/>
                     {!field.value && (
                       <p className="w-full text-center text-xs mt-2 text-muted-foreground">
                         Click to upload
@@ -228,6 +247,7 @@ export default function ProductDetailPage() {
                             <SelectItem value="service">Service</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
@@ -304,6 +324,7 @@ export default function ProductDetailPage() {
                         disabled={field.disabled}
                       ></ComboBox>
                     </FormControl>
+                    <FormMessage/>
                   </FormItem>
                 )}
               />

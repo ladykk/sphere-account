@@ -134,7 +134,7 @@ export const productRouter = createTRPCRouter({
                         description: products.description,
                         stock: products.stock,
                         unit: products.unit,
-                        image: products.image,
+                        image: products.image ,
                         createdAt: products.createdAt,
                         createdBy: products.createdBy,
                         updatedAt: products.updatedAt,
@@ -177,6 +177,7 @@ export const productRouter = createTRPCRouter({
                             vatType: input.vatType,
                             description: input.description,
                             unit: input.unit,
+                            image: getIdFromUrl(input.image),
                             createdBy: ctx.session.user.id,
                             updatedBy: ctx.session.user.id,
                         })
@@ -230,6 +231,7 @@ export const productRouter = createTRPCRouter({
                             vatType: input.vatType,
                             description: input.description,
                             unit: input.unit,
+                            image: getIdFromUrl(input.image),
                             updatedAt: sql`CURRENT_TIMESTAMP`,
                             updatedBy: ctx.session.user.id,
                         })
@@ -274,4 +276,16 @@ export const productRouter = createTRPCRouter({
             return units.map((str) => str.unit);
         });
     }),
+
+    generatePresignUrl: generatePresignedUrlProcedure((ctx) => ({
+        readAccessControl: {
+            rule: "userId",
+            userId: ctx.session?.user.id,
+        },
+        writeAccessControl: {
+            rule: "userId",
+            userId: ctx.session?.user.id,
+        },
+        isRequireAuth: true,
+    })),
 });
