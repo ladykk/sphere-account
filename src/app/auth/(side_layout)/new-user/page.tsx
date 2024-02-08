@@ -2,10 +2,6 @@
 import { Input } from "@/components/ui/input";
 import emailIcon from "@/assets/icon/email.svg";
 import lockKey from "@/assets/icon/padlock.png";
-import { Separator } from "@/components/ui/separator";
-import facebookLogo from "@/assets/image/facebookLogo.png";
-import googleLogo from "@/assets/image/googleLogo.png";
-import lineLogo from "@/assets/image/lineLogo.png";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,18 +20,23 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BlockInteraction } from "@/components/ui/spinner";
 import { SignInParams, useSignInMutation } from "@/hooks/auth";
+import { useEffect } from "react";
+import { sessions } from "@/db/schema/auth";
+import { useSession } from "next-auth/react";
+import { useEffectOnce } from "usehooks-ts";
 
-export default function RegisterPage() {
+export default function newUserPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const router = useRouter();
-  const form = useForm<RouterInputs["auth"]["register"]>({
+  const { data: session, status, update } = useSession();
+  
+  const form = useForm<RouterInputs["auth"]["updateAccount"]>({
     defaultValues: {
       email: "",
-      password: "",
       firstName: "",
       lastName: "",
-      confirmPassword: "",
+      image: "",
     },
   });
 
@@ -43,7 +44,7 @@ export default function RegisterPage() {
     callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
   }`;
 
-  const mutation = api.auth.register.useMutation({
+  const mutation = api.auth.updateAccount.useMutation({
     onSuccess: () => router.replace(loginPath),
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
@@ -51,19 +52,45 @@ export default function RegisterPage() {
 
   const signInMutation = useSignInMutation();
 
-  const handleLoginProvider = (input: SignInParams) => {
-    // CASE: Email & Password
-    if (input.type === "email-password") {
-      return;
-    } else {
-      signInMutation.mutate(input);
-      toast.loading("Redirecting to login provider...", {
-        duration: 1000 * 10,
-      });
-    }
+  const testUpdateClick = (input: RouterInputs["auth"]["updateAccount"]) => {
+    console.log("Test Update Click!! : " + input.email);
+    // router.replace(`/auth/account`);
   };
 
-  const onSubmit = async (input: RouterInputs["auth"]["register"]) => {
+  useEffectOnce(() => {
+    var firstName: string = "";
+    var lastName: string = "";
+    if (!session) {
+      console.log("No session");
+    } else {
+      if (session?.user.name) {
+        const position: number = session?.user.name?.search(" ");
+        firstName = session?.user.name?.substring(0, position);
+        lastName = session?.user.name?.substring(
+          position,
+          session?.user.name?.length
+        );
+        console.log(
+          "have session : " +
+            session?.user.email +
+            " : " +
+            firstName +
+            " : " +
+            lastName
+        );
+      }
+
+      form.reset({
+        email: String(session?.user.email),
+        firstName: firstName,
+        lastName: lastName,
+        image: "",
+      });
+    }
+  });
+  // useEffect(() => {});
+
+  const onSubmit = async (input: RouterInputs["auth"]["updateAccount"]) => {
     toast.promise(mutation.mutateAsync(input), {
       loading: "Creating account...",
       success: "Account created successfully!",
@@ -73,7 +100,9 @@ export default function RegisterPage() {
 
   return (
     <Form {...form}>
-      <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="w-full" onSubmit={form.handleSubmit(testUpdateClick)}>
+        {" "}
+        {/* test fix */}
         <BlockInteraction isBlock={mutation.isPending} />
         <h1 className="mb-4">Complete Information </h1>
         <h5 className="text-muted-foreground mb-4">
@@ -121,10 +150,9 @@ export default function RegisterPage() {
                 <FormMessage />
               </FormItem>
             )}
-          /> 
+          />
         </div>
         <Button className="w-full mt-8">Update</Button>
-
       </form>
     </Form>
   );
