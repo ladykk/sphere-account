@@ -38,19 +38,14 @@ export const AvatarMenu = () => {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link href="/auth/account">
-          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem>Manage Account</DropdownMenuItem>
         </Link>
-
-        <DropdownMenuItem>Manage Account</DropdownMenuItem>
-        <DropdownMenuItem>Dropdown</DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Language</DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
               <DropdownMenuItem>Thai</DropdownMenuItem>
               <DropdownMenuItem>Engilsh</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>More...</DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
