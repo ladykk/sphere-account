@@ -15,7 +15,7 @@ export const customers = pgTable("customer", {
   branchName: text("branch_name"),
   businessType: text("business_type"),
   email: text("email"),
-  telelphoneNumber: text("telelphone_number"),
+  telephoneNumber: text("telephone_number"),
   phoneNumber: text("phone_number"),
   faxNumber: text("fax_number"),
   website: text("website"),
