@@ -78,8 +78,8 @@ export default function ProductDetailPage() {
   });
 
   const mutation = useMutation<void, Error, FormInput>({
-    mutationFn: async (input)=> {
-      let{files, ...data} = input;
+    mutationFn: async (input) => {
+      let { files, ...data } = input;
 
       //Upload image
       if (files.image) {
@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
       });
 
       setIsEdit(false);
-      setTimeout(() => query.refetch(),1000);
+      setTimeout(() => query.refetch(), 1000);
     },
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
             ]}
           />
         </div>
-        {query.isLoadingError ? (
+        {query.isLoadingError && !isCreate ? (
           <>
             <X className="text-destructive mx-auto w-24 h-24" />
             <h2 className="text-center text-destructive my-5">
@@ -177,9 +177,9 @@ export default function ProductDetailPage() {
                       <AvatarInput {...field}>
                         {(fileUrl) => (
                           <Avatar className="w-60 h-60 rounded-md border shadow border-input cursor-pointer hover:opacity-70 transition-opacity">
-                            <AvatarImage 
-                            src={fileUrl ?? query.data?.image ?? ""}>
-                            </AvatarImage>
+                            <AvatarImage
+                              src={fileUrl ?? query.data?.image ?? ""}
+                            ></AvatarImage>
                             <AvatarFallback className="text-3xl rounded-md">
                               {getNamePrefix(query.data?.name)}
                             </AvatarFallback>
@@ -187,14 +187,13 @@ export default function ProductDetailPage() {
                         )}
                       </AvatarInput>
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                     {!field.value && (
                       <p className="w-full text-center text-xs mt-2 text-muted-foreground">
                         Click to upload
                       </p>
                     )}
                   </div>
-
                 )}
               />
 
@@ -247,7 +246,7 @@ export default function ProductDetailPage() {
                             <SelectItem value="service">Service</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage/>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -324,7 +323,7 @@ export default function ProductDetailPage() {
                         disabled={field.disabled}
                       ></ComboBox>
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -385,7 +384,7 @@ export default function ProductDetailPage() {
                 <Input disabled />
               </FormItem>
             </div>
-            <div className="flex justify-end items-center gap-5">
+            <div className="flex justify-end items-center gap-3">
               {isCreate ? (
                 <Button type="submit" disabled={!form.formState.isDirty}>
                   Create
@@ -394,7 +393,11 @@ export default function ProductDetailPage() {
                 <>
                   {isEdit ? (
                     <>
-                      <Button type="button" onClick={() => setIsEdit(false)}>
+                      <Button
+                        type="button"
+                        onClick={() => setIsEdit(false)}
+                        variant="destructive"
+                      >
                         Cancel
                       </Button>
                       <Button type="submit" disabled={!form.formState.isDirty}>

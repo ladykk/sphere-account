@@ -196,7 +196,7 @@ export default function CustomerDetailPage() {
             )}
           </div>
         </div>
-        {query.isLoadingError ? (
+        {query.isLoadingError && !isCreate ? (
           <>
             <X className="text-destructive mx-auto w-24 h-24" />
             <h2 className="text-center text-destructive my-5">
@@ -499,7 +499,7 @@ export default function CustomerDetailPage() {
                             <p className=" text-orange-500 font-semibold">
                               Account {index + 1}
                             </p>
-                            {isEdit && (
+                            {(isEdit || isCreate) && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
@@ -616,7 +616,7 @@ export default function CustomerDetailPage() {
                           </div>
                         </div>
                       ))}
-                      {isEdit && (
+                      {(isEdit || isCreate) && (
                         <Button
                           variant="link"
                           className=" text-orange-500 justify-start p-0"
@@ -653,7 +653,7 @@ export default function CustomerDetailPage() {
                             <p className="text-orange-500 font-semibold">
                               Contact Person {index + 1}
                             </p>
-                            {isEdit && (
+                            {(isEdit || isCreate) && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
@@ -751,7 +751,7 @@ export default function CustomerDetailPage() {
                           </div>
                         </div>
                       ))}
-                      {isEdit && (
+                      {(isEdit || isCreate) && (
                         <Button
                           variant="link"
                           className=" text-orange-500 justify-start p-0"

@@ -97,7 +97,7 @@ export default function PtojectDetailPage() {
             ]}
           />
         </div>
-        {query.isLoadingError ? (
+        {query.isLoadingError && !isCreate ? (
           <>
             <X className="text-destructive mx-auto w-24 h-24" />
             <h2 className="text-center text-destructive my-5">
@@ -150,7 +150,7 @@ export default function PtojectDetailPage() {
                 )}
               />
             </div>
-            <div className="flex justify-end items-center gap-5">
+            <div className="flex justify-end items-center gap-3">
               {isCreate ? (
                 <Button type="submit" disabled={!form.formState.isDirty}>
                   Create
@@ -159,7 +159,11 @@ export default function PtojectDetailPage() {
                 <>
                   {isEdit ? (
                     <>
-                      <Button type="button" onClick={() => setIsEdit(false)}>
+                      <Button
+                        type="button"
+                        onClick={() => setIsEdit(false)}
+                        variant="destructive"
+                      >
                         Cancel
                       </Button>
                       <Button type="submit" disabled={!form.formState.isDirty}>

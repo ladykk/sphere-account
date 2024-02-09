@@ -143,7 +143,7 @@ export default function EmployeeDetailPage() {
             ]}
           />
         </div>
-        {query.isLoadingError ? (
+        {query.isLoadingError && !isCreate ? (
           <>
             <X className="text-destructive mx-auto w-24 h-24" />
             <h2 className="text-center text-destructive my-5">
