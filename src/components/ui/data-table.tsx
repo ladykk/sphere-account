@@ -28,13 +28,13 @@ import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns?: ColumnDef<TData, TValue>[];
-  data: TData[];
+  data?: TData[];
   className?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns = [],
-  data,
+  data = [],
   className,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
@@ -47,11 +47,14 @@ export function DataTable<TData, TValue>({
     <div className={cn("rounded-md border bg-background", className)}>
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+          {table.getHeaderGroups().map((headerGroup, index) => (
+            <TableRow key={index}>
+              {headerGroup.headers.map((header, index) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={index}
+                    className="first:rounded-tl-md last:rounded-tr-md"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -66,13 +69,13 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, index) => (
               <TableRow
-                key={row.id}
+                key={index}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={index}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -123,8 +126,8 @@ export function DataTablePagination(props: DataTablePaginationProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {[10, 20, 30, 40, 50].map((itemsPerPage) => (
-              <SelectItem key={itemsPerPage} value={itemsPerPage.toString()}>
+            {[10, 20, 30, 40, 50].map((itemsPerPage, index) => (
+              <SelectItem key={index} value={itemsPerPage.toString()}>
                 {itemsPerPage}
               </SelectItem>
             ))}

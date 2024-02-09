@@ -45,3 +45,39 @@ export function DashboardFormContainer(
     </form>
   );
 }
+
+export function DashboardListContainer(
+  props: JSX.IntrinsicAttributes &
+    ClassAttributes<HTMLDivElement> &
+    HTMLAttributes<HTMLDivElement>
+) {
+  return (
+    <div
+      {...props}
+      className={cn(
+        "px-5 py-10 max-w-screen-3xl mx-auto w-full space-y-6",
+        props.className
+      )}
+    >
+      {props.children}
+    </div>
+  );
+}
+
+export function DashboardFormWrapper(
+  props: JSX.IntrinsicAttributes &
+    ClassAttributes<HTMLFormElement> &
+    FormHTMLAttributes<HTMLFormElement>
+) {
+  return (
+    <form
+      {...props}
+      className={cn(
+        "px-5 py-10 max-w-screen-3xl mx-auto w-full space-y-6",
+        props.className
+      )}
+    >
+      {props.children}
+    </form>
+  );
+}
