@@ -18,9 +18,9 @@ export default function Layout(props: Props) {
   const isMounted = useIsMounted();
 
   // If session exists, redirect to callbackUrl
-  useEffect(() => {
-    if (session?.user) router.replace(callbackUrl);
-  }, [session]);
+  // useEffect(() => {
+  //   if (session?.user) router.replace(callbackUrl);
+  // }, [session]);
 
   return (
     <SideAuthLayout loading={!isMounted || status === "loading"}>

@@ -27,7 +27,7 @@ import { useEffectOnce } from "usehooks-ts";
 
 export default function newUserPage() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
   const { data: session, status, update } = useSession();
   
@@ -40,12 +40,10 @@ export default function newUserPage() {
     },
   });
 
-  const loginPath = `/auth/login${
-    callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
-  }`;
+ 
 
   const mutation = api.auth.updateAccount.useMutation({
-    onSuccess: () => router.replace(loginPath),
+    onSuccess: () => router.replace(callbackUrl),
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
@@ -77,14 +75,17 @@ export default function newUserPage() {
             firstName +
             " : " +
             lastName
+            +
+            " : " +
+            session.user.image
         );
       }
 
       form.reset({
-        email: String(session?.user.email),
+        email: session?.user.email ?? "",
         firstName: firstName,
         lastName: lastName,
-        image: "",
+        image: session.user.image ?? "",
       });
     }
   });
@@ -92,15 +93,15 @@ export default function newUserPage() {
 
   const onSubmit = async (input: RouterInputs["auth"]["updateAccount"]) => {
     toast.promise(mutation.mutateAsync(input), {
-      loading: "Creating account...",
-      success: "Account created successfully!",
-      error: "Failed to create account",
+      loading: "Updating account...",
+      success: "Account updated successfully!",
+      error: "Failed to update account",
     });
   };
 
   return (
     <Form {...form}>
-      <form className="w-full" onSubmit={form.handleSubmit(testUpdateClick)}>
+      <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
         {" "}
         {/* test fix */}
         <BlockInteraction isBlock={mutation.isPending} />
