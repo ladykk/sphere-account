@@ -1,5 +1,4 @@
 "use client";
-import { CheckboxDropdown } from "@/components/filters/dropdown";
 import { SearchKeywordInput } from "@/components/filters/search-keyword";
 import { DashboardListContainer } from "@/components/layouts/dashboard";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,10 +12,12 @@ import Image from "next/image";
 
 // Assets
 import plus from "@/assets/icon/plus.svg";
+import { Edit } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function ProjectsListPage() {
+export default function CustomersListPage() {
   const searchParams = useSearchParams();
-  const query = api.project.getPaginateProjects.useQuery({
+  const query = api.customer.getPaginateCustomers.useQuery({
     page: Number(searchParams.get("page")) || 1,
     itemsPerPage: Number(searchParams.get("itemsPerPage")) || 10,
     customerId: searchParams.get("customerId") || undefined,
@@ -25,7 +26,7 @@ export default function ProjectsListPage() {
   return (
     <DashboardListContainer>
       <div className="flex items-baseline gap-3">
-        <h1>Customer</h1>
+        <h1>Customers</h1>
         {query.isLoading && <Spinner />}
       </div>
       <div className="flex items-center justify-between">
@@ -40,27 +41,38 @@ export default function ProjectsListPage() {
       <DataTable
         columns={[
           {
-            accessorKey: "name",
+            accessorKey: "taxId",
             header: "Tax ID",
           },
           {
-            accessorKey: "customerId",
-            header: "Customer Name",
-            cell: ({ row }) => "TODO: Customer Display",
+            accessorKey: "name",
+            header: "Name",
           },
           {
-            accessorKey: "detail",
+            accessorKey: "address",
             header: "Address",
           },
+
           {
-            id: "actions",
-            header: "Contact",
-            cell: ({ row }) => "TODO: Action Buttons",
+            id: "contacts",
+            header: "Contacts",
+            cell: ({ row }) => <p>TODO: Contact Display</p>,
           },
           {
             id: "actions",
             header: "Actions",
-            cell: ({ row }) => "TODO: Action Buttons",
+            cell: ({ row }) => (
+              <div className="space-x-3">
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "icon" })
+                  )}
+                  href={`/app/customers/${row.original.id}`}
+                >
+                  <Edit />
+                </Link>
+              </div>
+            ),
           },
         ]}
         data={query.data?.list}

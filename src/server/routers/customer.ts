@@ -12,7 +12,6 @@ import { Contact } from "lucide-react";
 import { Result } from "postcss";
 
 export const customerRouter = createTRPCRouter({
-  //Get Customer
   getCustomer: protectedProcedure
     .input(z.string().uuid("Invalid uuid"))
     .output(Customer.schemas.base)
@@ -80,6 +79,7 @@ export const customerRouter = createTRPCRouter({
             accountNumber: customerBankAccounts.accountNumber,
             bankBranch: customerBankAccounts.bankBranch,
             accountType: customerBankAccounts.accountType,
+            creditDate: customerBankAccounts.creditDate,
             createdAt: customerBankAccounts.createdAt,
             createdBy: customerBankAccounts.createdBy,
             updatedAt: customerBankAccounts.updatedAt,
@@ -94,8 +94,6 @@ export const customerRouter = createTRPCRouter({
         };
       });
     }),
-
-  //Get Customers
   getCustomers: protectedProcedure
     .output(z.array(Customer.schemas.base))
     .query(async ({ ctx }) => {
@@ -159,6 +157,7 @@ export const customerRouter = createTRPCRouter({
             accountNumber: customerBankAccounts.accountNumber,
             bankBranch: customerBankAccounts.bankBranch,
             accountType: customerBankAccounts.accountType,
+            creditDate: customerBankAccounts.creditDate,
             createdAt: customerBankAccounts.createdAt,
             createdBy: customerBankAccounts.createdBy,
             updatedAt: customerBankAccounts.updatedAt,
@@ -189,7 +188,6 @@ export const customerRouter = createTRPCRouter({
         });
       });
     }),
-
   getPaginateCustomers: protectedProcedure
     .input(Customer.schemas.paginateInput)
     .output(Customer.schemas.paginateOutput)
@@ -273,6 +271,7 @@ export const customerRouter = createTRPCRouter({
             accountNumber: customerBankAccounts.accountNumber,
             bankBranch: customerBankAccounts.bankBranch,
             accountType: customerBankAccounts.accountType,
+            creditDate: customerBankAccounts.creditDate,
             createdAt: customerBankAccounts.createdAt,
             createdBy: customerBankAccounts.createdBy,
             updatedAt: customerBankAccounts.updatedAt,
@@ -310,147 +309,9 @@ export const customerRouter = createTRPCRouter({
         };
       });
     }),
-
-  //Get Customer bank account
-  getCustomerBankAccount: protectedProcedure
-    .input(z.string().uuid("Invalid uuid"))
-    .output(baseBankAccount)
-    .query(async ({ ctx, input }) => {
-      return ctx.db.transaction(async (trx) => {
-        const result = await trx
-          .select({
-            id: customerBankAccounts.id,
-            customerId: customerBankAccounts.customerId,
-            bank: customerBankAccounts.bank,
-            accountNumber: customerBankAccounts.accountNumber,
-            bankBranch: customerBankAccounts.bankBranch,
-            accountType: customerBankAccounts.accountType,
-            createdAt: customerBankAccounts.createdAt,
-            createdBy: customerBankAccounts.createdBy,
-            updatedAt: customerBankAccounts.updatedAt,
-            updatedBy: customerBankAccounts.updatedBy,
-          })
-          .from(customerBankAccounts)
-          .where(eq(customerBankAccounts.id, input))
-          .limit(1);
-        if (result.length > 0) {
-          return result[0];
-        } else {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to get customer",
-          });
-        }
-      });
-    }),
-
-  //Get Customer contact
-  getCustomerContact: protectedProcedure
-    .input(z.string().uuid("Invalid uuid"))
-    .output(Customer.schemas.getCustomerContactInput)
-    .query(async ({ ctx, input }) => {
-      return ctx.db.transaction(async (trx) => {
-        const result = await trx
-          .select({
-            id: customerContacts.id,
-            customerId: customerContacts.customerId,
-            contactName: customerContacts.contactName,
-            email: customerContacts.email,
-            phoneNumber: customerContacts.phoneNumber,
-            createdAt: customerContacts.createdAt,
-            createdBy: customerContacts.createdBy,
-            updatedAt: customerContacts.updatedAt,
-            updatedBy: customerContacts.updatedBy,
-          })
-          .from(customerContacts)
-          .where(eq(customerContacts.id, input))
-          .limit(1);
-        if (result.length > 0) {
-          return result[0];
-        } else {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to get customer",
-          });
-        }
-      });
-    }),
-
-  //Create Customer contact
-  createCustomerContact: protectedProcedure
-    .input(Customer.schemas.createCustomerContactInput)
-    .output(Customer.schemas.createCustomerContactOutput)
-    .mutation(async ({ input, ctx }) => {
-      return await ctx.db.transaction(async (trx) => {
-        //Create Customer contact
-        const createResult = await trx
-          .insert(customerContacts)
-          .values({
-            id: crypto.randomUUID(),
-            customerId: input.customerId,
-            contactName: input.contactName,
-            email: input.email,
-            phoneNumber: input.phoneNumber,
-            createdAt: new Date(Date.now()),
-            createdBy: input.createdBy,
-            updatedAt: new Date(Date.now()),
-            updatedBy: input.updatedBy,
-          })
-          .returning({
-            id: customerContacts.id,
-          });
-
-        // Throw error if createResult is empty
-        if (createResult.length === 0)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create user",
-          });
-
-        return { id: createResult[0].id };
-      });
-    }),
-
-  //Create Customer Bank Accounts
-  createCustomerBankAccounts: protectedProcedure
-    .input(Customer.schemas.createCustomerBankAccountsInput)
-    .output(Customer.schemas.createCustomerBankAccountsOutput)
-    .mutation(async ({ input, ctx }) => {
-      return await ctx.db.transaction(async (trx) => {
-        //Create Bank Accounts
-        const createResult = await trx
-          .insert(customerBankAccounts)
-          .values({
-            id: crypto.randomUUID(),
-            customerId: input.customerId,
-            bank: input.bank,
-            accountNumber: input.accountNumber,
-            bankBranch: input.bankBranch,
-            accountType: input.accountType,
-            createdAt: new Date(Date.now()),
-            createdBy: input.createdBy,
-            updatedAt: new Date(Date.now()),
-            updatedBy: input.updatedBy,
-          })
-          .returning({
-            id: customerBankAccounts.id,
-          });
-
-        // Throw error if createResult is empty
-        if (createResult.length === 0)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create user",
-          });
-
-        return { id: createResult[0].id };
-      });
-    }),
-
-  //CreateOrUpdate Customer
-  createOrCustomer: protectedProcedure
+  createOrUpdateCustomer: protectedProcedure
     .input(Customer.schemas.formInput)
-    .output(Customer.schemas.createCustomerOutputSchema)
+    .output(Customer.schemas.formOutput)
     .mutation(async ({ input, ctx }) => {
       return await ctx.db.transaction(async (trx) => {
         // CASE: Create
@@ -488,42 +349,36 @@ export const customerRouter = createTRPCRouter({
               message: "Failed to create customer",
             });
 
+          // Insert Customer Contact
           if (input.contacts.length > 0) {
-            const createCustomerContact = await trx
-              .insert(customerContacts)
-              .values(
-                input.contacts.map((Contact) => ({
-                  id: crypto.randomUUID(),
-                  customerId: createResult[0].id,
-                  contactName: Contact.contactName,
-                  email: Contact.email,
-                  phoneNumber: Contact.phoneNumber,
-                }))
-              )
-              .returning({
-                id: customerContacts.id,
-              });
+            await trx.insert(customerContacts).values(
+              input.contacts.map((contact) => ({
+                id: crypto.randomUUID(),
+                customerId: createResult[0].id,
+                contactName: contact.contactName,
+                email: contact.email,
+                phoneNumber: contact.phoneNumber,
+              }))
+            );
           }
 
-          if (input.bankAccount.length > 0) {
-            const createCustomerBankAccount = await trx
-              .insert(customerBankAccounts)
-              .values(
-                input.bankAccount.map((BankAccount) => ({
-                  id: crypto.randomUUID(),
-                  customerId: createResult[0].id,
-                  bank: BankAccount.bank,
-                  accountNumber: BankAccount.accountNumber,
-                  bankBranch: BankAccount.bankBranch,
-                  accountType: BankAccount.accountType,
-                }))
-              )
-              .returning({
-                id: customerBankAccounts.id,
-              });
+          // Insert Customer Bank Account
+          if (input.bankAccounts.length > 0) {
+            await trx.insert(customerBankAccounts).values(
+              input.bankAccounts.map((BankAccount) => ({
+                id: crypto.randomUUID(),
+                customerId: createResult[0].id,
+                bank: BankAccount.bank,
+                accountNumber: BankAccount.accountNumber,
+                bankBranch: BankAccount.bankBranch,
+                accountType: BankAccount.accountType,
+                creditDate: BankAccount.creditDate,
+              }))
+            );
           }
           return createResult[0].id;
-        } // CASE: Update
+        }
+        // CASE: Update
         else {
           // Find Customer
           const customer = await trx
@@ -538,9 +393,11 @@ export const customerRouter = createTRPCRouter({
               )
             )
             .limit(1);
+
+          // Throw error if customer is empty
           if (customer.length === 0) {
             throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
+              code: "NOT_FOUND",
               message: "Customer not found",
             });
           }
@@ -570,37 +427,37 @@ export const customerRouter = createTRPCRouter({
             .where(eq(customers.id, id));
 
           const currentContactIds: string[] = [];
-          //update contact
+          // Upsert Customer Contact
           if (input.contacts.length > 0) {
-            input.contacts.forEach(async (Contact) => {
-              const currentId = Contact.id ?? crypto.randomUUID();
+            input.contacts.forEach(async (contact) => {
+              const currentId = contact.id ?? crypto.randomUUID();
               await trx
                 .insert(customerContacts)
                 .values({
                   id: currentId,
                   customerId: id,
-                  contactName: Contact.contactName,
-                  email: Contact.email,
-                  phoneNumber: Contact.phoneNumber,
+                  contactName: contact.contactName,
+                  email: contact.email,
+                  phoneNumber: contact.phoneNumber,
                   createdBy: ctx.session.user.id,
-                  createdAt: new Date(Date.now()),
+                  updatedBy: ctx.session.user.id,
                 })
                 .onConflictDoUpdate({
                   target: customerContacts.id,
                   set: {
                     id: currentId,
                     customerId: id,
-                    contactName: Contact.contactName,
-                    email: Contact.email,
-                    phoneNumber: Contact.phoneNumber,
+                    contactName: contact.contactName,
+                    email: contact.email,
+                    phoneNumber: contact.phoneNumber,
                     updatedBy: ctx.session.user.id,
-                    updatedAt: new Date(Date.now()),
+                    updatedAt: new Date(),
                   },
                 });
               currentContactIds.push(currentId);
             });
           }
-          //Delete Customer Contact
+          // Delete Customer Contact
           await trx
             .delete(customerContacts)
             .where(
@@ -611,9 +468,9 @@ export const customerRouter = createTRPCRouter({
             );
 
           const currentBankAccountIds: string[] = [];
-          //update bankAccount
-          if (input.bankAccount.length > 0) {
-            input.bankAccount.forEach(async (BankAccount) => {
+          // Upsert Customer BankAccount
+          if (input.bankAccounts.length > 0) {
+            input.bankAccounts.forEach(async (BankAccount) => {
               const currentId = BankAccount.id ?? crypto.randomUUID();
               await trx
                 .insert(customerBankAccounts)
@@ -624,6 +481,7 @@ export const customerRouter = createTRPCRouter({
                   accountNumber: BankAccount.accountNumber,
                   bankBranch: BankAccount.bankBranch,
                   accountType: BankAccount.accountType,
+                  creditDate: BankAccount.creditDate,
                   createdBy: ctx.session.user.id,
                   createdAt: new Date(Date.now()),
                 })

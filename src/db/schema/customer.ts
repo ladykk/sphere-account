@@ -74,6 +74,7 @@ export const customerBankAccounts = pgTable("customer_bank_accounts", {
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  creditDate: text("credit_date").notNull(),
   createdBy: text("created_by").references(() => users.id, {
     onDelete: "set null",
   }),
