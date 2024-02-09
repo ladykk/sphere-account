@@ -83,6 +83,7 @@ export default function CustomerDetailPage() {
     onSuccess: (id, variables) => {
       router.replace(`/app/customers/${id}`);
       form.reset(variables);
+      setIsEdit(false);
     },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
@@ -122,6 +123,7 @@ export default function CustomerDetailPage() {
         bankBranch: bankAccount.bankBranch,
         accountNumber: bankAccount.accountNumber,
         accountType: bankAccount.accountType,
+        creditDate: bankAccount.creditDate,
       })),
     });
   }, [query.data]);
@@ -497,49 +499,53 @@ export default function CustomerDetailPage() {
                             <p className=" text-orange-500 font-semibold">
                               Account {index + 1}
                             </p>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="link"
-                                  className="text-red-500 gap-1.5"
-                                  type="button"
-                                >
-                                  <p>Remove</p>
-                                  <Image
-                                    src={TrashRed}
-                                    alt={`remove bank account ${index + 1}`}
-                                    className=" w-5 h-5"
-                                  ></Image>
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you sure to remove this bank account?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Account {index + 1} will be removed from the
-                                    customer's bank account list.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogAction
-                                    className={buttonVariants({
-                                      variant: "destructive",
-                                    })}
-                                    onClick={() => {
-                                      const currents = field.value ?? [];
-                                      field.onChange(
-                                        currents.filter((_, i) => i !== index)
-                                      );
-                                    }}
+                            {isEdit && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="link"
+                                    className="text-red-500 gap-1.5"
+                                    type="button"
                                   >
-                                    Remove
-                                  </AlertDialogAction>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                    <p>Remove</p>
+                                    <Image
+                                      src={TrashRed}
+                                      alt={`remove bank account ${index + 1}`}
+                                      className=" w-5 h-5"
+                                    ></Image>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Are you sure to remove this bank account?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Account {index + 1} will be removed from
+                                      the customer's bank account list.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogAction
+                                      className={buttonVariants({
+                                        variant: "destructive",
+                                      })}
+                                      onClick={() => {
+                                        const currents = field.value ?? [];
+                                        field.onChange(
+                                          currents.filter((_, i) => i !== index)
+                                        );
+                                      }}
+                                    >
+                                      Remove
+                                    </AlertDialogAction>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
                           </div>
                           <div className="grid grid-cols-3 gap-y-3 gap-x-5">
                             <FormField
@@ -610,17 +616,19 @@ export default function CustomerDetailPage() {
                           </div>
                         </div>
                       ))}
-                      <Button
-                        variant="link"
-                        className=" text-orange-500 justify-start p-0"
-                        type="button"
-                        onClick={() => {
-                          const currents = field.value ?? [];
-                          field.onChange([...currents, {}]);
-                        }}
-                      >
-                        + Add Bank Account
-                      </Button>
+                      {isEdit && (
+                        <Button
+                          variant="link"
+                          className=" text-orange-500 justify-start p-0"
+                          type="button"
+                          onClick={() => {
+                            const currents = field.value ?? [];
+                            field.onChange([...currents, {}]);
+                          }}
+                        >
+                          + Add Bank Account
+                        </Button>
+                      )}
                     </div>
                   )}
                 />
@@ -645,49 +653,54 @@ export default function CustomerDetailPage() {
                             <p className="text-orange-500 font-semibold">
                               Contact Person {index + 1}
                             </p>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="link"
-                                  className="text-red-500 gap-1.5"
-                                  type="button"
-                                >
-                                  <p>Remove</p>
-                                  <Image
-                                    src={TrashRed}
-                                    alt={`remove contact person ${index + 1}`}
-                                    className=" w-5 h-5"
-                                  ></Image>
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you sure to remove this contact person?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Account {index + 1} will be removed from the
-                                    customer's contact person list.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogAction
-                                    className={buttonVariants({
-                                      variant: "destructive",
-                                    })}
-                                    onClick={() => {
-                                      const currents = field.value ?? [];
-                                      field.onChange(
-                                        currents.filter((_, i) => i !== index)
-                                      );
-                                    }}
+                            {isEdit && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="link"
+                                    className="text-red-500 gap-1.5"
+                                    type="button"
                                   >
-                                    Remove
-                                  </AlertDialogAction>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                    <p>Remove</p>
+                                    <Image
+                                      src={TrashRed}
+                                      alt={`remove contact person ${index + 1}`}
+                                      className=" w-5 h-5"
+                                    ></Image>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Are you sure to remove this contact
+                                      person?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Account {index + 1} will be removed from
+                                      the customer's contact person list.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogAction
+                                      className={buttonVariants({
+                                        variant: "destructive",
+                                      })}
+                                      onClick={() => {
+                                        const currents = field.value ?? [];
+                                        field.onChange(
+                                          currents.filter((_, i) => i !== index)
+                                        );
+                                      }}
+                                    >
+                                      Remove
+                                    </AlertDialogAction>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
                           </div>
                           <div className="grid grid-cols-3 gap-y-3 gap-x-5">
                             <FormField
@@ -738,17 +751,19 @@ export default function CustomerDetailPage() {
                           </div>
                         </div>
                       ))}
-                      <Button
-                        variant="link"
-                        className=" text-orange-500 justify-start p-0"
-                        type="button"
-                        onClick={() => {
-                          const currents = field.value ?? [];
-                          field.onChange([...currents, {}]);
-                        }}
-                      >
-                        + Add Contact Person
-                      </Button>
+                      {isEdit && (
+                        <Button
+                          variant="link"
+                          className=" text-orange-500 justify-start p-0"
+                          type="button"
+                          onClick={() => {
+                            const currents = field.value ?? [];
+                            field.onChange([...currents, {}]);
+                          }}
+                        >
+                          + Add Contact Person
+                        </Button>
+                      )}
                     </div>
                   )}
                 />

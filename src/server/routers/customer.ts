@@ -458,30 +458,31 @@ export const customerRouter = createTRPCRouter({
             });
           }
           // Delete Customer Contact
-          await trx
-            .delete(customerContacts)
-            .where(
-              and(
-                notInArray(customerContacts.id, currentContactIds),
-                eq(customerContacts.customerId, id)
-              )
-            );
+          if (currentContactIds.length > 0)
+            await trx
+              .delete(customerContacts)
+              .where(
+                and(
+                  notInArray(customerContacts.id, currentContactIds),
+                  eq(customerContacts.customerId, id)
+                )
+              );
 
           const currentBankAccountIds: string[] = [];
           // Upsert Customer BankAccount
           if (input.bankAccounts.length > 0) {
-            input.bankAccounts.forEach(async (BankAccount) => {
-              const currentId = BankAccount.id ?? crypto.randomUUID();
+            input.bankAccounts.forEach(async (bankAccount) => {
+              const currentId = bankAccount.id ?? crypto.randomUUID();
               await trx
                 .insert(customerBankAccounts)
                 .values({
                   id: currentId,
-                  customerId: BankAccount.customerId,
-                  bank: BankAccount.bank,
-                  accountNumber: BankAccount.accountNumber,
-                  bankBranch: BankAccount.bankBranch,
-                  accountType: BankAccount.accountType,
-                  creditDate: BankAccount.creditDate,
+                  customerId: id,
+                  bank: bankAccount.bank,
+                  accountNumber: bankAccount.accountNumber,
+                  bankBranch: bankAccount.bankBranch,
+                  accountType: bankAccount.accountType,
+                  creditDate: bankAccount.creditDate,
                   createdBy: ctx.session.user.id,
                   createdAt: new Date(Date.now()),
                 })
@@ -489,11 +490,12 @@ export const customerRouter = createTRPCRouter({
                   target: customerBankAccounts.id,
                   set: {
                     id: currentId,
-                    customerId: BankAccount.customerId,
-                    bank: BankAccount.bank,
-                    accountNumber: BankAccount.accountNumber,
-                    bankBranch: BankAccount.bankBranch,
-                    accountType: BankAccount.accountType,
+                    customerId: id,
+                    bank: bankAccount.bank,
+                    accountNumber: bankAccount.accountNumber,
+                    bankBranch: bankAccount.bankBranch,
+                    accountType: bankAccount.accountType,
+                    creditDate: bankAccount.creditDate,
                     updatedBy: ctx.session.user.id,
                     updatedAt: new Date(Date.now()),
                   },
@@ -502,14 +504,15 @@ export const customerRouter = createTRPCRouter({
             });
           }
           //Delete Customer BankAccount
-          await trx
-            .delete(customerBankAccounts)
-            .where(
-              and(
-                notInArray(customerBankAccounts.id, currentBankAccountIds),
-                eq(customerBankAccounts.customerId, id)
-              )
-            );
+          if (currentBankAccountIds.length > 0)
+            await trx
+              .delete(customerBankAccounts)
+              .where(
+                and(
+                  notInArray(customerBankAccounts.id, currentBankAccountIds),
+                  eq(customerBankAccounts.customerId, id)
+                )
+              );
 
           return id;
         }
