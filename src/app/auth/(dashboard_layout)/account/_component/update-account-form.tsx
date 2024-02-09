@@ -74,6 +74,7 @@ export function UpdateAccountForm() {
       // Update account
       await updateAccountMutation.mutateAsync(data);
       await update();
+      setTimeout(() => "", 1000);
     },
   });
 
