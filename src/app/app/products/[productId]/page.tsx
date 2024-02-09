@@ -1,6 +1,8 @@
 "use client";
 
+import { AvatarInput } from "@/components/auth/avatar-input";
 import { DashboardFormContainer } from "@/components/layouts/dashboard";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { ComboBox } from "@/components/ui/combo-box";
@@ -23,6 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { getNamePrefix } from "@/lib/auth";
+import { fileToPresignedUrlInput, uploadFile } from "@/lib/file";
 import { handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { RouterInputs } from "@/trpc/shared";
@@ -33,7 +37,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-type FormInput = RouterInputs["product"]["createOrUpdateProduct"];
+type FormInput = RouterInputs["product"]["createOrUpdateProduct"] & {
+  files: {
+    image: File | null;
+  };
+};
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -57,6 +65,7 @@ export default function ProductDetailPage() {
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
   });
 
+  const presignImageMutation = api.product.generatePresignUrl.useMutation();
   const createOrUpdateMutation = api.product.createOrUpdateProduct.useMutation({
     onSuccess: (id, variables) => {
       router.replace(`/app/products/${id}`);
@@ -69,19 +78,32 @@ export default function ProductDetailPage() {
   });
 
   const mutation = useMutation<void, Error, FormInput>({
-    mutationFn: async (input) => {
-      let { ...data } = input;
+    mutationFn: async (input)=> {
+      let{files, ...data} = input;
+
+      //Upload image
+      if (files.image) {
+        const presignedUrl = await presignImageMutation.mutateAsync([
+          fileToPresignedUrlInput(files.image),
+        ]);
+
+        data.image = (
+          await uploadFile(presignedUrl[0], files.image).catch((err) => {
+            form.setError("files.image", {
+              type: "manual",
+              message: err.message,
+            });
+            throw err;
+          })
+        ).url;
+      }
 
       await createOrUpdateMutation.mutateAsync({
         ...data,
       });
 
       setIsEdit(false);
-      setTimeout(() => {
-        query.refetch();
-        catagoriesQuery.refetch();
-        unitsQuery.refetch();
-      }, 1000);
+      setTimeout(() => query.refetch(),1000);
     },
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
@@ -101,6 +123,7 @@ export default function ProductDetailPage() {
       vatType: query.data.vatType,
       description: query.data.description,
       unit: query.data.unit,
+      image: query.data.image,
     });
   }, [query.data]);
 
@@ -144,12 +167,37 @@ export default function ProductDetailPage() {
         ) : (
           <>
             <div className="flex gap-y-3 gap-x-5 mb-3">
-              <FormItem className=" min-w-72">
-                <Label>Product Picture</Label>
-                <div className=" aspect-square border">
-                  <p>TODO: Image Upload</p>
-                </div>
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="files.image"
+                render={({ field }) => (
+                  <div>
+                    <FormLabel> Product Picture </FormLabel>
+                    <FormControl>
+                      <AvatarInput {...field}>
+                        {(fileUrl) => (
+                          <Avatar className="w-60 h-60 rounded-md border shadow border-input cursor-pointer hover:opacity-70 transition-opacity">
+                            <AvatarImage 
+                            src={fileUrl ?? query.data?.image ?? ""}>
+                            </AvatarImage>
+                            <AvatarFallback className="text-3xl rounded-md">
+                              {getNamePrefix(query.data?.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </AvatarInput>
+                    </FormControl>
+                    <FormMessage/>
+                    {!field.value && (
+                      <p className="w-full text-center text-xs mt-2 text-muted-foreground">
+                        Click to upload
+                      </p>
+                    )}
+                  </div>
+
+                )}
+              />
+
               <div className="flex flex-col gap-y-3">
                 <div className="grid grid-cols-5 gap-x-5">
                   <FormField
@@ -199,6 +247,7 @@ export default function ProductDetailPage() {
                             <SelectItem value="service">Service</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage/>
                       </FormItem>
                     )}
                   />
@@ -275,6 +324,7 @@ export default function ProductDetailPage() {
                         disabled={field.disabled}
                       ></ComboBox>
                     </FormControl>
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
