@@ -69,6 +69,7 @@ export const customerContactInput = baseContact
 const customerAccountInput = baseBankAccount
   .omit({
     id: true,
+    customerId: true,
     createdAt: true,
     createdBy: true,
     updatedAt: true,
