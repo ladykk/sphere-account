@@ -126,20 +126,23 @@ export const customerRouter = createTRPCRouter({
 
         const ids = result.map((r) => r.id);
 
-        const contactsResult = await trx
-          .select({
-            id: customerContacts.id,
-            customerId: customerContacts.customerId,
-            contactName: customerContacts.contactName,
-            email: customerContacts.email,
-            phoneNumber: customerContacts.phoneNumber,
-            createdAt: customerContacts.createdAt,
-            createdBy: customerContacts.createdBy,
-            updatedAt: customerContacts.updatedAt,
-            updatedBy: customerContacts.updatedBy,
-          })
-          .from(customerContacts)
-          .where(inArray(customerContacts.customerId, ids));
+        const contactsResult =
+          ids.length > 0
+            ? await trx
+                .select({
+                  id: customerContacts.id,
+                  customerId: customerContacts.customerId,
+                  contactName: customerContacts.contactName,
+                  email: customerContacts.email,
+                  phoneNumber: customerContacts.phoneNumber,
+                  createdAt: customerContacts.createdAt,
+                  createdBy: customerContacts.createdBy,
+                  updatedAt: customerContacts.updatedAt,
+                  updatedBy: customerContacts.updatedBy,
+                })
+                .from(customerContacts)
+                .where(inArray(customerContacts.customerId, ids))
+            : [];
 
         const contactsByCustomerId = contactsResult.reduce((acc, contact) => {
           if (!acc[contact.customerId]) {
@@ -149,22 +152,25 @@ export const customerRouter = createTRPCRouter({
           return acc;
         }, {} as Record<string, typeof contactsResult>);
 
-        const bankAccountsResult = await trx
-          .select({
-            id: customerBankAccounts.id,
-            customerId: customerBankAccounts.customerId,
-            bank: customerBankAccounts.bank,
-            accountNumber: customerBankAccounts.accountNumber,
-            bankBranch: customerBankAccounts.bankBranch,
-            accountType: customerBankAccounts.accountType,
-            creditDate: customerBankAccounts.creditDate,
-            createdAt: customerBankAccounts.createdAt,
-            createdBy: customerBankAccounts.createdBy,
-            updatedAt: customerBankAccounts.updatedAt,
-            updatedBy: customerBankAccounts.updatedBy,
-          })
-          .from(customerBankAccounts)
-          .where(inArray(customerBankAccounts.customerId, ids));
+        const bankAccountsResult =
+          ids.length > 0
+            ? await trx
+                .select({
+                  id: customerBankAccounts.id,
+                  customerId: customerBankAccounts.customerId,
+                  bank: customerBankAccounts.bank,
+                  accountNumber: customerBankAccounts.accountNumber,
+                  bankBranch: customerBankAccounts.bankBranch,
+                  accountType: customerBankAccounts.accountType,
+                  creditDate: customerBankAccounts.creditDate,
+                  createdAt: customerBankAccounts.createdAt,
+                  createdBy: customerBankAccounts.createdBy,
+                  updatedAt: customerBankAccounts.updatedAt,
+                  updatedBy: customerBankAccounts.updatedBy,
+                })
+                .from(customerBankAccounts)
+                .where(inArray(customerBankAccounts.customerId, ids))
+            : [];
 
         const bankAccountsByCustomerId = bankAccountsResult.reduce(
           (acc, bankAccount) => {
@@ -240,20 +246,23 @@ export const customerRouter = createTRPCRouter({
 
         const ids = list.map((r) => r.id);
 
-        const contactsResult = await trx
-          .select({
-            id: customerContacts.id,
-            customerId: customerContacts.customerId,
-            contactName: customerContacts.contactName,
-            email: customerContacts.email,
-            phoneNumber: customerContacts.phoneNumber,
-            createdAt: customerContacts.createdAt,
-            createdBy: customerContacts.createdBy,
-            updatedAt: customerContacts.updatedAt,
-            updatedBy: customerContacts.updatedBy,
-          })
-          .from(customerContacts)
-          .where(inArray(customerContacts.customerId, ids));
+        const contactsResult =
+          ids.length > 0
+            ? await trx
+                .select({
+                  id: customerContacts.id,
+                  customerId: customerContacts.customerId,
+                  contactName: customerContacts.contactName,
+                  email: customerContacts.email,
+                  phoneNumber: customerContacts.phoneNumber,
+                  createdAt: customerContacts.createdAt,
+                  createdBy: customerContacts.createdBy,
+                  updatedAt: customerContacts.updatedAt,
+                  updatedBy: customerContacts.updatedBy,
+                })
+                .from(customerContacts)
+                .where(inArray(customerContacts.customerId, ids))
+            : [];
 
         const contactsByCustomerId = contactsResult.reduce((acc, contact) => {
           if (!acc[contact.customerId]) {
@@ -263,22 +272,25 @@ export const customerRouter = createTRPCRouter({
           return acc;
         }, {} as Record<string, typeof contactsResult>);
 
-        const bankAccountsResult = await trx
-          .select({
-            id: customerBankAccounts.id,
-            customerId: customerBankAccounts.customerId,
-            bank: customerBankAccounts.bank,
-            accountNumber: customerBankAccounts.accountNumber,
-            bankBranch: customerBankAccounts.bankBranch,
-            accountType: customerBankAccounts.accountType,
-            creditDate: customerBankAccounts.creditDate,
-            createdAt: customerBankAccounts.createdAt,
-            createdBy: customerBankAccounts.createdBy,
-            updatedAt: customerBankAccounts.updatedAt,
-            updatedBy: customerBankAccounts.updatedBy,
-          })
-          .from(customerBankAccounts)
-          .where(inArray(customerBankAccounts.customerId, ids));
+        const bankAccountsResult =
+          ids.length > 0
+            ? await trx
+                .select({
+                  id: customerBankAccounts.id,
+                  customerId: customerBankAccounts.customerId,
+                  bank: customerBankAccounts.bank,
+                  accountNumber: customerBankAccounts.accountNumber,
+                  bankBranch: customerBankAccounts.bankBranch,
+                  accountType: customerBankAccounts.accountType,
+                  creditDate: customerBankAccounts.creditDate,
+                  createdAt: customerBankAccounts.createdAt,
+                  createdBy: customerBankAccounts.createdBy,
+                  updatedAt: customerBankAccounts.updatedAt,
+                  updatedBy: customerBankAccounts.updatedBy,
+                })
+                .from(customerBankAccounts)
+                .where(inArray(customerBankAccounts.customerId, ids))
+            : [];
 
         const bankAccountsByCustomerId = bankAccountsResult.reduce(
           (acc, bankAccount) => {
@@ -365,14 +377,14 @@ export const customerRouter = createTRPCRouter({
           // Insert Customer Bank Account
           if (input.bankAccounts.length > 0) {
             await trx.insert(customerBankAccounts).values(
-              input.bankAccounts.map((BankAccount) => ({
+              input.bankAccounts.map((bankAccount) => ({
                 id: crypto.randomUUID(),
                 customerId: createResult[0].id,
-                bank: BankAccount.bank,
-                accountNumber: BankAccount.accountNumber,
-                bankBranch: BankAccount.bankBranch,
-                accountType: BankAccount.accountType,
-                creditDate: BankAccount.creditDate,
+                bank: bankAccount.bank,
+                accountNumber: bankAccount.accountNumber,
+                bankBranch: bankAccount.bankBranch,
+                accountType: bankAccount.accountType,
+                creditDate: bankAccount.creditDate,
               }))
             );
           }
@@ -458,15 +470,16 @@ export const customerRouter = createTRPCRouter({
             });
           }
           // Delete Customer Contact
-          if (currentContactIds.length > 0)
-            await trx
-              .delete(customerContacts)
-              .where(
-                and(
-                  notInArray(customerContacts.id, currentContactIds),
-                  eq(customerContacts.customerId, id)
-                )
-              );
+          await trx
+            .delete(customerContacts)
+            .where(
+              and(
+                currentContactIds.length > 0
+                  ? notInArray(customerContacts.id, currentContactIds)
+                  : undefined,
+                eq(customerContacts.customerId, id)
+              )
+            );
 
           const currentBankAccountIds: string[] = [];
           // Upsert Customer BankAccount
@@ -504,15 +517,16 @@ export const customerRouter = createTRPCRouter({
             });
           }
           //Delete Customer BankAccount
-          if (currentBankAccountIds.length > 0)
-            await trx
-              .delete(customerBankAccounts)
-              .where(
-                and(
-                  notInArray(customerBankAccounts.id, currentBankAccountIds),
-                  eq(customerBankAccounts.customerId, id)
-                )
-              );
+          await trx
+            .delete(customerBankAccounts)
+            .where(
+              and(
+                currentBankAccountIds.length > 0
+                  ? notInArray(customerBankAccounts.id, currentBankAccountIds)
+                  : undefined,
+                eq(customerBankAccounts.customerId, id)
+              )
+            );
 
           return id;
         }
