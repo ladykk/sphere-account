@@ -204,5 +204,7 @@ export const Auth = {
           });
         }
       }),
+
+      getCountProvider : z.number().default(0),
   },
 };
