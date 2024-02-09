@@ -8,7 +8,7 @@ export const customers = pgTable("customer", {
   name: text("name").notNull(),
   taxId: text("tax_id"),
   address: text("address"),
-  shipping_address: text("shipping_address"),
+  shippingAddress: text("shipping_address"),
   zipcode: text("zipcode"),
   isBranch: boolean("is_branch").notNull().default(false),
   branchCode: text("branch_code"),
@@ -74,6 +74,7 @@ export const customerBankAccounts = pgTable("customer_bank_accounts", {
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  creditDate: text("credit_date").notNull(),
   createdBy: text("created_by").references(() => users.id, {
     onDelete: "set null",
   }),
