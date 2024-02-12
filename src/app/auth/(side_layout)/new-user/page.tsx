@@ -1,11 +1,8 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import emailIcon from "@/assets/icon/email.svg";
-import lockKey from "@/assets/icon/padlock.png";
-import { Button, buttonVariants } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import { cn, handleTRPCFormError } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { handleTRPCFormError } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { RouterInputs } from "@/trpc/shared";
 import {
@@ -19,9 +16,9 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BlockInteraction } from "@/components/ui/spinner";
-import { SignInParams, useSignInMutation } from "@/hooks/auth";
+
 import { useEffect } from "react";
-import { sessions } from "@/db/schema/auth";
+
 import { useSession } from "next-auth/react";
 import { useEffectOnce } from "usehooks-ts";
 
@@ -29,8 +26,8 @@ export default function newUserPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
-  const { data: session, status, update } = useSession();
-  
+  const { data: session } = useSession();
+
   const form = useForm<RouterInputs["auth"]["updateAccount"]>({
     defaultValues: {
       email: "",
@@ -40,20 +37,11 @@ export default function newUserPage() {
     },
   });
 
- 
-
   const mutation = api.auth.updateAccount.useMutation({
     onSuccess: () => router.replace(callbackUrl),
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
-
-  const signInMutation = useSignInMutation();
-
-  const testUpdateClick = (input: RouterInputs["auth"]["updateAccount"]) => {
-    console.log("Test Update Click!! : " + input.email);
-    // router.replace(`/auth/account`);
-  };
 
   useEffectOnce(() => {
     var firstName: string = "";
@@ -68,19 +56,7 @@ export default function newUserPage() {
           position,
           session?.user.name?.length
         );
-        console.log(
-          "have session : " +
-            session?.user.email +
-            " : " +
-            firstName +
-            " : " +
-            lastName
-            +
-            " : " +
-            session.user.image
-        );
       }
-
       form.reset({
         email: session?.user.email ?? "",
         firstName: firstName,
@@ -89,9 +65,15 @@ export default function newUserPage() {
       });
     }
   });
-  // useEffect(() => {});
 
-  const onSubmit = async (input: RouterInputs["auth"]["updateAccount"]) => {
+  useEffect(() => {
+    if (!session?.user) router.replace(callbackUrl);
+  }, [session]);
+
+  const onUpdate = async (input: RouterInputs["auth"]["updateAccount"]) => {
+    sessionStorage.setItem('session.user.firstName', form.getValues('firstName'))
+    sessionStorage.setItem('session.user.lastname', form.getValues('lastName'))
+    sessionStorage.setItem('session.user.email', form.getValues('email'))
     toast.promise(mutation.mutateAsync(input), {
       loading: "Updating account...",
       success: "Account updated successfully!",
@@ -101,9 +83,8 @@ export default function newUserPage() {
 
   return (
     <Form {...form}>
-      <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
+      <form className="w-full" onSubmit={form.handleSubmit(onUpdate)}>
         {" "}
-        {/* test fix */}
         <BlockInteraction isBlock={mutation.isPending} />
         <h1 className="mb-4">Complete Information </h1>
         <h5 className="text-muted-foreground mb-4">
@@ -117,7 +98,7 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="First Name" />
+                    <Input {...field} placeholder="First Name" disabled={!!form.getValues('firstName')}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,7 +110,7 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="Last Name" />
+                    <Input {...field} placeholder="Last Name" disabled={!!form.getValues('lastName')}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,6 +127,7 @@ export default function newUserPage() {
                     {...field}
                     placeholder="Email"
                     prefixIcon={emailIcon}
+                    disabled={!!form.getValues('email')}
                   />
                 </FormControl>
                 <FormMessage />

@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SendEmailSection } from "./_component/send-email";
 import {
   ChangePasswordSection,
@@ -14,6 +17,15 @@ export default async function ResetPasswordPage(props: {
   };
 }) {
   const token = props.searchParams.token;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const { data: session } = useSession();
+
+  // If session exists, redirect to callbackUrl
+  useEffect(() => {
+    if (session?.user) router.replace(callbackUrl);
+  }, [session]);
 
   // ถ้าไม่มี Token ให้แสดงหน้า SendEmailSection
   if (!token) return <SendEmailSection />;
