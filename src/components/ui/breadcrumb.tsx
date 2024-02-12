@@ -15,6 +15,7 @@ export const Breadcrumb = (props: BreadcrumbProps) => {
     <div className="flex items-center text-sm">
       {props.items.map((item, index) => (
         <Link
+          key={index}
           href={item.href ?? "#"}
           className={cn(
             "flex items-center transition-all",
