@@ -26,7 +26,7 @@ export default function newUserPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   const form = useForm<RouterInputs["auth"]["updateAccount"]>({
     defaultValues: {
@@ -50,7 +50,8 @@ export default function newUserPage() {
       console.log("No session");
     } else {
       if (session?.user.name) {
-        const position: number = session?.user.name?.search(" ");
+        console.log("Start : " + session.user.name);
+        const position: number = session.user.name.search(" ");
         firstName = session?.user.name?.substring(0, position);
         lastName = session?.user.name?.substring(
           position,
@@ -71,13 +72,22 @@ export default function newUserPage() {
   }, [session]);
 
   const onUpdate = async (input: RouterInputs["auth"]["updateAccount"]) => {
-    sessionStorage.setItem('session.user.firstName', form.getValues('firstName'))
-    sessionStorage.setItem('session.user.lastname', form.getValues('lastName'))
-    sessionStorage.setItem('session.user.email', form.getValues('email'))
-    toast.promise(mutation.mutateAsync(input), {
-      loading: "Updating account...",
-      success: "Account updated successfully!",
-      error: "Failed to update account",
+    await mutation.mutateAsync(input); // Wait for the account update to finish
+    upDateSess(); // Once the account update is finished, update the session
+    toast.promise(
+      Promise.resolve(), // No need to toast anything here, since the session is updated separately
+      {
+        loading: "Updating account...",
+        success: "Account updated successfully!",
+        error: "Failed to update account",
+      }
+    );
+  };
+
+  const upDateSess = () => {
+    update({
+      name: form.getValues("firstName") + " " + form.getValues("lastName"),
+      email: form.getValues("email"),
     });
   };
 
@@ -98,7 +108,11 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="First Name" disabled={!!form.getValues('firstName')}/>
+                    <Input
+                      {...field}
+                      placeholder="First Name"
+                      disabled={!!form.getValues("firstName")}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,7 +124,11 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input {...field} placeholder="Last Name" disabled={!!form.getValues('lastName')}/>
+                    <Input
+                      {...field}
+                      placeholder="Last Name"
+                      disabled={!!form.getValues("lastName")}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,7 +145,7 @@ export default function newUserPage() {
                     {...field}
                     placeholder="Email"
                     prefixIcon={emailIcon}
-                    disabled={!!form.getValues('email')}
+                    disabled={!!form.getValues("email")}
                   />
                 </FormControl>
                 <FormMessage />
