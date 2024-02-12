@@ -141,4 +141,50 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 Input.displayName = "Input";
 
-export { Input };
+const NumberInput = React.forwardRef<
+  HTMLInputElement,
+  Omit<InputProps, "value" | "type" | "onChange" | "onBlur"> & {
+    value: string | undefined;
+    onChange: (value: string) => void;
+    onBlur: (value: string) => void;
+  }
+>(({ onChange, onBlur, onFocus, step, value, ...props }, ref) => {
+  const defaultStep = step ?? "0.01";
+  const [isFocus, setIsFocus] = React.useState(false);
+  return (
+    <Input
+      type={isFocus ? "number" : "text"}
+      value={
+        isFocus
+          ? value
+          : Number(value?.replace(/,/g, "") || 0).toLocaleString("th-TH", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+      }
+      ref={ref}
+      onFocus={(e) => {
+        setIsFocus(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setIsFocus(false);
+        const value = e.target.value;
+        const number = Number(value.replace(/,/g, ""));
+
+        onChange?.(number.toString());
+      }}
+      onChange={(e) => {
+        const value = e.target.value;
+        const number = Number(value.replace(/,/g, ""));
+
+        onChange?.(number.toString());
+      }}
+      step={defaultStep}
+      {...props}
+    />
+  );
+});
+NumberInput.displayName = "NumberInput";
+
+export { Input, NumberInput };
