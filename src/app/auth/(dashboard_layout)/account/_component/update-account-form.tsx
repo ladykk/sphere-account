@@ -177,7 +177,7 @@ export function UpdateAccountForm() {
               )}
             />
             <Button className="w-fit" disabled={!form.formState.isDirty}>
-              Change
+              Update
             </Button>
           </div>
         </div>
