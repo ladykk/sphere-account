@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
+import { files } from "./file";
 
 export const products = pgTable("product", {
   id: uuid("id").notNull().primaryKey(),
@@ -22,6 +23,9 @@ export const products = pgTable("product", {
   description: text("description"),
   stock: integer("stock").notNull().default(0),
   unit: text("main_unit").notNull().default("Unit"),
+  image: text("image").references(() => files.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

@@ -25,11 +25,19 @@ function LoginProvider({
 }) {
   const queryClient = useQueryClient();
   const unlinkMutation = api.auth.unlinkLoginProvider.useMutation({
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: getQueryKey(api.auth.getAccountLoginOptions),
       }),
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(api.auth.getCountProvider),
+      })
+    }
+      
+      
   });
+
+  const queryCountProvider = api.auth.getCountProvider.useQuery();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -76,7 +84,8 @@ function LoginProvider({
           }
         }}
         className="w-16"
-        disabled={unlinkMutation.isPending}
+        disabled={unlinkMutation.isPending || (registered && queryCountProvider.data === 1)}
+
       >
         {registered ? "Unlink" : "Link"}
       </Button>
