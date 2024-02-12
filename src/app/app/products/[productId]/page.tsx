@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel> Code </FormLabel>
+                        <FormLabel required>Code</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem className="col-span-2">
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel required>Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -230,7 +230,7 @@ export default function ProductDetailPage() {
                     name="type"
                     render={({ field }) => (
                       <FormItem className=" col-span-2">
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel required>Type</FormLabel>
                         <Select
                           value={field.value ?? undefined}
                           onValueChange={field.onChange}

@@ -29,16 +29,15 @@ function LoginProvider({
       queryClient.invalidateQueries({
         queryKey: getQueryKey(api.auth.getAccountLoginOptions),
       }),
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(api.auth.getCountProvider),
-      })
-    }
-      
-      
+        queryClient.invalidateQueries({
+          queryKey: getQueryKey(api.auth.getCountProvider),
+        });
+    },
   });
 
   const queryCountProvider = api.auth.getCountProvider.useQuery();
 
+  console.log(queryCountProvider.data);
   const mutation = useMutation({
     mutationFn: async () => {
       if (registered) {
@@ -84,8 +83,10 @@ function LoginProvider({
           }
         }}
         className="w-16"
-        disabled={unlinkMutation.isPending || (registered && queryCountProvider.data === 1)}
-
+        disabled={
+          unlinkMutation.isPending ||
+          (registered && queryCountProvider.data === 1)
+        }
       >
         {registered ? "Unlink" : "Link"}
       </Button>
@@ -95,6 +96,7 @@ function LoginProvider({
 
 export function LoginOptions() {
   const query = api.auth.getAccountLoginOptions.useQuery();
+  console.log(query.data);
   return (
     <div className="flex-1">
       <div className="flex items-center mb-3">
