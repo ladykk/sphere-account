@@ -105,7 +105,11 @@ export default function ProductsListPage() {
             cell: ({ row }) => (
               <div>
                 <p className="font-semibold">
-                  {row.original.sellingPrice.toFixed(2) + " Baht"}
+                  {row.original.sellingPrice.toLocaleString("th-TH", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                    style: "decimal",
+                  }) + " Baht"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {row.original.vatType?.toUpperCase()} VAT
@@ -154,4 +158,3 @@ export default function ProductsListPage() {
     </DashboardListContainer>
   );
 }
- 

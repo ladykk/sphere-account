@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input, NumberInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -334,17 +334,7 @@ export default function ProductDetailPage() {
                   <FormItem>
                     <FormLabel>Selling Price (Baht)</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        value={field.value}
-                        onBlur={(e) => {
-                          // Format to 2 decimal places
-                          const value = parseFloat(e.target.value);
-                          field.onChange(value.toFixed(2));
-                        }}
-                        step={0.01}
-                      />
+                      <NumberInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
