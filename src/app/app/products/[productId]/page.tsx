@@ -125,6 +125,7 @@ export default function ProductDetailPage() {
       unit: query.data.unit,
       image: query.data.image,
     });
+    console.log(query.data);
   }, [query.data]);
 
   const onSubmit = (input: FormInput) => {
@@ -232,7 +233,7 @@ export default function ProductDetailPage() {
                       <FormItem className=" col-span-2">
                         <FormLabel required>Type</FormLabel>
                         <Select
-                          value={field.value ?? undefined}
+                          value={field.value ?? ""}
                           onValueChange={field.onChange}
                           disabled={field.disabled}
                         >
@@ -348,7 +349,7 @@ export default function ProductDetailPage() {
                     <FormLabel>VAT Type</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      value={field.value ?? undefined}
+                      value={field.value ?? ""}
                       disabled={field.disabled}
                     >
                       <FormControl>
