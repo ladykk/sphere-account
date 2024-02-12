@@ -25,6 +25,10 @@ const MENU_ITEMS = [
     label: "Customers",
     href: "customers",
   },
+  {
+    label: "Employees",
+    href: "employees",
+  },
 ];
 
 export function DashboardNavbar() {
@@ -45,9 +49,9 @@ export function DashboardNavbar() {
       <Separator />
       <div className="h-10 flex justify-center items-center">
         {/* TODO: Dropdown Nav Items */}
-        {MENU_ITEMS.map((item) => (
+        {MENU_ITEMS.map((item, index) => (
           <Link
-            key={item.href}
+            key={index}
             href={`/app/${item.href}`}
             className={buttonVariants({
               variant: "ghost",

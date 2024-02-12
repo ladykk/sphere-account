@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Button } from "./button";
-import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -14,6 +14,7 @@ import { Spinner } from "./spinner";
 import { useMediaQuery } from "usehooks-ts";
 import { Drawer, DrawerContent, DrawerTrigger } from "./drawer";
 import Image from "next/image";
+import { useCommandState } from "cmdk";
 
 export interface ComboBoxProps<T, V extends string | number> {
   options: Array<T> | undefined;
@@ -42,6 +43,7 @@ export interface SingleComboBoxProps<T, V extends string | number>
   multiple: false;
   value: V | undefined;
   onChange: (value: V | undefined) => void;
+  creatable?: boolean;
 }
 
 export interface MultiComboBoxProps<T, V extends string | number>
@@ -50,6 +52,65 @@ export interface MultiComboBoxProps<T, V extends string | number>
   value: Array<V>;
   setMultiLabel?: (values: Array<T>) => string;
   onChange: (value: Array<V>) => void;
+}
+
+function CommandOptions<T, V extends string | number>(
+  props: (SingleComboBoxProps<T, V> | MultiComboBoxProps<T, V>) & {
+    selectedOptions: Array<T>;
+    setOpen: (open: boolean) => void;
+  }
+) {
+  const search = useCommandState((state) => state.search);
+  const filtered = useCommandState((state) => state.filtered);
+
+  return (
+    <>
+      {props.clearable && props.selectedOptions && (
+        <CommandGroup className="border-t">
+          {props.clearable && props.selectedOptions && (
+            <CommandItem
+              className="hover:text-destructive"
+              onSelect={() => {
+                if (props.multiple) {
+                  props.onChange([]);
+                } else {
+                  props.onChange(undefined);
+                }
+                props.setOpen(false);
+              }}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Clear
+            </CommandItem>
+          )}
+        </CommandGroup>
+      )}
+      {!props.multiple &&
+        props.creatable &&
+        search.length > 0 &&
+        filtered.count === 0 && (
+          <div
+            className={cn(
+              "border-t overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
+            )}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="justify-start relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 w-full font-normal"
+              onClick={() => {
+                props.onChange(search as unknown as V);
+                props.setOpen(false);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create "{search}"
+            </Button>
+          </div>
+        )}
+    </>
+  );
 }
 
 export function ComboBox<T, V extends string | number>(
@@ -81,6 +142,8 @@ export function ComboBox<T, V extends string | number>(
             : props.multiple && props.setMultiLabel
             ? props.setMultiLabel(selectedOptions)
             : `${selectedOptions.length} selected`
+          : !props.multiple && props.creatable
+          ? props.value || placeholder
           : placeholder}
 
         {props.loading ? (
@@ -114,9 +177,9 @@ export function ComboBox<T, V extends string | number>(
           {options.length === 0 && (
             <p className="text-center py-5">{searchNoResultText}</p>
           )}
-          {options.map((option) => (
+          {options.map((option, index) => (
             <CommandItem
-              key={props.setValue(option).toString()}
+              key={`${props.setValue(option).toString()}-${index}`}
               value={
                 props.setKeyword
                   ? props.setKeyword(option)
@@ -175,24 +238,11 @@ export function ComboBox<T, V extends string | number>(
             </CommandItem>
           ))}
         </CommandGroup>
-        {props.clearable && selectedOptions && (
-          <CommandGroup className="border-t">
-            <CommandItem
-              className="hover:text-destructive"
-              onSelect={() => {
-                if (props.multiple) {
-                  props.onChange([]);
-                } else {
-                  props.onChange(undefined);
-                }
-                setOpen(false);
-              }}
-            >
-              <X className="mr-2 h-4 w-4" />
-              Clear
-            </CommandItem>
-          </CommandGroup>
-        )}
+        <CommandOptions
+          {...props}
+          selectedOptions={selectedOptions}
+          setOpen={setOpen}
+        />
       </Command>
     );
   }

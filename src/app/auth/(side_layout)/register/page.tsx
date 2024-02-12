@@ -23,6 +23,7 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BlockInteraction } from "@/components/ui/spinner";
+import { SignInParams, useSignInMutation } from "@/hooks/auth";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
@@ -47,6 +48,20 @@ export default function RegisterPage() {
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
+
+  const signInMutation = useSignInMutation();
+
+  const handleLoginProvider = (input: SignInParams) => {
+    // CASE: Email & Password
+    if (input.type === "email-password") {
+      return;
+    } else {
+      signInMutation.mutate(input);
+      toast.loading("Redirecting to login provider...", {
+        duration: 1000 * 10,
+      });
+    }
+  };
 
   const onSubmit = async (input: RouterInputs["auth"]["register"]) => {
     toast.promise(mutation.mutateAsync(input), {
@@ -148,17 +163,38 @@ export default function RegisterPage() {
             <Separator className="flex-1 bg-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="flex-1 gap-2" type="button">
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              type="button"
+              onClick={() =>
+                handleLoginProvider({ type: "google", isRemember: false })
+              }
+            >
               <Image src={googleLogo} alt="Google" className="w-5 h-5" />
               Google
             </Button>
-            <Button variant="outline" className="flex-1 gap-2" type="button">
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              type="button"
+              onClick={() =>
+                handleLoginProvider({ type: "facebook", isRemember: false })
+              }
+            >
               <Image src={facebookLogo} alt="Facebook" className="w-5 h-5" />
               Facebook
             </Button>
-            <Button variant="outline" className="flex-1 gap-2" type="button">
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              type="button"
+              onClick={() =>
+                handleLoginProvider({ type: "line", isRemember: false })
+              }
+            >
               <Image src={lineLogo} alt="LINE" className="w-5 h-5" />
-              Line
+              LINE
             </Button>
           </div>
         </div>

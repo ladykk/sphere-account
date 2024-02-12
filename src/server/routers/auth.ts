@@ -297,4 +297,27 @@ export const authRouter = createTRPCRouter({
           });
       });
     }),
+
+  getCountProvider: protectedProcedure
+    .output(Auth.schemas.getCountProvider)
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const result = await trx
+          .select({
+            provider: accounts.provider,
+          })
+          .from(accounts)
+          .where(eq(accounts.userId, ctx.session.user.id));
+
+        const userCredentialResult = await trx
+          .select({
+            userId: userCredentials.userId,
+          })
+          .from(userCredentials)
+          .where(eq(userCredentials.userId, ctx.session.user.id))
+          .limit(1);
+
+        return result.length + userCredentialResult.length > 0 ? 1 : 0;
+      });
+    }),
 });
