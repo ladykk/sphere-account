@@ -14,7 +14,6 @@ import { env } from "@/env/server.mjs";
 import { getBaseUrl } from "@/trpc/shared";
 import { generatePresignedUrlProcedure } from "../modules/file/trpc";
 import { deleteFileByUrl } from "../modules/file";
-import { account } from "../../../drizzle/schema";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -107,8 +106,9 @@ export const authRouter = createTRPCRouter({
           ResetPasswordEmail({
             name: userResult[0].name ?? "User",
             expiresDuration: Auth.constants.RESET_PASSWORD_TOKEN_EXPIRY_TEXT,
-            resetPasswordLink: `${getBaseUrl()}/auth/reset-password?token=${resetPasswordTokensResult[0].token
-              }`,
+            resetPasswordLink: `${getBaseUrl()}/auth/reset-password?token=${
+              resetPasswordTokensResult[0].token
+            }`,
             contactEmail: env.SMTP_USERNAME,
           })
         ).catch((err) => {
@@ -304,7 +304,7 @@ export const authRouter = createTRPCRouter({
       return ctx.db.transaction(async (trx) => {
         const result = await trx
           .select({
-            provider: account.provider,
+            provider: accounts.provider,
           })
           .from(accounts)
           .where(eq(accounts.userId, ctx.session.user.id));
@@ -318,6 +318,6 @@ export const authRouter = createTRPCRouter({
           .limit(1);
 
         return result.length + userCredentialResult.length > 0 ? 1 : 0;
-      })
+      });
     }),
 });
