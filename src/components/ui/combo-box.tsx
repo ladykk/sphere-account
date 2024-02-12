@@ -177,9 +177,9 @@ export function ComboBox<T, V extends string | number>(
           {options.length === 0 && (
             <p className="text-center py-5">{searchNoResultText}</p>
           )}
-          {options.map((option) => (
+          {options.map((option, index) => (
             <CommandItem
-              key={props.setValue(option).toString()}
+              key={`${props.setValue(option).toString()}-${index}`}
               value={
                 props.setKeyword
                   ? props.setKeyword(option)

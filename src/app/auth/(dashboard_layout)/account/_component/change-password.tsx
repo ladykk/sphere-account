@@ -42,6 +42,9 @@ export function ChangePassword() {
       queryClient.invalidateQueries({
         queryKey: getQueryKey(api.auth.getAccountLoginOptions),
       });
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(api.auth.getCountProvider),
+      })
     },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),

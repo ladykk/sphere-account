@@ -5,8 +5,14 @@ export const category = z.string().default("");
 
 export const unit = z.string().default("");
 
-export const baseOutput = z.object({
-  id: z.string().uuid("Invalid uuid"),
+const id = z
+  .string({
+    required_error: "Employee's id required",
+  })
+  .uuid("Invalid uuid");
+
+const baseOutput = z.object({
+  id: id,
   type: z.string().min(1, "Require product's type"),
   name: z.string().min(1, "Require product's name"),
   code: z.string().min(1, "Require product's code"),
@@ -20,13 +26,14 @@ export const baseOutput = z.object({
   description: z.string().nullable().default(""),
   unit: unit,
   stock: z.number().default(0),
+    image: z.string().url().nullable().default(null),
   createdAt: z.date(),
   createdBy: z.string().nullable(),
   updatedAt: z.date(),
   updatedBy: z.string().nullable(),
 });
 
-export const formInput = baseOutput
+const formInput = baseOutput
   .omit({
     id: true,
     stock: true,
@@ -41,6 +48,7 @@ export const formInput = baseOutput
 
 export const Product = {
   schemas: {
+        id,
     baseOutput,
     paginateInput: paginateInputSchema({
       keyword: z.string().optional(),
