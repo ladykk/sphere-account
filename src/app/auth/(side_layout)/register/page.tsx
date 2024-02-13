@@ -1,4 +1,6 @@
 "use client";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import emailIcon from "@/assets/icon/email.svg";
 import lockKey from "@/assets/icon/padlock.png";
@@ -27,7 +29,8 @@ import { SignInParams, useSignInMutation } from "@/hooks/auth";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const { data: session, status } = useSession();
   const router = useRouter();
   const form = useForm<RouterInputs["auth"]["register"]>({
     defaultValues: {
@@ -42,6 +45,11 @@ export default function RegisterPage() {
   const loginPath = `/auth/login${
     callbackUrl ? `?callbackUrl=${callbackUrl}` : ""
   }`;
+  
+  // If session exists, redirect to callbackUrl
+  useEffect(() => {
+    if (session?.user) router.replace(callbackUrl);
+  }, [session]);
 
   const mutation = api.auth.register.useMutation({
     onSuccess: () => router.replace(loginPath),
