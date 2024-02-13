@@ -29,12 +29,10 @@ function LoginProvider({
       queryClient.invalidateQueries({
         queryKey: getQueryKey(api.auth.getAccountLoginOptions),
       }),
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(api.auth.getCountProvider),
-      })
-    }
-      
-      
+        queryClient.invalidateQueries({
+          queryKey: getQueryKey(api.auth.getCountProvider),
+        });
+    },
   });
 
   const queryCountProvider = api.auth.getCountProvider.useQuery();
@@ -84,8 +82,10 @@ function LoginProvider({
           }
         }}
         className="w-16"
-        disabled={unlinkMutation.isPending || (registered && queryCountProvider.data === 1)}
-
+        disabled={
+          unlinkMutation.isPending ||
+          (registered && queryCountProvider.data === 1)
+        }
       >
         {registered ? "Unlink" : "Link"}
       </Button>

@@ -317,7 +317,7 @@ export const authRouter = createTRPCRouter({
           .where(eq(userCredentials.userId, ctx.session.user.id))
           .limit(1);
 
-        return result.length + userCredentialResult.length > 0 ? 1 : 0;
+        return result.length + (userCredentialResult.length > 0 ? 1 : 0);
       });
     }),
 });

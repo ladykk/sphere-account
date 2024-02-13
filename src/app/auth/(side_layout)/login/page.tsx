@@ -1,4 +1,6 @@
 "use client";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import emailIcon from "@/assets/icon/email.svg";
@@ -22,12 +24,14 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BlockInteraction } from "@/components/ui/spinner";
 
 export default function LoginPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const { data: session, status } = useSession();
 
   const mutation = useSignInMutation();
 
@@ -37,6 +41,11 @@ export default function LoginPage() {
       isRemember: false,
     },
   });
+
+  // If session exists, redirect to callbackUrl
+  useEffect(() => {
+    if (session?.user) router.replace(callbackUrl);
+  }, [session]);
 
   const onSubmit = (input: SignInParams) => {
     // CASE: Email & Password

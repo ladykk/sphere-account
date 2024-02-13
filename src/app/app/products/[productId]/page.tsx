@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input, NumberInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel> Code </FormLabel>
+                        <FormLabel required>Code</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem className="col-span-2">
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel required>Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -230,9 +230,9 @@ export default function ProductDetailPage() {
                     name="type"
                     render={({ field }) => (
                       <FormItem className=" col-span-2">
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel required>Type</FormLabel>
                         <Select
-                          value={field.value ?? undefined}
+                          value={field.value ?? ""}
                           onValueChange={field.onChange}
                           disabled={field.disabled}
                         >
@@ -334,17 +334,7 @@ export default function ProductDetailPage() {
                   <FormItem>
                     <FormLabel>Selling Price (Baht)</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        value={field.value}
-                        onBlur={(e) => {
-                          // Format to 2 decimal places
-                          const value = parseFloat(e.target.value);
-                          field.onChange(value.toFixed(2));
-                        }}
-                        step={0.01}
-                      />
+                      <NumberInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -358,7 +348,7 @@ export default function ProductDetailPage() {
                     <FormLabel>VAT Type</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      value={field.value ?? undefined}
+                      value={field.value ?? ""}
                       disabled={field.disabled}
                     >
                       <FormControl>
