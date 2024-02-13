@@ -18,7 +18,6 @@ export const SearchKeywordInput = (props: SearchKeywordInputProps) => {
   // Debounce keyword
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.log("keyword", keyword);
       if (keyword) searchParams.set("keyword", keyword);
       else searchParams.clear("keyword");
     }, props.delay ?? 1000);

@@ -16,17 +16,16 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BlockInteraction } from "@/components/ui/spinner";
-
-import { useEffect } from "react";
-
 import { useSession } from "next-auth/react";
-import { useEffectOnce } from "usehooks-ts";
+import { useEffect } from "react";
 
 export default function newUserPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const { data: session, update } = useSession({
+    required: true,
+  });
 
   const form = useForm<RouterInputs["auth"]["updateAccount"]>({
     defaultValues: {
@@ -38,57 +37,45 @@ export default function newUserPage() {
   });
 
   const mutation = api.auth.updateAccount.useMutation({
-    onSuccess: () => router.replace(callbackUrl),
+    onSuccess: async () => {
+      await update();
+      router.replace(callbackUrl);
+    },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
 
-  useEffectOnce(() => {
-    var firstName: string = "";
-    var lastName: string = "";
-    if (!session) {
-      console.log("No session");
-    } else {
-      if (session?.user.name) {
-        console.log("Start : " + session.user.name);
-        const position: number = session.user.name.search(" ");
-        firstName = session?.user.name?.substring(0, position);
-        lastName = session?.user.name?.substring(
-          position,
-          session?.user.name?.length
-        );
-      }
-      form.reset({
-        email: session?.user.email ?? "",
-        firstName: firstName,
-        lastName: lastName,
-        image: session.user.image ?? "",
-      });
-    }
-  });
-
   useEffect(() => {
-    if (!session?.user) router.replace(callbackUrl);
-  }, [session]);
+    if (!session) return;
+
+    // If the user is already logged in, we can pre-fill the form with their information
+    let firstName = "";
+    let lastName = "";
+    if (session?.user.name) {
+      const position: number = session.user.name.search(" ");
+      firstName = session?.user.name?.substring(0, position);
+      lastName = session?.user.name?.substring(
+        position,
+        session?.user.name?.length
+      );
+    }
+    form.reset({
+      email: session?.user.email ?? "",
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      image: session.user.image ?? "",
+    });
+  }, []);
 
   const onUpdate = async (input: RouterInputs["auth"]["updateAccount"]) => {
-    await mutation.mutateAsync(input); // Wait for the account update to finish
-    upDateSess(); // Once the account update is finished, update the session
     toast.promise(
-      Promise.resolve(), // No need to toast anything here, since the session is updated separately
+      mutation.mutateAsync(input), // No need to toast anything here, since the session is updated separately
       {
         loading: "Updating account...",
         success: "Account updated successfully!",
         error: "Failed to update account",
       }
     );
-  };
-
-  const upDateSess = () => {
-    update({
-      name: form.getValues("firstName") + " " + form.getValues("lastName"),
-      email: form.getValues("email"),
-    });
   };
 
   return (
@@ -108,11 +95,7 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="First Name"
-                      disabled={!!form.getValues("firstName")}
-                    />
+                    <Input {...field} placeholder="First Name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,11 +107,7 @@ export default function newUserPage() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Last Name"
-                      disabled={!!form.getValues("lastName")}
-                    />
+                    <Input {...field} placeholder="Last Name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

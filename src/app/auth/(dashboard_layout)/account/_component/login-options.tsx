@@ -37,7 +37,6 @@ function LoginProvider({
 
   const queryCountProvider = api.auth.getCountProvider.useQuery();
 
-  console.log(queryCountProvider.data);
   const mutation = useMutation({
     mutationFn: async () => {
       if (registered) {
@@ -96,7 +95,6 @@ function LoginProvider({
 
 export function LoginOptions() {
   const query = api.auth.getAccountLoginOptions.useQuery();
-  console.log(query.data);
   return (
     <div className="flex-1">
       <div className="flex items-center mb-3">

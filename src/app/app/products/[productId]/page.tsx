@@ -125,7 +125,6 @@ export default function ProductDetailPage() {
       unit: query.data.unit,
       image: query.data.image,
     });
-    console.log(query.data);
   }, [query.data]);
 
   const onSubmit = (input: FormInput) => {
