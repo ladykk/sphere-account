@@ -1,29 +1,28 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { files } from "./file";
 
 export const employees = pgTable("employee", {
   id: uuid("id").notNull().primaryKey(),
   // Information
-  saleNo: text("sale_no").notNull(),
+  code: text("code").notNull().unique(),
   name: text("name").notNull(),
   email: text("email"),
-  phoneNumber: text("phone_number"),
+  phoneNumber: text("phoneNumber"),
   image: text("image").references(() => files.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
   // Metadata
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  createdBy: text("created_by").references(() => users.id, {
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  createdBy: text("createdBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedBy: text("updated_by").references(() => users.id, {
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  updatedBy: text("updatedBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
 });

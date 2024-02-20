@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "./button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,9 @@ import {
   SelectValue,
 } from "./select";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Separator } from "./separator";
+import { AuthMetadata } from "../auth/auth-info";
 
 interface DataTableProps<TData, TValue> {
   columns?: ColumnDef<TData, TValue>[];
@@ -158,5 +161,44 @@ export function DataTablePagination(props: DataTablePaginationProps) {
         </Button>
       </div>
     </div>
+  );
+}
+
+export function DataTableMetadata(props: {
+  createdAt: string;
+  createdBy: string | null;
+  updatedAt: string;
+  updatedBy: string | null;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="outline">
+          <Info />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="text-sm w-fit">
+        <p className=" text-base font-bold">Metadata</p>
+        <Separator className="my-2" />
+        <div className="flex flex-col gap-1">
+          <p>
+            <span className="font-bold">Created at:</span>{" "}
+            {new Date(props.createdAt).toLocaleString("th-TH")}
+          </p>
+          <p>
+            <span className="font-bold">Created by:</span>{" "}
+            <AuthMetadata userId={props.createdBy} />
+          </p>
+          <p>
+            <span className="font-bold">Updated at:</span>{" "}
+            {new Date(props.updatedAt).toLocaleString("th-TH")}
+          </p>
+          <p>
+            <span className="font-bold">Updated by:</span>{" "}
+            <AuthMetadata userId={props.updatedBy} />
+          </p>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

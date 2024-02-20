@@ -74,25 +74,19 @@ export const fileToPresignedUrlInput = (
 export const uploadFile = async (
   key: string,
   file: File,
-  setFileUploadState?: FileUploadGlobalState["setFileUploadState"]
+  onProgress?: (progress: number) => void
 ) => {
-  setFileUploadState?.(key, {
-    status: "idle",
-  });
   return await axios({
     method: "PUT",
     url: `/api/file/${key}`,
     data: file,
     onUploadProgress(progressEvent) {
-      if (setFileUploadState) {
+      if (onProgress) {
         const loaded = progressEvent.loaded ?? 0;
         const total = progressEvent.total ?? 0;
 
         const progress = Math.round((loaded / total) * 100);
-        setFileUploadState(key, {
-          status: "uploading",
-          progress: progress || 0,
-        });
+        onProgress(progress);
       }
     },
   })
@@ -101,18 +95,13 @@ export const uploadFile = async (
       if (res.status !== 201) {
         throw new Error("Failed to upload file.");
       }
-      setFileUploadState?.(key, {
-        status: "done",
-      });
+
       return {
         key: key,
         url: res.data.url,
       };
     })
     .catch((error) => {
-      setFileUploadState?.(key, {
-        status: "error",
-      });
       throw error;
     });
 };

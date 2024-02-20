@@ -142,7 +142,7 @@ export default function CustomerDetailPage() {
     <Form {...form}>
       <DashboardFormWrapper
         onSubmit={form.handleSubmit(onSubmit)}
-        className=" max-w-screen-2xl"
+        className="max-w-screen-2xl"
       >
         <div className="flex items-baseline gap-3 mb-10 justify-between">
           <div className="flex gap-3 items-baseline justify-end">

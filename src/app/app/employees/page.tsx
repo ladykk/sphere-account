@@ -6,7 +6,7 @@ import { api } from "@/trpc/react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { DashboardPagination } from "@/components/dashboard/pagination";
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable, DataTableMetadata } from "@/components/ui/data-table";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -42,8 +42,8 @@ export default function EmployeesListPage() {
       <DataTable
         columns={[
           {
-            accessorKey: "saleNo",
-            header: "Sale No",
+            accessorKey: "code",
+            header: "Code",
           },
           {
             accessorKey: "image",
@@ -81,7 +81,8 @@ export default function EmployeesListPage() {
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-              <div className="space-x-3">
+              <div className="flex gap-3 items-center">
+                <DataTableMetadata {...row.original} />
                 <Link
                   className={cn(
                     buttonVariants({ variant: "outline", size: "icon" })

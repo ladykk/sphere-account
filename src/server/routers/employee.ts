@@ -4,12 +4,7 @@ import { Employee } from "../models/employee";
 import { employees } from "@/db/schema/employee";
 import { eq, and, like, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import {
-  deleteFileById,
-  deleteFileByUrl,
-  getIdFromUrl,
-  getUrlById,
-} from "../modules/file";
+import { deleteFileById, getIdFromUrl, getUrlById } from "../modules/file";
 import { generatePresignedUrlProcedure } from "../modules/file/trpc";
 
 export const employeeRouter = createTRPCRouter({
@@ -21,23 +16,19 @@ export const employeeRouter = createTRPCRouter({
         const result = await trx
           .select({
             id: employees.id,
-            saleNo: employees.saleNo,
+            code: employees.code,
             name: employees.name,
             email: employees.email,
             phoneNumber: employees.phoneNumber,
             image: employees.image,
+            isActive: employees.isActive,
             createdAt: employees.createdAt,
             createdBy: employees.createdBy,
             updatedAt: employees.updatedAt,
             updatedBy: employees.updatedBy,
           })
           .from(employees)
-          .where(
-            and(
-              eq(employees.id, input),
-              eq(employees.createdBy, ctx.session.user.id)
-            )
-          )
+          .where(and(eq(employees.id, input)))
           .limit(1);
 
         if (result.length === 0) {
@@ -60,18 +51,19 @@ export const employeeRouter = createTRPCRouter({
         const result = await trx
           .select({
             id: employees.id,
-            saleNo: employees.saleNo,
+            code: employees.code,
             name: employees.name,
             email: employees.email,
             phoneNumber: employees.phoneNumber,
             image: employees.image,
+            isActive: employees.isActive,
             createdAt: employees.createdAt,
             createdBy: employees.createdBy,
             updatedAt: employees.updatedAt,
             updatedBy: employees.updatedBy,
           })
-          .from(employees)
-          .where(eq(employees.createdBy, ctx.session.user.id));
+          .from(employees);
+
         return result.map((r) => ({
           ...r,
           image: r.image ? getUrlById(r.image) : null,
@@ -86,7 +78,6 @@ export const employeeRouter = createTRPCRouter({
         const { page, itemsPerPage, ...filters } = input;
 
         const whereClause = and(
-          eq(employees.createdBy, ctx.session.user.id),
           // Filter: Keyword
           filters.keyword
             ? like(employees.name, `%${filters.keyword}%`)
@@ -104,11 +95,12 @@ export const employeeRouter = createTRPCRouter({
         const list = await trx
           .select({
             id: employees.id,
-            saleNo: employees.saleNo,
+            code: employees.code,
             name: employees.name,
             email: employees.email,
             phoneNumber: employees.phoneNumber,
             image: employees.image,
+            isActive: employees.isActive,
             createdAt: employees.createdAt,
             createdBy: employees.createdBy,
             updatedAt: employees.updatedAt,
@@ -143,12 +135,7 @@ export const employeeRouter = createTRPCRouter({
               image: employees.image,
             })
             .from(employees)
-            .where(
-              and(
-                eq(employees.id, input.id),
-                eq(employees.createdBy, ctx.session.user.id)
-              )
-            )
+            .where(and(eq(employees.id, input.id)))
             .limit(1);
 
           if (oldData.length === 0) {
@@ -168,11 +155,12 @@ export const employeeRouter = createTRPCRouter({
           await trx
             .update(employees)
             .set({
-              saleNo: input.saleNo,
+              code: input.code,
               name: input.name,
               email: input.email,
               phoneNumber: input.phoneNumber,
               image: getIdFromUrl(input.image),
+              isActive: input.isActive,
               updatedAt: new Date(),
               updatedBy: ctx.session.user.id,
             })
@@ -191,11 +179,12 @@ export const employeeRouter = createTRPCRouter({
             .insert(employees)
             .values({
               id: crypto.randomUUID(),
-              saleNo: input.saleNo,
+              code: input.code,
               name: input.name,
               email: input.email,
               phoneNumber: input.phoneNumber,
               image: getIdFromUrl(input.image),
+              isActive: input.isActive,
               createdBy: ctx.session.user.id,
               updatedBy: ctx.session.user.id,
             })

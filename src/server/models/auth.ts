@@ -205,6 +205,11 @@ export const Auth = {
         }
       }),
 
-      getCountProvider : z.number().default(0),
+    getCountProvider: z.number().default(0),
+    getUserMetadataInfoInput: z.string().uuid(),
+    getUserMetadataInfoOutput: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
   },
 };

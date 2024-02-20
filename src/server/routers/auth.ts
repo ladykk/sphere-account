@@ -320,4 +320,31 @@ export const authRouter = createTRPCRouter({
         return result.length + (userCredentialResult.length > 0 ? 1 : 0);
       });
     }),
+  getUserMetadataInfo: protectedProcedure
+    .input(Auth.schemas.getUserMetadataInfoInput)
+    .output(Auth.schemas.getUserMetadataInfoOutput)
+    .query(async ({ ctx, input }) => {
+      return ctx.db.transaction(async (trx) => {
+        const user = await trx
+          .select({
+            id: users.id,
+            name: users.name,
+          })
+          .from(users)
+          .where(eq(users.id, input))
+          .limit(1);
+
+        // Throw not found
+        if (user.length === 0)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+
+        return {
+          id: user[0].id,
+          name: user[0].name ?? "Unname User",
+        };
+      });
+    }),
 });
