@@ -134,20 +134,24 @@ export function ComboBox<T, V extends string | number>(
   function Trigger() {
     return (
       <>
-        {selectedOptions.length > 0
-          ? selectedOptions.length === 1
-            ? props.customItemRender
-              ? props.customItemRender(selectedOptions[0], true)
-              : props.setLabel(selectedOptions[0])
-            : props.multiple && props.setMultiLabel
-            ? props.setMultiLabel(selectedOptions)
-            : `${selectedOptions.length} selected`
-          : !props.multiple && props.creatable
-          ? props.value || placeholder
-          : placeholder}
+        <span
+          className={cn("truncate", props.value ? "" : "text-muted-foreground")}
+        >
+          {selectedOptions.length > 0
+            ? selectedOptions.length === 1
+              ? props.customItemRender
+                ? props.customItemRender(selectedOptions[0], true)
+                : props.setLabel(selectedOptions[0])
+              : props.multiple && props.setMultiLabel
+              ? props.setMultiLabel(selectedOptions)
+              : `${selectedOptions.length} selected`
+            : !props.multiple && props.creatable
+            ? props.value || placeholder
+            : placeholder}
+        </span>
 
         {props.loading ? (
-          <Spinner />
+          <Spinner className="ml-2" />
         ) : props.subfixIcon ? (
           <Image
             src={props.subfixIcon}

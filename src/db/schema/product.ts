@@ -5,37 +5,40 @@ import {
   integer,
   numeric,
   uuid,
+  pgEnum,
+  boolean,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { files } from "./file";
 
+export const productTypeEnum = pgEnum("product_type", ["stock", "service"]);
+export const vatTypeEnum = pgEnum("vat_type", ["include", "exclude", "exempt"]);
+
 export const products = pgTable("product", {
   id: uuid("id").notNull().primaryKey(),
-  type: text("type").notNull(),
+  type: productTypeEnum("type").notNull(),
   name: text("name").notNull(),
-  // product_img: text("product_img"), // TODO: File implementation
-  code: text("code").notNull(),
+  code: text("code").notNull().unique(),
   category: text("category").notNull(),
   barcode: text("barcode"),
-  sellingPrice: numeric("selling_price").notNull().default("0.00"),
-  vatType: text("vat_type"),
+  sellingPrice: numeric("sellingPrice").notNull().default("0.00"),
+  vatType: vatTypeEnum("vatType").notNull().default("exclude"),
   description: text("description"),
   stock: integer("stock").notNull().default(0),
-  unit: text("main_unit").notNull().default("Unit"),
+  unit: text("unit").notNull().default("Unit"),
   image: text("image").references(() => files.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  createdBy: text("created_by").references(() => users.id, {
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  createdBy: text("createdBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedBy: text("updated_by").references(() => users.id, {
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  updatedBy: text("updatedBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
 });
