@@ -26,13 +26,23 @@ import { useMutation } from "@tanstack/react-query";
 import { Home, ImageOff, UploadCloud, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { DefaultValues, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type FormInput = RouterInputs["employee"]["createOrUpdateEmployee"] & {
   files: {
     image: File | null;
   };
+};
+
+const defaultValue: DefaultValues<FormInput> = {
+  id: undefined,
+  code: "",
+  name: "",
+  email: "",
+  phoneNumber: "",
+  image: "",
+  isActive: true,
 };
 
 export default function EmployeeDetailPage() {
@@ -116,12 +126,12 @@ export default function EmployeeDetailPage() {
       setTimeout(() => query.refetch(), 1000);
     },
     onSuccess: () =>
-      toast.success("Employee saved successfully", {
+      toast.success("Fail to Save Employee", {
         duration: 5000,
         id: "employee-detail",
       }),
     onError: (error) =>
-      toast.error(error.message, { duration: 5000, id: "employee-detail" }),
+      toast.error(error.name, { duration: 5000, id: "employee-detail" }),
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
   });
@@ -129,14 +139,7 @@ export default function EmployeeDetailPage() {
   // Set form data if query is successful and not in edit mode
   useEffect(() => {
     if (isCreate) {
-      form.reset({
-        code: "",
-        name: "",
-        email: "",
-        phoneNumber: "",
-        image: "",
-        isActive: true,
-      });
+      form.reset(defaultValue);
     } else {
       if (!query.data) return;
       if (isEdit) return;
@@ -226,153 +229,151 @@ export default function EmployeeDetailPage() {
             </h2>
           </>
         ) : (
-          <>
-            <DashboardMainContainer>
-              <div className="flex gap-x-5">
-                <FormField
-                  control={form.control}
-                  name="files.image"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex justify-between items-center h-6">
-                        <FormLabel>Image</FormLabel>
-                        {field.value && (
-                          <Button
-                            variant="link"
-                            onClick={() => field.onChange(null)}
-                            className="text-destructive h-fit p-0"
-                            size="sm"
-                          >
-                            Clear
-                          </Button>
+          <DashboardMainContainer>
+            <div className="flex gap-x-5">
+              <FormField
+                control={form.control}
+                name="files.image"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-center h-6">
+                      <FormLabel>Image</FormLabel>
+                      {field.value && (
+                        <Button
+                          variant="link"
+                          onClick={() => field.onChange(null)}
+                          className="text-destructive h-fit p-0"
+                          size="sm"
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </div>
+                    {!isEdit && !isCreate ? (
+                      <div className="w-52 h-52 border border-input rounded-md flex items-center justify-center">
+                        {query.data?.image ? (
+                          <img
+                            src={query.data?.image}
+                            alt=""
+                            className="w-full h-full rounded-mb object-cover rounded-md"
+                          />
+                        ) : (
+                          <ImageOff className="w-10 h-10" />
                         )}
                       </div>
-                      {!isEdit && !isCreate ? (
-                        <div className="w-52 h-52 border border-input rounded-md flex items-center justify-center">
-                          {query.data?.image ? (
-                            <img
-                              src={query.data?.image}
-                              alt=""
-                              className="w-full h-full rounded-mb object-cover rounded-md"
-                            />
-                          ) : (
-                            <ImageOff className="w-10 h-10" />
-                          )}
-                        </div>
-                      ) : (
-                        <DialogUpload
-                          {...field}
-                          header="Upload Image"
-                          accept={{
-                            "image/png": [".png"],
-                            "image/jpg": [".jpg"],
-                            "image/jpeg": [".jpeg"],
-                            "image/webp": [".webp"],
-                          }}
-                        >
-                          {(fileUrl) => (
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className="aspect-square border h-52 flex items-center justify-center flex-col gap-3 p-0"
-                                type="button"
-                                disabled={form.formState.disabled}
-                              >
-                                {fileUrl || query.data?.image ? (
-                                  <img
-                                    src={fileUrl ?? query.data?.image ?? ""}
-                                    alt=""
-                                    className="w-full h-full object-cover rounded-md hover:opacity-80 bg-white transition-opacity"
-                                  />
-                                ) : (
-                                  <>
-                                    <UploadCloud className=" w-10 h-10" />
-                                    Upload Image
-                                  </>
-                                )}
-                              </Button>
-                            </FormControl>
-                          )}
-                        </DialogUpload>
-                      )}
+                    ) : (
+                      <DialogUpload
+                        {...field}
+                        header="Upload Image"
+                        accept={{
+                          "image/png": [".png"],
+                          "image/jpg": [".jpg"],
+                          "image/jpeg": [".jpeg"],
+                          "image/webp": [".webp"],
+                        }}
+                      >
+                        {(fileUrl) => (
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className="aspect-square border h-52 flex items-center justify-center flex-col gap-3 p-0"
+                              type="button"
+                              disabled={form.formState.disabled}
+                            >
+                              {fileUrl || query.data?.image ? (
+                                <img
+                                  src={fileUrl ?? query.data?.image ?? ""}
+                                  alt=""
+                                  className="w-full h-full object-cover rounded-md hover:opacity-80 bg-white transition-opacity"
+                                />
+                              ) : (
+                                <>
+                                  <UploadCloud className=" w-10 h-10" />
+                                  Upload Image
+                                </>
+                              )}
+                            </Button>
+                          </FormControl>
+                        )}
+                      </DialogUpload>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-4 gap-y-3 gap-x-5 flex-1 h-fit">
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Code</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. EMP00000001" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-4 gap-y-3 gap-x-5 flex-1 h-fit">
-                  <FormField
-                    control={form.control}
-                    name="code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel required>Code</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g. EMP00000001" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem className="col-span-3">
-                        <FormLabel required>Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phoneNumber"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value ?? ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel required>Is Active</FormLabel>
-                        <div className="h-10 flex items-center">
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={field.disabled}
-                          />
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <div />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-3">
+                      <FormLabel required>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel required>Is Active</FormLabel>
+                      <div className="h-10 flex items-center">
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={field.disabled}
+                        />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <div />
               </div>
-            </DashboardMainContainer>
-          </>
+            </div>
+          </DashboardMainContainer>
         )}
       </DashboardFormWrapper>
     </Form>

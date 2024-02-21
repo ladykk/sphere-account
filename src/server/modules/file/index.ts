@@ -68,14 +68,16 @@ export async function uploadObject(
 
 export const checkAccessControl = async (accessControl: TAccessControl) => {
   const unknownRule = String(accessControl.rule);
+  const session = await getServerAuthSession();
+
   switch (accessControl.rule) {
     case "public":
       return true;
+    case "authenticated":
+      return !!session;
     case "userId":
-      const session = await getServerAuthSession();
       if (!session) return false;
       if (session.user.id === accessControl.userId) return true;
-
       return false;
     default:
       console.warn(`[R2]: Not implemented access control rule. ${unknownRule}`);

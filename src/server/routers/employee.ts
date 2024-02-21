@@ -198,8 +198,7 @@ export const employeeRouter = createTRPCRouter({
     }),
   generatePresignUrl: generatePresignedUrlProcedure((ctx) => ({
     readAccessControl: {
-      rule: "userId",
-      userId: ctx.session?.user.id,
+      rule: "authenticated",
     },
     writeAccessControl: {
       rule: "userId",

@@ -5,6 +5,9 @@ export const accessControlSchema = z.discriminatedUnion("rule", [
     rule: z.literal("public"),
   }),
   z.object({
+    rule: z.literal("authenticated"),
+  }),
+  z.object({
     rule: z.literal("userId"),
     userId: z.string().nullish(),
   }),
