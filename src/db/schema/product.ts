@@ -15,7 +15,7 @@ export const productTypeEnum = pgEnum("product_type", ["stock", "service"]);
 export const vatTypeEnum = pgEnum("vat_type", ["include", "exclude", "exempt"]);
 
 export const products = pgTable("product", {
-  id: uuid("id").notNull().primaryKey(),
+  id: uuid("id").primaryKey(),
   type: productTypeEnum("type").notNull(),
   name: text("name").notNull(),
   code: text("code").notNull().unique(),
