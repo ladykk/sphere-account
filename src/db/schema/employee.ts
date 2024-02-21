@@ -3,7 +3,7 @@ import { users } from "./auth";
 import { files } from "./file";
 
 export const employees = pgTable("employee", {
-  id: uuid("id").notNull().primaryKey(),
+  id: uuid("id").primaryKey(),
   // Information
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
