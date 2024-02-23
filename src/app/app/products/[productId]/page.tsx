@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
       handleTRPCFormError(error.data?.zodError, form.setError),
   });
 
-  const mutation = useMutation<void, Error, FormInput>({
+  const mutation = useMutation<string, Error, FormInput>({
     mutationFn: async (input) => {
       let { files, ...data } = input;
       toast.loading("Preparing...", {
@@ -129,7 +129,7 @@ export default function ProductDetailPage() {
         id: "product-detail",
         duration: Number.POSITIVE_INFINITY,
       });
-      await createOrUpdateMutation.mutateAsync({
+      return await createOrUpdateMutation.mutateAsync({
         ...data,
       });
     },
