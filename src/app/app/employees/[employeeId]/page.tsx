@@ -67,10 +67,6 @@ export default function EmployeeDetailPage() {
   const presignImageMutation = api.employee.generatePresignUrl.useMutation();
   const createOrUpdateMutation =
     api.employee.createOrUpdateEmployee.useMutation({
-      onSuccess: (id, variables) => {
-        router.replace(`/app/employees/${id}`);
-        form.reset(variables);
-      },
       onError: (error) =>
         handleTRPCFormError(error.data?.zodError, form.setError),
     });
@@ -125,13 +121,21 @@ export default function EmployeeDetailPage() {
       setIsEdit(false);
       setTimeout(() => query.refetch(), 1000);
     },
-    onSuccess: () =>
-      toast.success("Fail to Save Employee", {
+    onSuccess: (id, variables) => {
+      form.reset(variables);
+      setIsEdit(false);
+      router.replace(`/app/employees/${id}`);
+      setTimeout(() => query.refetch(), 1000);
+      toast.success("Employee Saved Successfully", {
+        duration: 5000,
+        id: "employee-detail",
+      });
+    },
+    onError: (error) =>
+      toast.error("Failed to Save Employee", {
         duration: 5000,
         id: "employee-detail",
       }),
-    onError: (error) =>
-      toast.error(error.name, { duration: 5000, id: "employee-detail" }),
     onMutate: () => setIsDisabled(true),
     onSettled: () => setIsDisabled(false),
   });
