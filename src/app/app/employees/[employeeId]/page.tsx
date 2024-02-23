@@ -71,7 +71,7 @@ export default function EmployeeDetailPage() {
         handleTRPCFormError(error.data?.zodError, form.setError),
     });
 
-  const mutation = useMutation<void, Error, FormInput>({
+  const mutation = useMutation<string, Error, FormInput>({
     mutationFn: async (input) => {
       let { files, ...data } = input;
       toast.loading("Preparing...", {
@@ -109,7 +109,7 @@ export default function EmployeeDetailPage() {
         duration: Number.POSITIVE_INFINITY,
       });
       // Create or update employee
-      await createOrUpdateMutation.mutateAsync({
+      return await createOrUpdateMutation.mutateAsync({
         ...data,
         email: data.email && data.email.length > 0 ? data.email : null,
         phoneNumber:
@@ -117,9 +117,6 @@ export default function EmployeeDetailPage() {
             ? data.phoneNumber
             : null,
       });
-
-      setIsEdit(false);
-      setTimeout(() => query.refetch(), 1000);
     },
     onSuccess: (id, variables) => {
       form.reset(variables);
