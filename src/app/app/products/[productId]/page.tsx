@@ -87,14 +87,8 @@ export default function ProductDetailPage() {
 
   const presignImageMutation = api.product.generatePresignUrl.useMutation();
   const createOrUpdateMutation = api.product.createOrUpdateProduct.useMutation({
-    onSuccess: (id, variables) => {
-      router.replace(`/app/products/${id}`);
-      form.reset(variables);
-    },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
-    onMutate: () => setIsDisabled(true),
-    onSettled: () => setIsDisabled(false),
   });
 
   const mutation = useMutation<void, Error, FormInput>({
@@ -138,15 +132,17 @@ export default function ProductDetailPage() {
       await createOrUpdateMutation.mutateAsync({
         ...data,
       });
-
-      setIsEdit(false);
-      setTimeout(() => query.refetch(), 1000);
     },
-    onSuccess: () =>
+    onSuccess: (id, variables) => {
+      form.reset(variables);
+      setIsEdit(false);
+      router.replace(`/app/products/${id}`);
+      setTimeout(() => query.refetch(), 1000);
       toast.success("Product Saved Successfully", {
         id: "product-detail",
         duration: 5000,
-      }),
+      });
+    },
     onError: (error) =>
       toast.error("Failed to Save Product", {
         id: "product-detail",
