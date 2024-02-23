@@ -120,6 +120,7 @@ export const customerAttachmentInput = baseAttachment
   .omit({
     id: true,
     customerId: true,
+    fileId: true,
     fileName: true,
     fileSize: true,
     uploadedAt: true,
@@ -127,6 +128,7 @@ export const customerAttachmentInput = baseAttachment
   })
   .extend({
     id: baseAttachment.shape.id.optional(),
+    fileUrl: z.string(),
   });
 
 export const formInput = base
@@ -138,11 +140,13 @@ export const formInput = base
     updatedBy: true,
     contacts: true,
     bankAccounts: true,
+    attachments: true,
   })
   .extend({
     id: z.string().uuid("Invalid uuid").optional(),
     contacts: z.array(customerContactInput),
     bankAccounts: z.array(customerAccountInput),
+    attachments: z.array(customerAttachmentInput),
   });
 
 export const Customer = {
