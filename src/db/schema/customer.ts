@@ -1,89 +1,124 @@
-import { sql } from "drizzle-orm";
-import { timestamp, pgTable, text, boolean, uuid } from "drizzle-orm/pg-core";
+import {
+  timestamp,
+  pgTable,
+  text,
+  boolean,
+  uuid,
+  pgEnum,
+  integer,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { files } from "./file";
+
+export const contactTypeEnum = pgEnum("contactTypeEnum", [
+  "person",
+  "coperate",
+]);
 
 export const customers = pgTable("customer", {
-  id: uuid("id").notNull().primaryKey(),
+  id: uuid("id").primaryKey(),
   // Information
+  code: text("code").notNull().unique(),
   name: text("name").notNull(),
-  taxId: text("tax_id"),
+  type: contactTypeEnum("type").default("person").notNull(),
+  taxId: text("taxId"),
   address: text("address"),
-  shippingAddress: text("shipping_address"),
   zipcode: text("zipcode"),
-  isBranch: boolean("is_branch").notNull().default(false),
-  branchCode: text("branch_code"),
-  branchName: text("branch_name"),
-  businessType: text("business_type"),
+  shippingAddress: text("shippingAddress"),
+  shippingZipcode: text("shippingZipcode"),
+  isBranch: boolean("isBranch").notNull().default(false),
+  branchCode: text("branchCode"),
+  branchName: text("branchName"),
+  businessType: text("businessType"),
   email: text("email"),
-  telephoneNumber: text("telephone_number"),
-  phoneNumber: text("phone_number"),
-  faxNumber: text("fax_number"),
+  telephoneNumber: text("telephoneNumber"),
+  phoneNumber: text("phoneNumber"),
+  faxNumber: text("faxNumber"),
   website: text("website"),
+  creditDate: integer("creditDate"),
   notes: text("notes"),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  createdBy: text("created_by").references(() => users.id, {
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  createdBy: text("createdBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedBy: text("updated_by").references(() => users.id, {
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  updatedBy: text("updatedBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  //   contact_type: text("contact_type"),
-  //   credit_date: date("credit_date"),
 });
 
-export const customerContacts = pgTable("customer_contacts", {
-  id: uuid("id").notNull().primaryKey(),
-  customerId: uuid("customer_id")
+export const customerContacts = pgTable("customerContacts", {
+  id: uuid("id").primaryKey(),
+  customerId: uuid("customerId")
     .notNull()
     .references(() => customers.id, {
+      onUpdate: "cascade",
       onDelete: "cascade",
     }),
-  contactName: text("contact_name").notNull(),
+  contactName: text("contactName").notNull(),
   email: text("email"),
-  phoneNumber: text("phone_number"),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  createdBy: text("created_by").references(() => users.id, {
+  phoneNumber: text("phoneNumber"),
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  createdBy: text("createdBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedBy: text("updated_by").references(() => users.id, {
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  updatedBy: text("updatedBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
 });
 
-export const customerBankAccounts = pgTable("customer_bank_accounts", {
-  id: uuid("id").notNull().primaryKey(),
-  customerId: uuid("customer_id")
+export const customerBankAccounts = pgTable("customerBankAccounts", {
+  id: uuid("id").primaryKey(),
+  customerId: uuid("customerId")
     .notNull()
     .references(() => customers.id, {
+      onUpdate: "cascade",
       onDelete: "cascade",
     }),
   bank: text("bank").notNull(),
-  accountNumber: text("account_number").notNull(),
-  bankBranch: text("bank_branch").notNull(),
-  accountType: text("account_type").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  creditDate: text("credit_date").notNull(),
-  createdBy: text("created_by").references(() => users.id, {
+  accountNumber: text("accountNumber").notNull(),
+  bankBranch: text("bankBranch").notNull(),
+  accountType: text("accountType").notNull(),
+  isActive: boolean("isActive").notNull().default(true),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  createdBy: text("createdBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedBy: text("updated_by").references(() => users.id, {
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  updatedBy: text("updatedBy").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
 });
 
-// TODO: Attachment Table
+export const customerAttachmentType = pgEnum("customerAttachmentType", [
+  "infomation",
+  "bankAccounts",
+  "contactPersons",
+  "notes",
+]);
+
+export const customerAttachments = pgTable("customerAttachments", {
+  id: uuid("id").primaryKey(),
+  customerId: uuid("customerId")
+    .notNull()
+    .references(() => customers.id, {
+      onUpdate: "cascade",
+      onDelete: "cascade",
+    }),
+  fileId: uuid("fileId")
+    .notNull()
+    .references(() => files.id, {
+      onUpdate: "cascade",
+      onDelete: "cascade",
+    }),
+  category: customerAttachmentType("category").notNull(),
+});

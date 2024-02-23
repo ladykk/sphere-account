@@ -12,6 +12,7 @@ export const files = pgTable("file", {
   issuedAt: timestamp("issued_at", { mode: "date" }).notNull(),
   expiredAt: timestamp("expired_at", { mode: "date" }).notNull(),
   issuedBy: text("issued_by").references(() => users.id, {
+    onUpdate: "cascade",
     onDelete: "set null",
   }),
   uploadedAt: timestamp("uploaded_at", { mode: "date" }),
