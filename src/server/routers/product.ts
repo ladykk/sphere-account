@@ -240,12 +240,7 @@ export const productRouter = createTRPCRouter({
             category: products.category,
           })
           .from(products)
-          .where(
-            and(
-              eq(products.createdBy, ctx.session.user.id),
-              isNotNull(products.category)
-            )
-          )
+          .where(isNotNull(products.category))
           .groupBy(products.category);
         return categories.map((str) => str.category);
       });
@@ -259,7 +254,6 @@ export const productRouter = createTRPCRouter({
             unit: products.unit,
           })
           .from(products)
-          .where(eq(products.createdBy, ctx.session.user.id))
           .groupBy(products.unit);
         return units.map((str) => str.unit);
       });
