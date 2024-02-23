@@ -55,7 +55,7 @@ const defaultValue: DefaultValues<FormInput> = {
   code: "",
   category: "",
   barcode: "",
-  sellingPrice: "0.00",
+  sellingPrice: "0",
   vatType: "include",
   description: "",
   unit: "",
