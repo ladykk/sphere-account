@@ -264,8 +264,7 @@ export const productRouter = createTRPCRouter({
       rule: "authenticated",
     },
     writeAccessControl: {
-      rule: "userId",
-      userId: ctx.session?.user.id,
+      rule: "authenticated",
     },
     isRequireAuth: true,
   })),
