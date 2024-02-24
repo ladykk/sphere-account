@@ -114,7 +114,7 @@ export const customerAttachments = pgTable("customerAttachments", {
       onUpdate: "cascade",
       onDelete: "cascade",
     }),
-  fileId: uuid("fileId")
+  fileId: text("fileId")
     .notNull()
     .references(() => files.id, {
       onUpdate: "cascade",
