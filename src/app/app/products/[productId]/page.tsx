@@ -83,6 +83,7 @@ export default function ProductDetailPage() {
 
   const form = useForm<FormInput>({
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
+    defaultValues: defaultValue,
   });
 
   const presignImageMutation = api.product.generatePresignUrl.useMutation();
