@@ -17,11 +17,6 @@ const MENU_ITEMS = [
     href: "products",
   },
   {
-    label: "Buy",
-    href: "buy",
-    children: [],
-  },
-  {
     label: "Customers",
     href: "customers",
   },

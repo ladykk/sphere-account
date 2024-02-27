@@ -12,8 +12,14 @@ import Image from "next/image";
 
 // Assets
 import plus from "@/assets/icon/plus.svg";
-import { Edit } from "lucide-react";
+import { Edit, Mail, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { AccordionItem } from "@radix-ui/react-accordion";
 
 export default function CustomersListPage() {
   const searchParams = useSearchParams();
@@ -41,6 +47,10 @@ export default function CustomersListPage() {
       <DataTable
         columns={[
           {
+            accessorKey: "code",
+            header: "Code",
+          },
+          {
             accessorKey: "taxId",
             header: "Tax ID",
           },
@@ -56,7 +66,44 @@ export default function CustomersListPage() {
           {
             id: "contacts",
             header: "Contacts",
-            cell: ({ row }) => <p>TODO: Contact Display</p>,
+            cell: ({ row }) => (
+              <Accordion type="single" collapsible>
+                {row.original.contacts
+                  .filter((contact) => contact.isActive) // Show only active contacts
+                  .sort(
+                    (
+                      a,
+                      b // Sort by createdAt ASC
+                    ) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime()
+                  )
+                  .slice(0, 3) // Show only 3 contacts
+                  .map((contact, index) => (
+                    <AccordionItem key={contact.id} value={contact.id}>
+                      <AccordionTrigger className="text-sm py-2">
+                        {index + 1}. {contact.contactName}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-1">
+                          {contact.email?.split(",").map((email) => (
+                            <p key={email} className="flex items-center ml-5">
+                              <Mail className="w-5 h-5 mr-2" />
+                              {email}
+                            </p>
+                          ))}
+                          {contact.phoneNumber?.split(",").map((phone) => (
+                            <p key={phone} className="flex items-center ml-5">
+                              <Phone className="w-5 h-5 mr-2" />
+                              {phone}
+                            </p>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+              </Accordion>
+            ),
           },
           {
             id: "actions",
