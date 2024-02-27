@@ -176,7 +176,7 @@ export default function PtojectDetailPage() {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel required>Code</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -189,7 +189,7 @@ export default function PtojectDetailPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel required>Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -202,7 +202,7 @@ export default function PtojectDetailPage() {
                 name="customerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Customer</FormLabel>
+                    <FormLabel required>Customer</FormLabel>
                     <FormControl>
                       <ComboBox
                         options={customer.data}

@@ -8,7 +8,7 @@ import {
 import { TabsContent } from "@/components/ui/tabs";
 import { AutoSizeTextarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
-import { FormInput } from "../page";
+import { FormInput } from "../_meta";
 
 type Props = {
   tabContentClassName: string;

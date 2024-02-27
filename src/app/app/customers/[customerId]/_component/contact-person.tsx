@@ -1,5 +1,4 @@
 import { DefaultValues, UseFormReturn, useFieldArray } from "react-hook-form";
-import { CustomerTab, FormInput, defaultContact } from "../page";
 import { TabsContent } from "@/components/ui/tabs";
 import {
   FormControl,
@@ -24,6 +23,7 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Paperclip, Plus, Trash2 } from "lucide-react";
+import { CustomerTab, FormInput, defaultContact } from "../_meta";
 
 type Props = {
   tabContentClassName: string;

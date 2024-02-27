@@ -7,14 +7,12 @@ import { Form } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
 import { cn, handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { RouterInputs } from "@/trpc/shared";
 import { Home, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { DefaultValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { customerAttachmentType } from "@/static/customer";
 import { InfomationTab } from "./_component/infomation";
 import { BankAccountsTab } from "./_component/bank-accounts";
 import { NoteTab } from "./_component/notes";
@@ -23,76 +21,14 @@ import { AttachementsTab } from "./_component/attachements";
 import { useMutation } from "@tanstack/react-query";
 import { fileToPresignedUrlInput, uploadFile } from "@/lib/file";
 import { DataTableMetadata } from "@/components/ui/data-table";
-
-export type CustomerTab =
-  | "information"
-  | "bankAccounts"
-  | "contacts"
-  | "attachments"
-  | "notes";
-
-export type FormInput = RouterInputs["customer"]["createOrUpdateCustomer"] & {
-  files: {
-    attachements: Array<{
-      file: File;
-      fileCategory: customerAttachmentType;
-    }>;
-  };
-};
-
-export const defaultBankAccount: FormInput["bankAccounts"][0] = {
-  id: undefined,
-  accountNumber: "",
-  bank: "",
-  bankBranch: "",
-  accountType: "",
-  isActive: true,
-};
-
-export const defaultContact: FormInput["contacts"][0] = {
-  id: undefined,
-  contactName: "",
-  phoneNumber: "",
-  email: "",
-  isActive: true,
-};
-
-const defaultValue: DefaultValues<FormInput> = {
-  id: undefined,
-  code: "",
-  name: "",
-  type: "person",
-  taxId: "",
-  address: "",
-  zipcode: "",
-  shippingAddress: "",
-  shippingZipcode: "",
-  isBranch: false,
-  branchCode: "",
-  branchName: "",
-  businessType: "",
-  email: "",
-  telephoneNumber: "",
-  phoneNumber: "",
-  faxNumber: "",
-  website: "",
-  creditDate: null,
-  notes: "",
-  isActive: true,
-  contacts: [defaultContact],
-  bankAccounts: [defaultBankAccount],
-  attachments: [],
-  files: {
-    attachements: [],
-  },
-};
-
-const tabTriggerClassName =
-  "data-[state=active]:bg-orange-500 rounded-t-lg bg-gray-400 text-white pl-6 pt-3 pb-3 pr-6 rounded-b-none data-[state=active]:text-white w-36";
-const tabTriggerInvalidClassName =
-  "data-[state=inactive]:animate-pulse data-[state=inactive]:bg-destructive";
-const tabContentClassName =
-  "p-6 shadow-lg rounded-b-lg bg-white mt-0 rounded-tr-lg border";
+import {
+  CustomerTab,
+  FormInput,
+  defaultValue,
+  tabContentClassName,
+  tabTriggerClassName,
+  tabTriggerInvalidClassName,
+} from "./_meta";
 
 export default function CustomerDetailPage() {
   const router = useRouter();

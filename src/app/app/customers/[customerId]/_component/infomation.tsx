@@ -1,6 +1,5 @@
 "use client";
 import { TabsContent } from "@/components/ui/tabs";
-import { FormInput } from "../page";
 import { DefaultValues, UseFormReturn } from "react-hook-form";
 import {
   FormControl,
@@ -27,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { useMemo } from "react";
+import { FormInput } from "../_meta";
 
 type Props = {
   tabContentClassName: string;

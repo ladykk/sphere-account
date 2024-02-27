@@ -2,9 +2,7 @@
 import { AttachmentTable } from "@/components/customer/attachment-table";
 import { TabsContent } from "@/components/ui/tabs";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
-import { FormInput } from "../page";
 import { api } from "@/trpc/react";
-import { Separator } from "@/components/ui/separator";
 import { MultipleDropzoneUpload } from "@/components/ui/file-upload";
 import {
   FormControl,
@@ -45,6 +43,7 @@ import { CUSTOMER_ATTACHMENT_TYPE } from "@/static/customer";
 import { useState } from "react";
 import { FileViewer } from "@/components/ui/file-viewer";
 import { toast } from "sonner";
+import { FormInput } from "../_meta";
 
 type Props = {
   tabContentClassName: string;
