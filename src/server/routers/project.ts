@@ -14,21 +14,18 @@ export const projectRouter = createTRPCRouter({
         const result = await trx
           .select({
             id: projects.id,
+            code: projects.code,
             name: projects.name,
             customerId: projects.customerId,
             detail: projects.detail,
+            isActive: projects.isActive,
             createdAt: projects.createdAt,
             createdBy: projects.createdBy,
             updatedAt: projects.updatedAt,
             updatedBy: projects.updatedBy,
           })
           .from(projects)
-          .where(
-            and(
-              eq(projects.id, input),
-              eq(projects.createdBy, ctx.session.user.id)
-            )
-          )
+          .where(and(eq(projects.id, input)))
           .limit(1);
 
         if (result.length === 0) {
@@ -37,6 +34,8 @@ export const projectRouter = createTRPCRouter({
             message: "Project not found",
           });
         }
+
+        console.log(result[0]);
 
         return result[0];
       });
@@ -48,16 +47,17 @@ export const projectRouter = createTRPCRouter({
         const result = await trx
           .select({
             id: projects.id,
+            code: projects.code,
             name: projects.name,
             customerId: projects.customerId,
             detail: projects.detail,
+            isActive: projects.isActive,
             createdAt: projects.createdAt,
             createdBy: projects.createdBy,
             updatedAt: projects.updatedAt,
             updatedBy: projects.updatedBy,
           })
-          .from(projects)
-          .where(eq(projects.createdBy, ctx.session.user.id));
+          .from(projects);
 
         return result;
       });
@@ -70,7 +70,6 @@ export const projectRouter = createTRPCRouter({
 
       // Filters
       const whereClause = and(
-        eq(projects.createdBy, ctx.session.user.id),
         filters.keyword // Filter: Keyword
           ? like(projects.name, `%${filters.keyword}%`)
           : undefined,
@@ -89,9 +88,11 @@ export const projectRouter = createTRPCRouter({
       const list = await ctx.db
         .select({
           id: projects.id,
+          code: projects.code,
           name: projects.name,
           customerId: projects.customerId,
           detail: projects.detail,
+          isActive: projects.isActive,
           createdAt: projects.createdAt,
           createdBy: projects.createdBy,
           updatedAt: projects.updatedAt,
@@ -120,9 +121,11 @@ export const projectRouter = createTRPCRouter({
             .insert(projects)
             .values({
               id: crypto.randomUUID(),
+              code: input.code,
               name: input.name,
               customerId: input.customerId,
               detail: input.detail,
+              isActive: input.isActive,
               createdBy: ctx.session.user.id,
               updatedBy: ctx.session.user.id,
             })
@@ -140,12 +143,7 @@ export const projectRouter = createTRPCRouter({
               id: projects.id,
             })
             .from(projects)
-            .where(
-              and(
-                eq(projects.id, input.id),
-                eq(projects.createdBy, ctx.session.user.id)
-              )
-            )
+            .where(and(eq(projects.id, input.id)))
             .limit(1);
 
           // Check if project exists
@@ -160,10 +158,12 @@ export const projectRouter = createTRPCRouter({
           await trx
             .update(projects)
             .set({
+              code: input.code,
               name: input.name,
               customerId: input.customerId,
               detail: input.detail,
-              updatedAt: sql`CURRENT_TIMESTAMP`,
+              isActive: input.isActive,
+              updatedAt: new Date(),
               updatedBy: ctx.session.user.id,
             })
             .where(eq(projects.id, input.id));

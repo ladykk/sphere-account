@@ -2,15 +2,19 @@ import { z } from "zod";
 import { paginateInputSchema, paginateOutputSchema } from ".";
 
 export const baseOutput = z.object({
-  id: z.string().uuid("Invalid uuid"),
-  name: z.string().min(1, "Project's name required"),
-  // TODO: Add customer field
-  customerId: z.string().min(1, "Customer Required").uuid("Invalid uuid"),
-  detail: z.string().nullable().default(""),
+  id: z.string().min(1, "Project ID is required").uuid("Invalid Project ID"),
+  code: z.string().min(1, "Code is required"),
+  name: z.string().min(1, "Name required"),
+  customerId: z
+    .string()
+    .min(1, "Customer is Required")
+    .uuid("Invalid Customer ID"),
+  detail: z.string().nullable().default(null),
+  isActive: z.boolean().default(true),
   createdAt: z.date(),
-  createdBy: z.string().nullable(),
+  createdBy: z.string().nullable().default(null),
   updatedAt: z.date(),
-  updatedBy: z.string().nullable(),
+  updatedBy: z.string().nullable().default(null),
 });
 
 export const formInput = baseOutput
@@ -22,7 +26,7 @@ export const formInput = baseOutput
     updatedBy: true,
   })
   .extend({
-    id: z.string().uuid("Invalid uuid").optional(),
+    id: baseOutput.shape.id.optional(),
   });
 
 export const Project = {

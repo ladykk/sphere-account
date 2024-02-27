@@ -159,5 +159,10 @@ export const Customer = {
     paginateOutput: paginateOutputSchema(base),
     formInput,
     formOutput: base.shape.id,
+    dropdownOutput: base.omit({
+      contacts: true,
+      bankAccounts: true,
+      attachments: true,
+    }),
   },
 };

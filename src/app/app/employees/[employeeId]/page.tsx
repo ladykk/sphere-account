@@ -368,6 +368,7 @@ export default function EmployeeDetailPage() {
                           disabled={field.disabled}
                         />
                       </div>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

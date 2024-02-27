@@ -1,8 +1,13 @@
 "use client";
 
-import { DashboardFormContainer } from "@/components/layouts/dashboard";
+import {
+  DashboardFormContainer,
+  DashboardFormWrapper,
+  DashboardMainContainer,
+} from "@/components/layouts/dashboard";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { ComboBox } from "@/components/ui/combo-box";
 import {
   Form,
   FormControl,
@@ -13,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { handleTRPCFormError } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -20,8 +26,18 @@ import { RouterInputs } from "@/trpc/shared";
 import { Home, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { DefaultValues, useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+type FormInput = RouterInputs["project"]["createOrUpdateProject"];
+const defaultValue: DefaultValues<FormInput> = {
+  id: undefined,
+  code: "",
+  name: "",
+  customerId: "",
+  detail: "",
+  isActive: true,
+};
 
 export default function PtojectDetailPage() {
   const router = useRouter();
@@ -38,6 +54,7 @@ export default function PtojectDetailPage() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const customer = api.customer.getCustomerDropdown.useQuery();
 
   const form = useForm<RouterInputs["project"]["createOrUpdateProject"]>({
     disabled: (isCreate ? false : !isEdit) || isDisabled || query.isLoading,
@@ -45,8 +62,10 @@ export default function PtojectDetailPage() {
 
   const mutation = api.project.createOrUpdateProject.useMutation({
     onSuccess: (id, variables) => {
-      router.replace(`/app/projects/${id}`);
       form.reset(variables);
+      setIsEdit(false);
+      router.replace(`/app/projects/${id}`);
+      setTimeout(() => query.refetch(), 1000);
     },
     onError: (error) =>
       handleTRPCFormError(error.data?.zodError, form.setError),
@@ -56,14 +75,21 @@ export default function PtojectDetailPage() {
 
   // Set form data if query is successful
   useEffect(() => {
-    if (!query.data) return;
-    form.reset({
-      id: query.data.id,
-      name: query.data.name,
-      customerId: query.data.customerId,
-      detail: query.data.detail,
-    });
-  }, [query.data]);
+    if (isCreate) {
+      form.reset(defaultValue);
+    } else {
+      if (!query.data) return;
+      if (isEdit) return;
+      form.reset({
+        id: query.data.id,
+        code: query.data.code,
+        name: query.data.name,
+        customerId: query.data.customerId,
+        detail: query.data.detail,
+        isActive: query.data.isActive,
+      });
+    }
+  }, [query.data, isEdit, isCreate]);
 
   const onSubmit = (
     input: RouterInputs["project"]["createOrUpdateProject"]
@@ -77,26 +103,64 @@ export default function PtojectDetailPage() {
 
   return (
     <Form {...form}>
-      <DashboardFormContainer onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex items-baseline gap-3 mb-10">
-          <h1>{isCreate ? "Create Project" : "Project Detail"}</h1>
-          {query.isLoading && <Spinner />}
-          <Breadcrumb
-            items={[
-              {
-                label: "Projects",
-                icon: Home,
-              },
-              {
-                label: "Projects' List",
-                href: "/app/projects",
-              },
-              {
-                label: isCreate ? "Create Project" : `Project: ${projectId}`,
-              },
-            ]}
-          />
+      <DashboardFormWrapper
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="max-w-screen-2xl"
+      >
+        <div className="flex items-center gap-3 justify-between">
+          <div className="flex items-baseline gap-3">
+            <h1>{isCreate ? "Create Project" : "Project Detail"}</h1>
+            {query.isLoading && <Spinner />}
+            <Breadcrumb
+              items={[
+                {
+                  label: "Projects",
+                  icon: Home,
+                },
+                {
+                  label: "Projects' List",
+                  href: "/app/projects",
+                },
+                {
+                  label: isCreate
+                    ? "Create Project"
+                    : query.data
+                    ? `${query.data.code}: ${query.data.name}`
+                    : `Project: ${projectId}`,
+                },
+              ]}
+            />
+          </div>
+          <div className="flex justify-end items-center gap-3">
+            {isCreate ? (
+              <Button type="submit" disabled={!form.formState.isDirty}>
+                Create
+              </Button>
+            ) : (
+              <>
+                {isEdit ? (
+                  <>
+                    <Button
+                      type="button"
+                      onClick={() => setIsEdit(false)}
+                      variant="destructive"
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!form.formState.isDirty}>
+                      Save
+                    </Button>
+                  </>
+                ) : (
+                  <Button type="button" onClick={() => setIsEdit(true)}>
+                    Edit
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
+
         {query.isLoadingError && !isCreate ? (
           <>
             <X className="text-destructive mx-auto w-24 h-24" />
@@ -105,8 +169,21 @@ export default function PtojectDetailPage() {
             </h2>
           </>
         ) : (
-          <>
+          <DashboardMainContainer>
             <div className="grid grid-cols-3 gap-y-3 gap-x-5 mb-10">
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Code</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="name"
@@ -126,12 +203,26 @@ export default function PtojectDetailPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Customer</FormLabel>
-                    <p>TODO: Customer Selector</p>
+                    <FormControl>
+                      <ComboBox
+                        options={customer.data}
+                        setLabel={(option) => option.name}
+                        setValue={(option) => option.id}
+                        value={field.value}
+                        onChange={field.onChange}
+                        multiple={false}
+                        disabled={field.disabled}
+                        loading={customer.isLoading}
+                        placeholder="Select Customer"
+                        searchPlaceholder="Search Customer"
+                        searchNoResultText="No Customer Found"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div />
+
               <FormField
                 control={form.control}
                 name="detail"
@@ -149,38 +240,27 @@ export default function PtojectDetailPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Is Active</FormLabel>
+                    <div className="h-10 flex items-center">
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={field.disabled}
+                      />
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <div className="flex justify-end items-center gap-3">
-              {isCreate ? (
-                <Button type="submit" disabled={!form.formState.isDirty}>
-                  Create
-                </Button>
-              ) : (
-                <>
-                  {isEdit ? (
-                    <>
-                      <Button
-                        type="button"
-                        onClick={() => setIsEdit(false)}
-                        variant="destructive"
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={!form.formState.isDirty}>
-                        Save
-                      </Button>
-                    </>
-                  ) : (
-                    <Button type="button" onClick={() => setIsEdit(true)}>
-                      Edit
-                    </Button>
-                  )}
-                </>
-              )}
-            </div>
-          </>
+          </DashboardMainContainer>
         )}
-      </DashboardFormContainer>
+      </DashboardFormWrapper>
     </Form>
   );
 }

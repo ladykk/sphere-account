@@ -821,4 +821,58 @@ export const customerRouter = createTRPCRouter({
         return accountTypes.map((str) => str.accountType as string);
       });
     }),
+  getCustomerDropdown: protectedProcedure
+    .output(z.array(Customer.schemas.dropdownOutput))
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const result = await trx
+          .select({
+            id: customers.id,
+            code: customers.code,
+            name: customers.name,
+            type: customers.type,
+            taxId: customers.taxId,
+            address: customers.address,
+            zipcode: customers.zipcode,
+            shippingAddress: customers.shippingAddress,
+            shippingZipcode: customers.shippingZipcode,
+            isBranch: customers.isBranch,
+            branchCode: customers.branchCode,
+            branchName: customers.branchName,
+            businessType: customers.businessType,
+            email: customers.email,
+            telephoneNumber: customers.telephoneNumber,
+            phoneNumber: customers.phoneNumber,
+            faxNumber: customers.faxNumber,
+            website: customers.website,
+            creditDate: customers.creditDate,
+            notes: customers.notes,
+            isActive: customers.isActive,
+            createdAt: customers.createdAt,
+            createdBy: customers.createdBy,
+            updatedAt: customers.updatedAt,
+            updatedBy: customers.updatedBy,
+          })
+          .from(customers)
+          .where(eq(customers.isActive, true));
+
+        return result;
+      });
+    }),
+  getCustomerMetadataInfo: protectedProcedure
+    .input(z.string().uuid("Invalid uuid").nullable())
+    .output(z.string().nullable())
+    .query(async ({ ctx, input }) => {
+      if (!input) return null;
+      return ctx.db.transaction(async (trx) => {
+        const result = await trx
+          .select({
+            name: customers.name,
+          })
+          .from(customers)
+          .where(eq(customers.id, input))
+          .limit(1);
+        return result[0]?.name;
+      });
+    }),
 });

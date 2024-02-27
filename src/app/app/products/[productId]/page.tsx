@@ -521,6 +521,7 @@ export default function ProductDetailPage() {
                         disabled={field.disabled}
                       />
                     </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

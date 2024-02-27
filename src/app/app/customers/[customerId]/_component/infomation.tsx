@@ -240,7 +240,6 @@ export const InfomationTab = ({
                   />
                 </FormControl>
               </div>
-
               <FormMessage />
             </FormItem>
           )}
@@ -288,7 +287,6 @@ export const InfomationTab = ({
                     checked={field.value}
                     onCheckedChange={(value) => {
                       field.onChange(value);
-
                       if (!value) {
                         form.setValue("branchCode", "");
                         form.setValue("branchName", "");

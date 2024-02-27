@@ -2,7 +2,7 @@
 import { CheckboxDropdown } from "@/components/filters/dropdown";
 import { SearchKeywordInput } from "@/components/filters/search-keyword";
 import { DashboardListContainer } from "@/components/layouts/dashboard";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,6 +13,8 @@ import Image from "next/image";
 
 // Assets
 import plus from "@/assets/icon/plus.svg";
+import { CustomerMetadata } from "@/components/customer/customer-info";
+import { Inspect } from "lucide-react";
 
 export default function ProjectsListPage() {
   const searchParams = useSearchParams();
@@ -20,7 +22,10 @@ export default function ProjectsListPage() {
     page: Number(searchParams.get("page")) || 1,
     itemsPerPage: Number(searchParams.get("itemsPerPage")) || 10,
     customerId: searchParams.get("customerId") || undefined,
+    keyword: searchParams.get("keyword") || undefined,
   });
+  const customer = api.customer.getCustomerDropdown.useQuery();
+
   return (
     <DashboardListContainer>
       <div className="flex items-baseline gap-3">
@@ -34,9 +39,9 @@ export default function ProjectsListPage() {
             searchKey="customerId"
             placeholder="Filter by Customer"
             searchPlaceholder="Search Customer..."
-            options={[]} // TODO: Set Options
-            setLabel={(option) => "TODO: Set Label"}
-            setValue={(option) => "TODO: Set Value"}
+            options={customer.data}
+            setLabel={(option) => option.name}
+            setValue={(option) => option.id}
             setMultiLabel={(values) => `${values.length} Customers`}
           />
         </div>
@@ -48,13 +53,19 @@ export default function ProjectsListPage() {
       <DataTable
         columns={[
           {
+            accessorKey: "code",
+            header: "Code",
+          },
+          {
             accessorKey: "name",
             header: "Name",
           },
           {
             accessorKey: "customerId",
             header: "Customer",
-            cell: ({ row }) => "TODO: Customer Display",
+            cell: ({ row }) => (
+              <CustomerMetadata customerId={row.original.customerId} />
+            ),
           },
           {
             accessorKey: "detail",
@@ -63,7 +74,19 @@ export default function ProjectsListPage() {
           {
             id: "actions",
             header: "Actions",
-            cell: ({ row }) => "TODO: Action Buttons",
+            cell: ({ row }) => (
+              <div className="space-x-3">
+                <Link
+                  href={`/app/projects/${row.original.id}`}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "icon",
+                  })}
+                >
+                  <Inspect />
+                </Link>
+              </div>
+            ),
           },
         ]}
         data={query.data?.list}

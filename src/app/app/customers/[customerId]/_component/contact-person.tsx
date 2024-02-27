@@ -74,7 +74,6 @@ export const ContactPersonsTab = ({
                       </FormControl>
                       <FormLabel required>Is Active</FormLabel>
                     </div>
-
                     <FormMessage />
                   </FormItem>
                 )}
