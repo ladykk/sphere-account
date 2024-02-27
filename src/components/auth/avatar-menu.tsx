@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from "react";
 import {
   FileUploadDropzone,
-  SingleFileUploadDropzoneProps,
+  SingleFileUploadDropzoneBaseProps,
 } from "../ui/file-upload";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

@@ -11,14 +11,14 @@ import {
 } from "../ui/dialog";
 import {
   FileUploadDropzone,
-  SingleFileUploadDropzoneProps,
+  SingleFileUploadDropzoneBaseProps,
 } from "../ui/file-upload";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { FileUploadState, useFileUploadState } from "@/lib/file";
 type AvatarInputProps = {
   children: (fileUrl: string | null) => ReactNode;
-} & Omit<SingleFileUploadDropzoneProps, "multiple">;
+} & Omit<SingleFileUploadDropzoneBaseProps, "multiple">;
 
 export const AvatarInput = (props: AvatarInputProps) => {
   const { children, ...fileUploadProps } = props;

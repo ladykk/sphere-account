@@ -50,9 +50,10 @@ export const baseAttachment = z.object({
     .string()
     .min(1, "Customer ID Required")
     .uuid("Invalid Customer ID"),
-  fileId: z.string().min(1, "File ID Required").uuid("Invalid File ID"),
+  fileUrl: z.string().min(1, "File Url Required"),
   fileName: z.string().min(1, "File Name Required"),
   fileSize: z.number().min(1, "File Size Required"),
+  fileType: z.string().min(1, "File Type Required"),
   fileCategory: z.enum(customerAttachmentType.enumValues),
   uploadedBy: z.string().nullable(),
   uploadedAt: z.date(),
@@ -120,15 +121,14 @@ export const customerAttachmentInput = baseAttachment
   .omit({
     id: true,
     customerId: true,
-    fileId: true,
     fileName: true,
     fileSize: true,
+    fileType: true,
     uploadedAt: true,
     uploadedBy: true,
   })
   .extend({
     id: baseAttachment.shape.id.optional(),
-    fileUrl: z.string(),
   });
 
 export const formInput = base

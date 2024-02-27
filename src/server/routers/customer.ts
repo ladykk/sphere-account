@@ -1,7 +1,16 @@
 import { Customer, baseBankAccount } from "../models/customer";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { string, z } from "zod";
-import { and, eq, inArray, like, sql, ne, notInArray } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  like,
+  sql,
+  ne,
+  notInArray,
+  isNotNull,
+} from "drizzle-orm";
 import {
   customers,
   customerBankAccounts,
@@ -10,7 +19,7 @@ import {
 } from "@/db/schema/customer";
 import { TRPCError } from "@trpc/server";
 import { files } from "@/db/schema/file";
-import { deleteFileById, getIdFromUrl } from "../modules/file";
+import { deleteFileById, getIdFromUrl, getUrlById } from "../modules/file";
 import { generatePresignedUrlProcedure } from "../modules/file/trpc";
 
 export const customerRouter = createTRPCRouter({
@@ -101,20 +110,28 @@ export const customerRouter = createTRPCRouter({
             fileId: customerAttachments.fileId,
             fileName: files.fileName,
             fileSize: files.fileSize,
+            fileType: files.fileType,
             fileCategory: customerAttachments.category,
             uploadedBy: files.issuedBy,
             uploadedAt: files.issuedAt,
           })
           .from(customerAttachments)
           .innerJoin(files, eq(customerAttachments.fileId, files.id))
-          .where(eq(customerAttachments.customerId, input));
+          .where(eq(customerAttachments.customerId, input))
+          .then((result) =>
+            result.map((r) => ({
+              ...r,
+              fileUrl: getUrlById(r.fileId),
+            }))
+          );
 
-        return {
+        const test = {
           ...result[0],
           contacts: contactsResult,
           bankAccounts: bankAccountsResult,
           attachments: attachmentsResult,
         };
+        return test;
       });
     }),
   getCustomers: protectedProcedure
@@ -220,6 +237,7 @@ export const customerRouter = createTRPCRouter({
                   fileId: customerAttachments.fileId,
                   fileName: files.fileName,
                   fileSize: files.fileSize,
+                  fileType: files.fileType,
                   fileCategory: customerAttachments.category,
                   uploadedBy: files.issuedBy,
                   uploadedAt: files.issuedAt,
@@ -227,6 +245,12 @@ export const customerRouter = createTRPCRouter({
                 .from(customerAttachments)
                 .innerJoin(files, eq(customerAttachments.fileId, files.id))
                 .where(inArray(customerAttachments.customerId, ids))
+                .then((result) =>
+                  result.map((r) => ({
+                    ...r,
+                    fileUrl: getUrlById(r.fileId),
+                  }))
+                )
             : [];
 
         const attachmentsByCustomerId = attachementsResult.reduce(
@@ -376,6 +400,7 @@ export const customerRouter = createTRPCRouter({
                   fileId: customerAttachments.fileId,
                   fileName: files.fileName,
                   fileSize: files.fileSize,
+                  fileType: files.fileType,
                   fileCategory: customerAttachments.category,
                   uploadedBy: files.issuedBy,
                   uploadedAt: files.issuedAt,
@@ -383,6 +408,12 @@ export const customerRouter = createTRPCRouter({
                 .from(customerAttachments)
                 .innerJoin(files, eq(customerAttachments.fileId, files.id))
                 .where(inArray(customerAttachments.customerId, ids))
+                .then((result) =>
+                  result.map((r) => ({
+                    ...r,
+                    fileUrl: getUrlById(r.fileId),
+                  }))
+                )
             : [];
 
         const attachmentsByCustomerId = attachmentsResult.reduce(
@@ -502,9 +533,10 @@ export const customerRouter = createTRPCRouter({
             .filter((attachment) => !!attachment.fileId);
 
           // Insert Customer Attachments
-          await trx
-            .insert(customerAttachments)
-            .values(customerAttachmentValues);
+          if (customerAttachmentValues.length > 0)
+            await trx
+              .insert(customerAttachments)
+              .values(customerAttachmentValues);
 
           return createResult[0].id;
         }
@@ -559,7 +591,7 @@ export const customerRouter = createTRPCRouter({
           const currentContactIds: string[] = [];
           // Upsert Customer Contact
           if (input.contacts.length > 0) {
-            input.contacts.forEach(async (contact) => {
+            for (const contact of input.contacts) {
               const currentId = contact.id ?? crypto.randomUUID();
               await trx
                 .insert(customerContacts)
@@ -585,9 +617,13 @@ export const customerRouter = createTRPCRouter({
                     updatedBy: ctx.session.user.id,
                     updatedAt: new Date(),
                   },
+                  where: and(
+                    eq(customerContacts.id, currentId),
+                    eq(customerContacts.customerId, id)
+                  ),
                 });
               currentContactIds.push(currentId);
-            });
+            }
           }
           // Delete Customer Contact
           await trx
@@ -604,7 +640,7 @@ export const customerRouter = createTRPCRouter({
           const currentBankAccountIds: string[] = [];
           // Upsert Customer BankAccount
           if (input.bankAccounts.length > 0) {
-            input.bankAccounts.forEach(async (bankAccount) => {
+            for (const bankAccount of input.bankAccounts) {
               const currentId = bankAccount.id ?? crypto.randomUUID();
               await trx
                 .insert(customerBankAccounts)
@@ -617,7 +653,7 @@ export const customerRouter = createTRPCRouter({
                   accountType: bankAccount.accountType,
                   isActive: bankAccount.isActive,
                   createdBy: ctx.session.user.id,
-                  createdAt: new Date(Date.now()),
+                  updatedBy: ctx.session.user.id,
                 })
                 .onConflictDoUpdate({
                   target: customerBankAccounts.id,
@@ -632,9 +668,13 @@ export const customerRouter = createTRPCRouter({
                     updatedBy: ctx.session.user.id,
                     updatedAt: new Date(Date.now()),
                   },
+                  where: and(
+                    eq(customerBankAccounts.id, currentId),
+                    eq(customerBankAccounts.customerId, id)
+                  ),
                 });
               currentBankAccountIds.push(currentId);
-            });
+            }
           }
           //Delete Customer BankAccount
           await trx
@@ -669,16 +709,16 @@ export const customerRouter = createTRPCRouter({
 
           // Upsert Customer Attachment
           if (input.attachments.length > 0) {
-            input.attachments.forEach(async (attachment) => {
+            for (const attachment of input.attachments) {
               // Skip if cannot extract file id from fileUrl
               const newFileId = getIdFromUrl(attachment.fileUrl);
-              if (!newFileId) return;
+              if (!newFileId) break;
 
               // Delete old file if fileUrl is different
               if (attachment.id) {
                 const oldData = oldAttachements[attachment.id];
                 if (oldData.fileId !== newFileId)
-                  await deleteFileById(oldData.fileId);
+                  await deleteFileById(oldData.fileId, trx);
               }
               const currentId = attachment.id ?? crypto.randomUUID();
               await trx
@@ -696,9 +736,13 @@ export const customerRouter = createTRPCRouter({
                     fileId: newFileId,
                     category: attachment.fileCategory,
                   },
+                  where: and(
+                    eq(customerAttachments.id, currentId),
+                    eq(customerAttachments.customerId, id)
+                  ),
                 });
               currentAttachmentIds.push(currentId);
-            });
+            }
           }
 
           // Delete Customer Attachment
@@ -714,14 +758,13 @@ export const customerRouter = createTRPCRouter({
             );
 
           // Delete old file if not in currentAttachmentIds
-          Object.keys(oldAttachements)
-            .filter(
-              (oldAttachmentId) =>
-                !currentAttachmentIds.includes(oldAttachmentId)
-            )
-            .forEach(async (oldAttachmentId) => {
-              await deleteFileById(oldAttachements[oldAttachmentId].fileId);
-            });
+          const oldAttachmentIds = Object.keys(oldAttachements).filter(
+            (oldAttachmentId) => !currentAttachmentIds.includes(oldAttachmentId)
+          );
+
+          for (const oldAttachmentId of oldAttachmentIds) {
+            await deleteFileById(oldAttachements[oldAttachmentId].fileId, trx);
+          }
 
           return id;
         }
@@ -736,4 +779,46 @@ export const customerRouter = createTRPCRouter({
     },
     isRequireAuth: true,
   })),
+  getBusinessTypes: protectedProcedure
+    .output(z.array(Customer.schemas.base.shape.businessType.unwrap()))
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const businessTypes = await trx
+          .select({
+            businessType: customers.businessType,
+          })
+          .from(customers)
+          .where(isNotNull(customers.businessType))
+          .groupBy(customers.businessType);
+        return businessTypes.map((str) => str.businessType as string);
+      });
+    }),
+  getBanks: protectedProcedure
+    .output(z.array(baseBankAccount.shape.bank))
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const banks = await trx
+          .select({
+            bank: customerBankAccounts.bank,
+          })
+          .from(customerBankAccounts)
+          .where(isNotNull(customerBankAccounts.bank))
+          .groupBy(customerBankAccounts.bank);
+        return banks.map((str) => str.bank as string);
+      });
+    }),
+  getBankAccountTypes: protectedProcedure
+    .output(z.array(baseBankAccount.shape.accountType))
+    .query(async ({ ctx }) => {
+      return ctx.db.transaction(async (trx) => {
+        const accountTypes = await trx
+          .select({
+            accountType: customerBankAccounts.accountType,
+          })
+          .from(customerBankAccounts)
+          .where(isNotNull(customerBankAccounts.accountType))
+          .groupBy(customerBankAccounts.accountType);
+        return accountTypes.map((str) => str.accountType as string);
+      });
+    }),
 });

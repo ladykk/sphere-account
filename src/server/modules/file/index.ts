@@ -43,6 +43,7 @@ export async function deleteObject(key: string): Promise<boolean> {
       .promise();
     return true;
   } catch (err) {
+    console.error(`[R2]: Failed to delete object. ${err}`);
     return false;
   }
 }
@@ -100,9 +101,10 @@ export const getIdFromUrl = (url: string | undefined | null) => {
   return key;
 };
 
-export const deleteFileById = async (id: string) => {
+export const deleteFileById = async (id: string, trxDb?: typeof db) => {
+  const trx = trxDb ?? db;
   // Get file from database
-  const file = await db
+  const file = await trx
     .select({
       id: files.id,
       writeAccessControl: files.writeAccessControl,
@@ -131,13 +133,12 @@ export const deleteFileById = async (id: string) => {
   }
 
   // Delete file from database
-  await db.delete(files).where(eq(files.id, file[0].id)).execute();
-
+  await trx.delete(files).where(eq(files.id, file[0].id));
   // Return success
   return;
 };
 
-export const deleteFileByUrl = async (url: string) => {
+export const deleteFileByUrl = async (url: string, trxDb?: typeof db) => {
   const key = getIdFromUrl(url);
 
   if (!key) {
@@ -145,5 +146,5 @@ export const deleteFileByUrl = async (url: string) => {
     return;
   }
 
-  await deleteFileById(key);
+  await deleteFileById(key, trxDb);
 };

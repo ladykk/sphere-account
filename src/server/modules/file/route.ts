@@ -65,6 +65,9 @@ export const PUT_FILE = async (req: NextRequest, props: FileProps) => {
       }
     );
 
+  // Wait 1 second to prevent 404
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
   // Get file from database
   const file = await db
     .select({ id: files.id, writeAccessControl: files.writeAccessControl })

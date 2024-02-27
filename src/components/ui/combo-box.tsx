@@ -65,26 +65,27 @@ function CommandOptions<T, V extends string | number>(
 
   return (
     <>
-      {props.clearable && props.selectedOptions && (
-        <CommandGroup className="border-t">
-          {props.clearable && props.selectedOptions && (
-            <CommandItem
-              className="hover:text-destructive"
-              onSelect={() => {
-                if (props.multiple) {
-                  props.onChange([]);
-                } else {
-                  props.onChange(undefined);
-                }
-                props.setOpen(false);
-              }}
-            >
-              <X className="mr-2 h-4 w-4" />
-              Clear
-            </CommandItem>
-          )}
-        </CommandGroup>
-      )}
+      {props.clearable &&
+        (props.multiple ? props.value.length > 0 : !!props.value) && (
+          <CommandGroup className="border-t">
+            {props.clearable && props.selectedOptions && (
+              <CommandItem
+                className="hover:text-destructive"
+                onSelect={() => {
+                  if (props.multiple) {
+                    props.onChange([]);
+                  } else {
+                    props.onChange(undefined);
+                  }
+                  props.setOpen(false);
+                }}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear
+              </CommandItem>
+            )}
+          </CommandGroup>
+        )}
       {!props.multiple &&
         props.creatable &&
         search.length > 0 &&

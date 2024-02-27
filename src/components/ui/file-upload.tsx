@@ -20,21 +20,22 @@ export type FileUploadDropzoneBaseProps = {
   className?: string;
 };
 
-export type SingleFileUploadDropzoneProps = FileUploadDropzoneBaseProps & {
+export type SingleFileUploadDropzoneBaseProps = FileUploadDropzoneBaseProps & {
   multiple: false;
   value: File | null;
 
   onChange: (file: File | null) => void;
 };
 
-export type MultipleFileUploadDropzoneProps = FileUploadDropzoneBaseProps & {
-  multiple: true;
-  value: File[];
-  onChange: (files: File[] | null) => void;
-};
+export type MultipleFileUploadDropzoneBaseProps =
+  FileUploadDropzoneBaseProps & {
+    multiple: true;
+    value: File[];
+    onChange: (files: File[] | null) => void;
+  };
 
 export const FileUploadDropzone = (
-  props: SingleFileUploadDropzoneProps | MultipleFileUploadDropzoneProps
+  props: SingleFileUploadDropzoneBaseProps | MultipleFileUploadDropzoneBaseProps
 ) => {
   const onDrop = useCallback<NonNullable<DropzoneOptions["onDrop"]>>(
     (acceptedFiles, fileRejections, event) => {
@@ -79,7 +80,7 @@ export const FileUploadDropzone = (
 type DialogUploadProps = {
   children: (fileUrl: string | null) => ReactNode;
   header?: string;
-} & Omit<SingleFileUploadDropzoneProps, "multiple">;
+} & Omit<SingleFileUploadDropzoneBaseProps, "multiple">;
 
 export const DialogUpload = (props: DialogUploadProps) => {
   const { children, ...fileUploadProps } = props;
@@ -125,5 +126,17 @@ export const DialogUpload = (props: DialogUploadProps) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+type MultipleDropzoneUploadProps = {} & Omit<
+  MultipleFileUploadDropzoneBaseProps,
+  "multiple"
+>;
+export const MultipleDropzoneUpload = (props: MultipleDropzoneUploadProps) => {
+  return (
+    <div>
+      <FileUploadDropzone {...props} multiple />
+    </div>
   );
 };

@@ -224,9 +224,9 @@ export const authRouter = createTRPCRouter({
           line: false,
         };
 
-        accountResults.forEach((account) => {
+        for (const account of accountResults) {
           result[account.provider as keyof typeof result] = true;
-        });
+        }
 
         return result;
       });
@@ -248,7 +248,7 @@ export const authRouter = createTRPCRouter({
         const allowChangeEmail = !ctx.session.user.email;
 
         if (input.image !== ctx.session.user.image)
-          await deleteFileByUrl(ctx.session.user.image ?? "");
+          await deleteFileByUrl(ctx.session.user.image ?? "", trx);
 
         await trx
           .update(users)

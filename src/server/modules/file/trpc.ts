@@ -3,6 +3,7 @@ import { TAccessControl } from "./access-control";
 import { z } from "zod";
 import { files } from "@/db/schema/file";
 import { TRPCError } from "@trpc/server";
+import { sql } from "drizzle-orm";
 
 export const generatePresignedUrlInputSchema = z.object({
   fileName: z.string(),
@@ -53,6 +54,9 @@ export const generatePresignedUrlProcedure = (
         const filesResult = await trx.insert(files).values(values).returning({
           id: files.id,
         });
+
+        // Force Commit
+        await trx.execute(sql`COMMIT;`);
 
         return filesResult.map((file) => file.id);
       });

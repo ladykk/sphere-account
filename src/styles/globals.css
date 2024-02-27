@@ -96,3 +96,8 @@
     @apply text-[12px] leading-[18px]; /* Caption */
   }
 }
+
+/* File viewer */
+#pdf-controls {
+  @apply z-10;
+}

@@ -206,7 +206,7 @@ export const productRouter = createTRPCRouter({
             oldData[0].image &&
             oldData[0].image !== getIdFromUrl(input.image)
           ) {
-            await deleteFileById(oldData[0].image);
+            await deleteFileById(oldData[0].image, trx);
           }
           //Update product
           await trx
